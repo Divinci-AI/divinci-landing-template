@@ -15,18 +15,20 @@ const t = getUI(lang).hero;
   id="hero"
   class="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden"
 >
-  <!-- Background poster — fades to 10% opacity on first message via ChatIsland.
-       Breathing room on all 4 sides so the illustration doesn't kiss the
-       viewport edges and so the title sits cleanly above it. -->
+  <!-- Ambient background art — full-bleed cover so edges bleed off-screen (no
+       rectangle), kept faint so it reads as brand texture behind the chat card,
+       not a literal illustration competing with it. Fades further on first
+       message via ChatIsland. Generalizes to any auto-generated art (no
+       per-image fitting, unlike the legacy drfuhrman circle-over-illustration). -->
   <div
     id="hero-bg"
-    class="pointer-events-none absolute hidden translate-y-[22px] transition-opacity duration-1000 ease-out md:block md:inset-x-[10.5rem] md:inset-y-[7.5rem]"
+    class="pointer-events-none absolute inset-0 transition-opacity duration-1000 ease-out"
     aria-hidden="true"
   >
     <img
       src={brand.media.heroImage}
       alt=""
-      class="h-full w-full object-contain object-center"
+      class="h-full w-full object-cover object-center opacity-[0.16]"
       loading="eager"
       fetchpriority="high"
     />
@@ -81,26 +83,16 @@ const t = getUI(lang).hero;
       }
       @media (min-width: 768px) {
         .chat-panel-wrapper {
-          padding: 74px;
-          border-radius: 50%;
+          padding: 2rem 2rem 2.5rem;
+          border-radius: 1.5rem;
         }
-        /* The glass orb must always be a PERFECT circle, never an oval.
-           `border-radius: 50%` only renders a circle on a square box, so
-           we decouple the glass from the content-driven wrapper height:
-           cancel the Tailwind `inset-0`, then size it as a square
-           (aspect-ratio 1:1, diameter = wrapper width) centered in the
-           wrapper. Content floats over it via the sibling z-10 layer, so
-           the orb stays circular no matter how tall the conversation grows. */
+        /* Frosted glass CARD that fills the wrapper as a rounded rectangle.
+           (Replaces the legacy circular orb, which only made sense atop
+           drfuhrman's half-circle hero art; a rounded card generalizes to any
+           customer's full-bleed ambient background and never gets covered.) */
         .chat-glass {
-          inset: auto;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: auto;
-          aspect-ratio: 1 / 1;
-          border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 1.5rem;
           background-image: var(--chat-glass-gradient);
           box-shadow: var(--chat-glass-shadow);
           backdrop-filter: blur(12px) saturate(1.25) contrast(1.05);
@@ -415,9 +407,9 @@ const t = getUI(lang).hero;
       </p>
     </div>
 
-    <div class="chat-panel-wrapper relative mt-8 w-full md:mt-[3.875rem]">
+    <div class="chat-panel-wrapper relative mt-8 w-full md:mt-12">
       <div class="chat-glass"></div>
-      <div class="relative z-10 mt-2 md:mt-[75px]">
+      <div class="relative z-10 mt-2">
         <ChatIsland client:load lang={lang} />
       </div>
     </div>
