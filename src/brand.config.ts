@@ -39,6 +39,10 @@ export interface BrandConfig {
   };
   referral: { source: string };
   deploy: { workerName: string; demoHost: string };
+  /** Optional section toggles. A section renders unless its flag is explicitly
+   *  false — so existing configs are unaffected, and demos can hide aspirational
+   *  sections (examples, coming-soon) that would otherwise show empty media. */
+  sections?: { examples?: boolean; comingSoon?: boolean };
 }
 
 export const brand: BrandConfig = {

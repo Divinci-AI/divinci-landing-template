@@ -110,8 +110,8 @@ const canonical = urlFor(lang);
       <HeroSection lang={lang} />
       <CorpusSection lang={lang} />
       <TranscriptShowcase lang={lang} />
-      <ExamplesSection lang={lang} />
-      <ComingSoonSection lang={lang} />
+      {brand.sections?.examples !== false && <ExamplesSection lang={lang} />}
+      {brand.sections?.comingSoon !== false && <ComingSoonSection lang={lang} />}
       <BiosSection lang={lang} />
       <CTASection lang={lang} />
     </main>

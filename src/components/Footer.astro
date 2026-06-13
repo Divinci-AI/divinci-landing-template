@@ -18,7 +18,9 @@ const privacyUrl = withRef(brand.links.privacy ?? "https://divinci.ai/privacy-po
 const divinciHomeUrl = withRef("https://divinci.ai", "footer-credit");
 ---
 
-<footer class="border-t border-gray-200 bg-df-cream py-8">
+<!-- pb clears the fixed StickyChatBar (bottom-0) so the copyright row is never
+     hidden behind it on the last screen. -->
+<footer class="border-t border-gray-200 bg-df-cream pt-8 pb-28">
   <div
     class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 text-sm text-gray-600 md:flex-row md:justify-between"
   >
