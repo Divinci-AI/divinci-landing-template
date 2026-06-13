@@ -36,6 +36,9 @@ export interface BrandConfig {
   media: {
     logo: string; favicon: string; heroImage: string; corpusVideo?: string;
     ogTagline: string; ogSubtitle: string;
+    /** True when the logo is light/white (built for a dark header) — the hero
+     *  darkens it so it doesn't wash out on the light background. */
+    logoIsLight?: boolean;
   };
   referral: { source: string };
   deploy: { workerName: string; demoHost: string };

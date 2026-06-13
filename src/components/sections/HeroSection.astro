@@ -22,13 +22,16 @@ const t = getUI(lang).hero;
        per-image fitting, unlike the legacy drfuhrman circle-over-illustration). -->
   <div
     id="hero-bg"
-    class="pointer-events-none absolute inset-0 transition-opacity duration-1000 ease-out"
+    class="pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-out"
     aria-hidden="true"
   >
+    <!-- Heavily blurred + scaled so ANY generated art reads as soft ambient
+         brand texture (color + soft form), never a recognizable, awkwardly
+         cropped subject. scale prevents the blur from revealing edge gaps. -->
     <img
       src={brand.media.heroImage}
       alt=""
-      class="h-full w-full object-cover object-center opacity-[0.16]"
+      class="h-full w-full scale-125 object-cover object-center opacity-[0.20] blur-2xl"
       loading="eager"
       fetchpriority="high"
     />
@@ -364,10 +367,13 @@ const t = getUI(lang).hero;
     <div class="text-center">
       <div class="relative inline-flex items-end justify-center gap-3">
         <span class="gleam-host">
+          {/* A light/white logo (built for a dark site header) washes out on the
+              hero's light bg — darken it here. The scrolled navy Header keeps it
+              white. */}
           <img
             src={brand.media.logo}
             alt={brand.identity.siteName}
-            class="block h-10 w-auto md:h-14"
+            class:list={["block h-10 w-auto md:h-14", brand.media.logoIsLight && "brightness-0"]}
             width="200"
             height="42"
           />
