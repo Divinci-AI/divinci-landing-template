@@ -1,0 +1,122 @@
+---
+import { getUI } from "~/i18n";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const t = getUI(lang).comingSoon;
+
+// Badge = logo + label pairs. iPhone / Android / Gemma are brand names (kept
+// in component code, not translated); card 1 reuses its i18n badge text.
+const badgeParts: { logo: string; label: string }[][] = [
+  [
+    { logo: "apple", label: "iPhone" },
+    { logo: "android", label: "Android" },
+  ],
+  [{ logo: "gemma", label: t.cards[1].badge }],
+];
+
+const R2 = "https://pub-4381eeaa2126408e92be4a3b3267fd55.r2.dev";
+
+const cards = [
+  {
+    badge: "iOS + Android",
+    video: `${R2}/mobile-app.webm`,
+    poster: "/marketing/mobile-app.jpg",
+    imageAlt:
+      "A person holding up a smartphone at a farmers market, the camera framed over fresh kale and tomatoes with a green analysis ring",
+    title: "Native mobile app with food-photo recognition",
+    body: "Snap a picture of your food at the grocery store, in the kitchen, or at a restaurant. The DFO AI tells you instantly whether it fits a Nutritarian lifestyle — and what to swap in if it doesn't.",
+  },
+  {
+    badge: "Offline · Gemma 4",
+    video: `${R2}/offline-ai.webm`,
+    poster: "/marketing/offline-ai.jpg",
+    imageAlt:
+      "A traveler in an airplane window seat using the DFO AI on their smartphone, soft golden-hour clouds visible through the window",
+    title: "The DFO AI, running entirely on your device",
+    body: "A compressed version of the DFO AI, powered by Google's Gemma 4 open model. Works on planes, in remote kitchens, in the back of the supplement aisle — no connection required.",
+  },
+];
+---
+
+<section id="coming-soon" class="bg-df-cream py-20">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="mx-auto max-w-3xl text-center">
+      <p
+        class="text-sm font-medium uppercase tracking-wider text-df-green-dark"
+      >
+        {t.label}
+      </p>
+      <h2 class="mt-3 text-3xl font-bold text-df-text md:text-4xl">
+        {t.headline}
+      </h2>
+    </div>
+
+    <div class="mt-12 grid gap-6 md:grid-cols-2">
+      {
+        cards.map((card, i) => (
+          <article class="video-hover-card flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+            <video
+              src={card.video}
+              poster={card.poster}
+              class="video-hover-target aspect-[16/10] w-full object-cover"
+              loop
+              muted
+              playsinline
+              preload="metadata"
+              aria-label={t.cards[i].imageAlt}
+            />
+            <div class="flex flex-1 flex-col p-8">
+              <span class="inline-flex w-fit items-center gap-2 rounded-full bg-df-green-leaf/20 px-3 py-1 text-xs font-medium tracking-wide text-df-green-dark">
+                {badgeParts[i].map((part, j) => (
+                  <>
+                    {j > 0 && (
+                      <span aria-hidden="true" class="text-df-green-dark/40">·</span>
+                    )}
+                    <span class="inline-flex items-center gap-1">
+                      <img
+                        src={`/logos/${part.logo}.svg`}
+                        alt=""
+                        aria-hidden="true"
+                        width="16"
+                        height="16"
+                        class="h-4 w-4"
+                      />
+                      {part.label}
+                    </span>
+                  </>
+                ))}
+              </span>
+              <h3 class="mt-4 text-xl font-semibold text-df-text">
+                {t.cards[i].title}
+              </h3>
+              <p class="mt-3 text-base leading-relaxed text-gray-700">
+                {t.cards[i].body}
+              </p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  // Coming-soon section videos play only while the card is hovered.
+  document.querySelectorAll<HTMLElement>(".video-hover-card").forEach(
+    (card) => {
+      const video = card.querySelector<HTMLVideoElement>(".video-hover-target");
+      if (!video) return;
+      card.addEventListener("pointerenter", () => {
+        video.play().catch(() => {});
+      });
+      card.addEventListener("pointerleave", () => {
+        video.pause();
+        video.currentTime = 0;
+      });
+    },
+  );
+</script>

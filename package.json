@@ -1,0 +1,49 @@
+{
+  "name": "divinci-landing-template",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "description": "Divinci SDK landing-page template — Astro + React islands + Cloudflare Workers. Re-skin per customer via src/brand.config.ts.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "dev:worker": "astro build && wrangler dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "og": "tsx scripts/build-og.ts && rsvg-convert -w 1200 -h 630 public/og-card.svg -o public/og.png",
+    "deploy:prod": "astro build && wrangler deploy",
+    "deploy:staging": "astro build && wrangler deploy --env staging",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "dependencies": {
+    "@astrojs/react": "^5.0.7",
+    "@divinci-ai/client": "^0.4.3",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^6.4.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@playwright/test": "^1.60.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitest/coverage-v8": "^4.1.7",
+    "@vitest/ui": "^4.1.7",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.7",
+    "wrangler": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

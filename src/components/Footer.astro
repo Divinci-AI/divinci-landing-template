@@ -1,0 +1,65 @@
+---
+import { withRef } from "~/lib/links";
+import { getUI } from "~/i18n";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { brand } from "~/brand.config";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const t = getUI(lang).footer;
+
+const year = new Date().getFullYear();
+// Divinci legal URLs are shared defaults; brand.links.* can override per customer.
+const aiSafetyUrl = withRef(brand.links.aiSafety ?? "https://divinci.ai/ai-safety/", "footer");
+const termsUrl = withRef(brand.links.terms ?? "https://divinci.ai/terms-of-service/", "footer");
+const privacyUrl = withRef(brand.links.privacy ?? "https://divinci.ai/privacy-policy/", "footer");
+const divinciHomeUrl = withRef("https://divinci.ai", "footer-credit");
+---
+
+<footer class="border-t border-gray-200 bg-df-cream py-8">
+  <div
+    class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 text-sm text-gray-600 md:flex-row md:justify-between"
+  >
+    <p>
+      © {year} {brand.identity.legalName} · {t.poweredBy}{" "}
+      <a
+        href={divinciHomeUrl}
+        class="font-medium text-df-green-dark hover:underline"
+        target="_blank"
+        rel="noopener"
+      >
+        Divinci AI
+      </a>
+    </p>
+    <p class="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <a
+        href={aiSafetyUrl}
+        class="hover:text-df-green-dark"
+        target="_blank"
+        rel="noopener"
+      >
+        {t.aiSafety}
+      </a>
+      <span class="text-gray-400">·</span>
+      <a
+        href={termsUrl}
+        class="hover:text-df-green-dark"
+        target="_blank"
+        rel="noopener"
+      >
+        {t.terms}
+      </a>
+      <span class="text-gray-400">·</span>
+      <a
+        href={privacyUrl}
+        class="hover:text-df-green-dark"
+        target="_blank"
+        rel="noopener"
+      >
+        {t.privacy}
+      </a>
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,98 @@
+---
+import { getUI } from "~/i18n";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { withRef } from "~/lib/links";
+import { brand } from "~/brand.config";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const t = getUI(lang).bios;
+
+const creditLabel = brand.links.mainSite.replace(/^https?:\/\//, "").replace(/\/$/, "");
+const creditUrl = withRef(brand.links.bioCreditUrl, "bios-credit");
+
+const HERO_IMG = brand.media.heroImage;
+
+// NOTE (template TODO): the face-mask geometry below is tuned to the drfuhrman
+// 2-person hero illustration (Joel left, Cara right). Names now come from
+// brand.config.bios, but the radial-mask `corner`/`tx`/`ty` values assume that
+// specific portrait. A customer with a different portrait or a different number
+// of people needs to re-tune these slots (or swap to a simpler avatar layout).
+// Falls back gracefully: only as many cards render as brand.config.bios has.
+const LAYOUT_SLOTS = [
+  { headerAlign: "max-w-[56%]", floatSide: "right", img: { corner: "74% 26%", tx: "-38%", ty: "-35%", width: "210%" } },
+  { headerAlign: "ml-auto max-w-[56%] text-right", floatSide: "left", img: { corner: "26% 22%", tx: "-62%", ty: "-35%", width: "210%" } },
+];
+const bios = brand.bios.map((b, i) => ({ name: b.name, ...LAYOUT_SLOTS[i % LAYOUT_SLOTS.length] }));
+---
+
+<section id="bios" class="bg-white py-20">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="mx-auto max-w-3xl text-center">
+      <h2 class="text-3xl font-bold text-df-text md:text-4xl">
+        {t.headline}
+      </h2>
+      <p class="mt-4 text-lg text-gray-700">
+        {t.subheading}
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-8 md:grid-cols-2">
+      {
+        bios.map((bio, i) => (
+          <article class="relative isolate min-h-[20rem] overflow-hidden rounded-2xl bg-df-cream p-8 shadow-sm ring-1 ring-black/5">
+            {/* Full-panel portrait, faded out except the face corner. */}
+            <div
+              class="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-60"
+              style={`-webkit-mask-image:radial-gradient(58% 64% at ${bio.img.corner}, #000 24%, transparent 74%);mask-image:radial-gradient(58% 64% at ${bio.img.corner}, #000 24%, transparent 74%)`}
+            >
+              <img
+                src={HERO_IMG}
+                alt=""
+                aria-hidden="true"
+                width="1658"
+                height="902"
+                loading="lazy"
+                class="absolute max-w-none select-none"
+                style={`left:${bio.img.corner.split(" ")[0]};top:${bio.img.corner.split(" ")[1]};width:${bio.img.width};transform:translate(${bio.img.tx},${bio.img.ty})`}
+              />
+            </div>
+            <div class="relative z-10">
+              <div class={bio.headerAlign}>
+                <h3 class="text-2xl font-bold text-df-text">{bio.name}</h3>
+                <p class="mt-1 text-sm font-medium uppercase tracking-wider text-df-green-dark">
+                  {t.roles[i]}
+                </p>
+              </div>
+              {/* Face-shaped exclusion: the body wraps around the portrait
+                  instead of running under it. */}
+              <div
+                aria-hidden="true"
+                class="pointer-events-none mt-4"
+                style={`float:${bio.floatSide};width:44%;height:9.5rem;shape-outside:ellipse(52% 50%);shape-margin:0.9rem`}
+              ></div>
+              <p class="mt-4 text-base leading-relaxed text-gray-700">
+                {t.bodies[i]}
+              </p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <p class="mt-10 text-center text-sm text-gray-500">
+      {t.footerPrefix}{" "}
+      <a
+        href={creditUrl}
+        target="_blank"
+        rel="noopener"
+        class="font-medium text-df-green-dark hover:underline"
+      >
+        {creditLabel}
+      </a>
+      .
+    </p>
+  </div>
+</section>

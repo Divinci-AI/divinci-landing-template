@@ -1,0 +1,111 @@
+---
+import { withRef } from "~/lib/links";
+import { getUI } from "~/i18n";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { brand } from "~/brand.config";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const ui = getUI(lang);
+
+const mainSiteLabel = brand.links.mainSite.replace(/^https?:\/\//, "").replace(/\/$/, "");
+const navItems = [
+  { href: "#hero", label: ui.nav.chat },
+  { href: "#corpus", label: ui.nav.corpus },
+  { href: "#examples", label: ui.nav.examples },
+  { href: "#coming-soon", label: ui.nav.comingSoon },
+  {
+    href: withRef(brand.links.mainSite, "header-nav"),
+    label: mainSiteLabel,
+    external: true,
+  },
+];
+---
+
+<header
+  id="site-header"
+  class="header-hidden fixed inset-x-0 top-0 z-30 bg-df-navy/95 px-6 py-3 text-white shadow-sm backdrop-blur-md transition-all duration-300 ease-out"
+>
+  <div class="mx-auto flex max-w-6xl items-center justify-between">
+    <a href="#hero" class="flex items-end gap-1.5" aria-label={ui.header.logoAriaLabel}>
+      <img
+        src={brand.media.logo}
+        alt={brand.identity.siteName}
+        class="h-6 w-auto brightness-0 invert"
+        width="200"
+        height="42"
+      />
+      <span class="relative inline-flex items-center">
+        <span
+          class="bg-gradient-to-br from-df-green-leaf via-df-green-leaf to-df-green-mid bg-clip-text text-lg font-extrabold leading-none tracking-tight text-transparent"
+        >
+          AI
+        </span>
+        <svg
+          class="absolute -right-2 -top-1 h-2.5 w-2.5 text-df-green-leaf"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M12 2L13.4 9.6 21 12L13.4 14.4 12 22 10.6 14.4 3 12 10.6 9.6Z"
+          ></path>
+        </svg>
+        <svg
+          class="absolute -bottom-1 -left-1.5 h-2 w-2 text-df-green-mid"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M12 2L13.4 9.6 21 12L13.4 14.4 12 22 10.6 14.4 3 12 10.6 9.6Z"
+          ></path>
+        </svg>
+      </span>
+    </a>
+    <div class="flex items-center gap-4">
+      <nav class="hidden gap-6 text-sm md:flex">
+        {
+          navItems.map((item) => (
+            <a
+              href={item.href}
+              class="transition-colors hover:text-df-green-leaf"
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener" : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  #site-header.header-hidden {
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  // Hide the header while the hero section is in view; reveal it once the
+  // visitor scrolls past the hero.
+  const header = document.getElementById("site-header");
+  const hero = document.getElementById("hero");
+  if (header && hero) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          header.classList.add("header-hidden");
+        } else {
+          header.classList.remove("header-hidden");
+        }
+      },
+      { threshold: 0.05 },
+    );
+    observer.observe(hero);
+  }
+</script>

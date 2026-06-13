@@ -1,0 +1,425 @@
+---
+import { ChatIsland } from "~/components/chat/ChatIsland";
+import { getUI } from "~/i18n";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { brand } from "~/brand.config";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const t = getUI(lang).hero;
+---
+
+<section
+  id="hero"
+  class="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden"
+>
+  <!-- Background poster — fades to 10% opacity on first message via ChatIsland.
+       Breathing room on all 4 sides so the illustration doesn't kiss the
+       viewport edges and so the title sits cleanly above it. -->
+  <div
+    id="hero-bg"
+    class="pointer-events-none absolute hidden translate-y-[22px] transition-opacity duration-1000 ease-out md:block md:inset-x-[10.5rem] md:inset-y-[7.5rem]"
+    aria-hidden="true"
+  >
+    <img
+      src={brand.media.heroImage}
+      alt=""
+      class="h-full w-full object-contain object-center"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
+  <!-- Soft top/bottom cream fade so the section blends into the page bg below. -->
+  <div
+    class="pointer-events-none absolute inset-0 bg-gradient-to-b from-df-cream/20 via-transparent to-df-cream/95"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="relative z-10 mx-auto w-full max-w-3xl px-6 py-6 md:py-8">
+    <style is:global>
+      .chat-panel-wrapper {
+        --orb-x: 50%;
+        --orb-y: 50%;
+        --chat-glass-gradient: linear-gradient(135deg, #ffffff2e, #ffffff26);
+        --chat-glass-shadow: 0 8px 32px #00000006;
+      }
+
+      /* Chat panel shape. Mobile: a plain full-width rounded card so the
+         conversation has room to breathe (no circular crop). Desktop
+         (md+): the signature glass orb. The styles live here rather than
+         inline so the breakpoint can actually override them. */
+      .chat-panel-wrapper {
+        padding: 0;
+        border-radius: 1.5rem;
+      }
+      /* Mobile: the glass is fully transparent — no card box, no blur, no
+         shadow — so the conversation sits straight on the hero background
+         with no visible padding rectangle. All the frosted-orb styling is
+         applied only at md+ below. */
+      .chat-glass {
+        /* Position in the scoped CSS — NOT via Tailwind `absolute inset-0`
+           on the element. Astro scopes component styles with
+           `:where([data-astro-cid])` (zero added specificity), so a
+           `.chat-glass` rule ties with Tailwind's `.inset-0` utility and the
+           later-loaded utility wins — pinning all four insets and defeating
+           the md+ circle decoupling below (the orb fills the wrapper box and
+           goes oval when the content is wide-and-short, e.g. the 402 CTA).
+           Owning position here removes that competition entirely. */
+        position: absolute;
+        inset: 0;
+        margin-top: 0;
+        border-radius: 1.5rem;
+        background: transparent;
+      }
+      /* Email label + member-login chip — same frosted tint as the orb,
+         kept extremely subtle so the text reads without a heavy pill. */
+      .chat-glass-chip {
+        background-image: var(--chat-glass-gradient);
+      }
+      @media (min-width: 768px) {
+        .chat-panel-wrapper {
+          padding: 74px;
+          border-radius: 50%;
+        }
+        /* The glass orb must always be a PERFECT circle, never an oval.
+           `border-radius: 50%` only renders a circle on a square box, so
+           we decouple the glass from the content-driven wrapper height:
+           cancel the Tailwind `inset-0`, then size it as a square
+           (aspect-ratio 1:1, diameter = wrapper width) centered in the
+           wrapper. Content floats over it via the sibling z-10 layer, so
+           the orb stays circular no matter how tall the conversation grows. */
+        .chat-glass {
+          inset: auto;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          height: auto;
+          aspect-ratio: 1 / 1;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background-image: var(--chat-glass-gradient);
+          box-shadow: var(--chat-glass-shadow);
+          backdrop-filter: blur(12px) saturate(1.25) contrast(1.05);
+          -webkit-backdrop-filter: blur(12px) saturate(1.25) contrast(1.05);
+        }
+      }
+
+      /* Active-chat transition: once the visitor sends a message, the glass
+         orb fades out and the wrapper sheds its circular padding so the chat
+         "grows out" into the full-width card (.df-active-card) rendered by
+         ChatIsland. */
+      .chat-panel-wrapper {
+        transition:
+          padding 0.6s ease,
+          border-radius 0.6s ease;
+      }
+      .chat-glass {
+        transition: opacity 0.5s ease;
+      }
+      .chat-panel-wrapper.chat-active .chat-glass {
+        opacity: 0;
+      }
+      @media (min-width: 768px) {
+        .chat-panel-wrapper.chat-active {
+          padding: 0;
+          border-radius: 1.5rem;
+        }
+        /* Cancel the circular content offset so the card sits flush. */
+        .chat-panel-wrapper.chat-active > .relative.z-10 {
+          margin-top: 0;
+        }
+      }
+      .df-active-card {
+        animation: df-card-in 0.5s ease-out both;
+      }
+      @keyframes df-card-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.985);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      /* Slim on-brand scrollbar for the live transcript (matches showcase). */
+      .df-chat-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(22 101 52 / 0.3) transparent;
+      }
+      .df-chat-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+      .df-chat-scroll::-webkit-scrollbar-thumb {
+        background-color: rgb(22 101 52 / 0.25);
+        border-radius: 9999px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .df-active-card {
+          animation: none;
+        }
+      }
+
+      /* Shine that lands ONLY on the glyphs — no rectangle edges. Two
+         coordinated pieces read as one wave crossing the lockup:
+
+         1. Wordmark: .logo-gleam is masked by the logo SVG itself, so its
+            moving white band (the ::before child) is clipped to the exact
+            letter silhouette. The mask sits on the fixed parent while the
+            band translates inside it — that decoupling keeps the mask put.
+         2. "AI": a background-clip:text white band (::after overlay, same
+            "AI" glyphs) travels over the static green gradient.
+
+         The AI band is delayed slightly so the highlight trails the
+         wordmark, left→right. */
+      .gleam-host {
+        position: relative;
+        display: inline-block;
+      }
+      .logo-gleam {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        -webkit-mask: var(--logo-url) center / 100% 100% no-repeat;
+        mask: var(--logo-url) center / 100% 100% no-repeat;
+      }
+      .logo-gleam::before {
+        content: "";
+        position: absolute;
+        top: -20%;
+        bottom: -20%;
+        left: 0;
+        width: 55%;
+        background: linear-gradient(
+          105deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.95) 50%,
+          transparent 100%
+        );
+        transform: translateX(-220%) skewX(-12deg);
+        animation: logo-gleam-sweep 6.5s ease-in-out infinite;
+      }
+      @keyframes logo-gleam-sweep {
+        0%,
+        56% {
+          transform: translateX(-220%) skewX(-12deg);
+        }
+        100% {
+          transform: translateX(360%) skewX(-12deg);
+        }
+      }
+
+      .ai-shine {
+        position: relative;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(
+          135deg,
+          var(--color-df-green-dark),
+          var(--color-df-green-mid),
+          var(--color-df-green-leaf)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+      .ai-shine::after {
+        content: "AI";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(
+          110deg,
+          transparent 38%,
+          rgba(255, 255, 255, 0.95) 50%,
+          transparent 62%
+        );
+        background-repeat: no-repeat;
+        background-size: 200% 100%;
+        background-position: 200% 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: ai-shine-sweep 6.5s ease-in-out infinite;
+        animation-delay: 0.4s;
+      }
+      @keyframes ai-shine-sweep {
+        0%,
+        56% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* The two AI sparkles throb like a twinkling star — a pure scale +
+         opacity pulse (no tilt), staggered so they sparkle out of sync. */
+      .ai-sparkle {
+        transform-origin: center;
+        animation: ai-twinkle 2.6s ease-in-out infinite;
+      }
+      .ai-sparkle-2 {
+        animation-duration: 3.1s;
+        animation-delay: 1.15s;
+      }
+      @keyframes ai-twinkle {
+        0%,
+        100% {
+          transform: scale(0.68);
+          opacity: 0.4;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 1;
+        }
+      }
+
+      /* Respect users who prefer less motion — hold everything still. */
+      @media (prefers-reduced-motion: reduce) {
+        .logo-gleam::before,
+        .ai-shine::after,
+        .ai-sparkle {
+          animation: none;
+        }
+        .logo-gleam::before,
+        .ai-shine::after {
+          opacity: 0;
+        }
+      }
+      @media (hover: hover) {
+        /* While hovering the chat circle, force the conversation
+           starter pills to full opacity even if the email-required
+           gate has otherwise disabled them. */
+        .chat-panel-wrapper:hover .starter-pill {
+          opacity: 1 !important;
+        }
+        /* Welcome bubble pops a little more solid on hover so the
+           DFO intro is easy to read while the orb of transparency
+           is open. */
+        .chat-panel-wrapper:hover .welcome-bubble {
+          background-color: rgba(220, 234, 220, 0.85) !important;
+        }
+        .chat-panel-wrapper:hover .chat-glass {
+          -webkit-mask-image: radial-gradient(
+            circle 160px at var(--orb-x) var(--orb-y),
+            transparent 0%,
+            transparent 30%,
+            rgba(0, 0, 0, 0.65) 65%,
+            black 100%
+          );
+          mask-image: radial-gradient(
+            circle 160px at var(--orb-x) var(--orb-y),
+            transparent 0%,
+            transparent 30%,
+            rgba(0, 0, 0, 0.65) 65%,
+            black 100%
+          );
+        }
+      }
+    </style>
+    <script>
+      const wrapper = document.querySelector<HTMLElement>(
+        ".chat-panel-wrapper",
+      );
+      if (wrapper) {
+        if (window.matchMedia("(hover: hover)").matches) {
+          wrapper.addEventListener(
+            "pointermove",
+            (e) => {
+              const rect = wrapper.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width) * 100;
+              const y = ((e.clientY - rect.top) / rect.height) * 100;
+              wrapper.style.setProperty("--orb-x", `${x}%`);
+              wrapper.style.setProperty("--orb-y", `${y}%`);
+            },
+            { passive: true },
+          );
+        }
+
+        // Auto-scroll the chat panel into view (bottom-aligned so the
+        // advisory text under Send is always visible) whenever the user
+        // engages with it — click anywhere on the wrapper, focus into
+        // an input/textarea, or tab into a button. Throttled so rapid
+        // clicks don't queue multiple smooth-scroll animations.
+        let lastScrollAt = 0;
+        const SCROLL_THROTTLE_MS = 700;
+        function ensurePanelInView() {
+          const now = Date.now();
+          if (now - lastScrollAt < SCROLL_THROTTLE_MS) return;
+          lastScrollAt = now;
+          const rect = wrapper.getBoundingClientRect();
+          const vh = window.innerHeight;
+          // If the wrapper is taller than the viewport, align its
+          // BOTTOM to the bottom (advisory in view). Otherwise centre
+          // the whole panel.
+          wrapper.scrollIntoView({
+            behavior: "smooth",
+            block: rect.height > vh ? "end" : "center",
+          });
+        }
+        wrapper.addEventListener("focusin", ensurePanelInView, {
+          passive: true,
+        });
+        wrapper.addEventListener("pointerdown", ensurePanelInView, {
+          passive: true,
+        });
+      }
+    </script>
+    <div class="text-center">
+      <div class="relative inline-flex items-end justify-center gap-3">
+        <span class="gleam-host">
+          <img
+            src={brand.media.logo}
+            alt={brand.identity.siteName}
+            class="block h-10 w-auto md:h-14"
+            width="200"
+            height="42"
+          />
+          <span class="logo-gleam" aria-hidden="true"></span>
+        </span>
+        <span class="relative inline-flex items-center">
+          <span
+            class="ai-shine text-4xl font-extrabold tracking-tight md:text-5xl"
+          >
+            AI
+          </span>
+          <svg
+            class="ai-sparkle ai-sparkle-1 absolute -right-4 -top-2 h-4 w-4 text-df-green-leaf md:-right-5 md:-top-3 md:h-5 md:w-5"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 2L13.4 9.6 21 12L13.4 14.4 12 22 10.6 14.4 3 12 10.6 9.6Z"
+            ></path>
+          </svg>
+          <svg
+            class="ai-sparkle ai-sparkle-2 absolute -left-3 -bottom-4 h-3 w-3 text-df-green-mid md:-left-4 md:-bottom-5 md:h-3.5 md:w-3.5"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 2L13.4 9.6 21 12L13.4 14.4 12 22 10.6 14.4 3 12 10.6 9.6Z"
+            ></path>
+          </svg>
+        </span>
+      </div>
+
+      <p class="mt-4 text-xl font-medium text-df-text md:text-2xl">
+        {t.headline}
+      </p>
+    </div>
+
+    <div class="chat-panel-wrapper relative mt-8 w-full md:mt-[3.875rem]">
+      <div class="chat-glass"></div>
+      <div class="relative z-10 mt-2 md:mt-[75px]">
+        <ChatIsland client:load lang={lang} />
+      </div>
+    </div>
+  </div>
+</section>

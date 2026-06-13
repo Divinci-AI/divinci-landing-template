@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-df-navy: #3d4256;
+  --color-df-green-dark: #3b6b3f;
+  --color-df-green-mid: #5a8f5f;
+  --color-df-green-leaf: #9ec947;
+  --color-df-cream: #f4efda;
+  --color-df-cream-soft: #ebe7df;
+  --color-df-bubble-user: #dceadc;
+  --color-df-text: #1a1a1a;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+html,
+body {
+  background-color: #f4efda;
+  color: var(--color-df-text);
+  min-height: 100%;
+}
+
+/* Send-button glow: a slow-rotating conic gradient peeks 2px around the
+   send button whenever the message draft has content. Implemented as a
+   wrapper span that pads the button; the conic gradient lives on the
+   wrapper, the button covers the center. Animated via the registered
+   custom property --send-glow-ang. */
+@property --send-glow-ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+/* Send-button glow + email-field glow share the same conic-gradient
+   spinner + halo. .send-glow-wrap stays inline-block (wraps a button);
+   .email-glow-wrap is block-flow because the email row is a flex item
+   that needs full width. */
+.send-glow-wrap,
+.email-glow-wrap {
+  border-radius: 0.6rem;
+  padding: 3px;
+  background: transparent;
+  box-shadow: none;
+  transition:
+    background 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+}
+.send-glow-wrap {
+  display: inline-block;
+}
+.email-glow-wrap {
+  display: block;
+}
+.send-glow-wrap.is-active,
+.email-glow-wrap.is-active {
+  background: conic-gradient(
+    from var(--send-glow-ang, 0deg),
+    #9ec947 0deg,
+    rgba(158, 201, 71, 0.15) 60deg,
+    #3b6b3f 180deg,
+    rgba(59, 107, 63, 0.15) 300deg,
+    #9ec947 360deg
+  );
+  animation: send-glow-spin 2.2s linear infinite;
+  box-shadow:
+    0 0 18px rgba(158, 201, 71, 0.55),
+    0 0 4px rgba(59, 107, 63, 0.45);
+}
+.send-glow-wrap > button,
+.email-glow-wrap > input {
+  border-radius: 0.45rem;
+  display: block;
+  width: 100%;
+}
+@keyframes send-glow-spin {
+  to {
+    --send-glow-ang: 360deg;
+  }
+}
+
+/* Cursor-tracked aurora — a soft radial smear of the brand greens
+   following the cursor across the page. Falls back gracefully (just
+   the cream base) if JS doesn't set the custom props. */
+body {
+  background-image:
+    radial-gradient(
+      640px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(158, 201, 71, 0.18),
+      transparent 65%
+    ),
+    radial-gradient(
+      960px circle at calc(var(--mouse-x, 50%) - 200px)
+        calc(var(--mouse-y, 50%) + 120px),
+      rgba(59, 107, 63, 0.10),
+      transparent 70%
+    );
+  background-attachment: fixed;
+  transition: background-position 0.2s ease-out;
+}
+
+/* Green-tinted classic cursors. Same NW-arrow / I-beam / pointing-hand
+   shapes a user expects, just rendered in the brand greens with a soft
+   white outline for OS-agnostic visibility. */
+
+/* Default — classic NW-pointing arrow, dark-green fill + white outline.
+   Hotspot at the tip (2, 2). */
+*,
+*::before,
+*::after {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><path d='M2 2 L2 17 L6 13 L9 20 L11.5 19 L8.5 12 L14 12 Z' fill='%233b6b3f' stroke='%23ffffff' stroke-width='1' stroke-linejoin='round'/></svg>")
+      2 2,
+    auto;
+}
+
+/* Text inputs / textareas — classic green I-beam. Hotspot center (7, 11). */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+input[type="number"],
+input:not([type]),
+textarea,
+[contenteditable="true"] {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='22' viewBox='0 0 14 22'><path d='M3 1 L11 1 L11 3 L8 3 L8 19 L11 19 L11 21 L3 21 L3 19 L6 19 L6 3 L3 3 Z' fill='%233b6b3f' stroke='%23ffffff' stroke-width='0.5'/></svg>")
+      7 11,
+    text !important;
+}
+
+/* Clickable elements — green pointing-hand. Hotspot at the index-finger
+   tip (9, 1). */
+a,
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+.example-card,
+summary,
+label {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='24' viewBox='0 0 22 24'><path d='M8 1 L8 12 L5 9 L3 11 L8 18 L8 20 L14 23 L18 21 L19 14 L19 9 L17 9 L17 12 L16 12 L16 7 L14 7 L14 12 L13 12 L13 5 L11 5 L11 12 L10 12 L10 1 Z' fill='%239ec947' stroke='%233b6b3f' stroke-width='1' stroke-linejoin='round'/></svg>")
+      9 1,
+    pointer !important;
+}

@@ -1,0 +1,146 @@
+---
+/**
+ * The full landing-page document, parameterized by `lang`. Rendered by
+ * both src/pages/index.astro (en, at "/") and
+ * src/pages/[lang]/index.astro (every other locale, at "/<code>/").
+ *
+ * Responsibilities:
+ *   - <html lang dir> for the active locale (RTL-aware)
+ *   - translated <head> meta (title/description/og/twitter)
+ *   - hreflang alternates for all 36 locales + x-default (SEO)
+ *   - return-visitor language preference (localStorage) from the root
+ *   - passes `lang` into every section so they pull from the dictionary
+ */
+import "~/styles/global.css";
+import LanguageSwitcher from "~/components/LanguageSwitcher.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import HeroSection from "~/components/sections/HeroSection.astro";
+import CorpusSection from "~/components/sections/CorpusSection.astro";
+import TranscriptShowcase from "~/components/sections/TranscriptShowcase.astro";
+import ExamplesSection from "~/components/sections/ExamplesSection.astro";
+import ComingSoonSection from "~/components/sections/ComingSoonSection.astro";
+import BiosSection from "~/components/sections/BiosSection.astro";
+import CTASection from "~/components/sections/CTASection.astro";
+import { getUI } from "~/i18n";
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  dirFor,
+} from "~/i18n/locales";
+import { brand } from "~/brand.config";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const m = getUI(lang).meta;
+const dir = dirFor(lang);
+const site = brand.identity.domain;
+
+// Brand palette + font injected as :root overrides. The template's Tailwind
+// @theme tokens (--color-df-*) carry drfuhrman defaults; this block overrides
+// them with the customer's palette so every `bg-df-*`/`text-df-*` utility
+// re-skins with zero component changes.
+const p = brand.palette;
+const brandVars = `:root{` +
+  `--color-df-navy:${p.primary};--color-df-green-dark:${p.dark};` +
+  `--color-df-green-mid:${p.mid};--color-df-green-leaf:${p.accent};` +
+  `--color-df-cream:${p.cream};--color-df-cream-soft:${p.soft};` +
+  `--color-df-bubble-user:${p.bubble};--color-df-text:${p.text};` +
+  `--font-sans:${brand.fonts.family};` +
+  `--logo-url:url("${brand.media.logo}");}`;
+
+function urlFor(code: string): string {
+  return code === DEFAULT_LOCALE ? `${site}/` : `${site}/${code}/`;
+}
+const canonical = urlFor(lang);
+---
+
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={brand.media.favicon} />
+    <style is:inline set:html={brandVars}></style>
+    <title>{m.title}</title>
+    <meta name="description" content={m.description} />
+    <link rel="canonical" href={canonical} />
+
+    {/* hreflang alternates — one per locale + x-default → English root */}
+    {
+      LOCALES.map((l) => (
+        <link rel="alternate" hreflang={l.code} href={urlFor(l.code)} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={urlFor(DEFAULT_LOCALE)} />
+
+    <meta property="og:site_name" content={brand.identity.siteName} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={m.ogTitle} />
+    <meta property="og:description" content={m.ogDescription} />
+    <meta property="og:image" content="/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={m.ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={m.twitterTitle} />
+    <meta name="twitter:description" content={m.twitterDescription} />
+    <meta name="twitter:image" content="/og.png" />
+
+    {/* Return-visitor language preference: only auto-redirects FROM the
+        English root to a previously-chosen non-English locale, so manual
+        navigation to a specific /<code>/ is always respected. Runs before
+        paint to avoid a flash. */}
+    {
+      lang === DEFAULT_LOCALE && (
+        <script is:inline>
+          {`(function(){try{var p=localStorage.getItem("df-lang");if(p&&p!=="en"&&location.pathname==="/"){location.replace("/"+p+"/");}}catch(e){}})();`}
+        </script>
+      )
+    }
+  </head>
+  <body class="min-h-screen bg-white text-df-text antialiased">
+    <LanguageSwitcher lang={lang} />
+    <Header lang={lang} />
+    <main>
+      <HeroSection lang={lang} />
+      <CorpusSection lang={lang} />
+      <TranscriptShowcase lang={lang} />
+      <ExamplesSection lang={lang} />
+      <ComingSoonSection lang={lang} />
+      <BiosSection lang={lang} />
+      <CTASection lang={lang} />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import { initHeroHashLinks } from "~/lib/scroll-to-hero";
+
+      initHeroHashLinks();
+    </script>
+    <script>
+      // Cursor-tracked aurora gradient on the body background.
+      // RAF-throttled so we don't repaint more than once per frame.
+      let mx = 0,
+        my = 0,
+        raf: number | null = null;
+      function flush() {
+        document.body.style.setProperty("--mouse-x", `${mx}px`);
+        document.body.style.setProperty("--mouse-y", `${my}px`);
+        raf = null;
+      }
+      window.addEventListener(
+        "pointermove",
+        (e) => {
+          mx = e.clientX;
+          my = e.clientY;
+          if (raf === null) raf = requestAnimationFrame(flush);
+        },
+        { passive: true },
+      );
+    </script>
+  </body>
+</html>

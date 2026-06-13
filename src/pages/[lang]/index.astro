@@ -1,0 +1,16 @@
+---
+/**
+ * Localized landing pages at "/<code>/" for every non-default locale
+ * (es, fr, …, zh-hans, zh-hant). English lives at the root (index.astro).
+ */
+import Landing from "~/layouts/Landing.astro";
+import { NON_DEFAULT_LOCALE_CODES } from "~/i18n/locales";
+
+export function getStaticPaths() {
+  return NON_DEFAULT_LOCALE_CODES.map((code) => ({ params: { lang: code } }));
+}
+
+const { lang } = Astro.params;
+---
+
+<Landing lang={lang} />

@@ -1,0 +1,310 @@
+---
+/**
+ * Transcript showcase — ONE real conversation from the live Dr. Fuhrman AI
+ * (Fuhrman v8 + Gemini 3.5 Flash), rendered as a single scrollable chat
+ * window. The messages area scrolls; a decoy composer pinned at the bottom
+ * scrolls the visitor up into the real hero chat to ask their own question.
+ *
+ * Answers carry lightweight inline markup so we can mirror the in-app
+ * formatting without a markdown dependency:
+ *   **bold**      → <strong>
+ *   *italic*      → <em>
+ *   [[n]]         → citation superscript; hovering/focusing shows the n-th
+ *                   retrieved source's title (the "context" pop-up).
+ *
+ * The conversation is a real English product exchange; its PROSE is
+ * translated via the `transcript` dictionary so the showcase reads in the
+ * page locale. The inline markup (**bold**, *italic*, [[n]]) is preserved
+ * across translations. Filenames (sources), book recommendations, and the
+ * model string stay in English here.
+ */
+import { getUI } from "~/i18n";
+import { cleanContextTitle } from "~/lib/clean-context-title";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const t = getUI(lang).transcript;
+const welcome = getUI(lang).chat.welcomeMessage;
+
+interface Exchange {
+  question: string;
+  sources: string[];
+  answer: string[]; // paragraphs in the inline-markup mini-syntax
+  recommendation?: string;
+}
+
+type Seg =
+  | { t: "text"; v: string }
+  | { t: "b"; v: string }
+  | { t: "i"; v: string }
+  | { t: "cite"; n: number };
+
+// Parse the mini-syntax into renderable segments. Non-nested by design.
+function parseInline(s: string): Seg[] {
+  const out: Seg[] = [];
+  const re = /\*\*([^*]+)\*\*|\*([^*]+)\*|\[\[(\d+)\]\]/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(s)) !== null) {
+    if (m.index > last) out.push({ t: "text", v: s.slice(last, m.index) });
+    if (m[1] !== undefined) out.push({ t: "b", v: m[1] });
+    else if (m[2] !== undefined) out.push({ t: "i", v: m[2] });
+    else out.push({ t: "cite", n: Number(m[3]) });
+    last = re.lastIndex;
+  }
+  if (last < s.length) out.push({ t: "text", v: s.slice(last) });
+  return out;
+}
+
+function sourceIcon(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "txt") return "📑";
+  if (ext === "html" || ext === "htm") return "🌐";
+  return "📄";
+}
+
+const welcomeMessage = welcome;
+
+// Non-translatable per-exchange data — retrieved-source filenames and the
+// book recommendation — zipped by index with the translated question +
+// answer paragraphs from the `transcript` dictionary.
+const exchangeMeta: Array<{ sources: string[]; recommendation?: string }> = [
+  {
+    sources: [
+      "ENDofDIETING_2P.pdf",
+      "S2-E26-habits.txt",
+      "Nutritarian Handbook & Food Scoring Guide - Paperback.html",
+      "Eat To Live - Episode 9.txt",
+      "Eat for Health - ebook.html",
+      "Eat_For_Health.pdf",
+      "S2-E21-Ozempic.txt",
+      "Eat for Health - Paperback.html",
+    ],
+    recommendation: "Eat for Health",
+  },
+  {
+    sources: [
+      "Eat_For_Health.pdf",
+      "Ep 1 - final - 3_11_21, 6.58 AM.txt",
+      "Nutritarian Handbook & Food Scoring Guide - Paperback.html",
+      "ENDofDIETING_2P.pdf",
+      "S2-E21-Ozempic.txt",
+      "The End of Dieting - ebook.html",
+      "The End of Dieting - Paperback.html",
+    ],
+    recommendation: "The End of Dieting",
+  },
+  {
+    sources: [
+      "EAT-TO-LIVE_Joel-Fuhrman_380.pdf",
+      "Eat To Live - Episode 9.txt",
+      "Complete Greens.html",
+      "10in20__58016.pdf",
+      "S2-E26-habits.txt",
+      "Organic Kale Chips - Cashew Cream & Onion.html",
+    ],
+  },
+];
+
+const exchanges: Exchange[] = exchangeMeta.map((meta, i) => ({
+  question: t.questions[i],
+  answer: t.answers[i],
+  sources: meta.sources,
+  recommendation: meta.recommendation,
+}));
+
+const ASSISTANT_MODEL = "Fuhrman v8 (Embedding-2) + Gemini 3.5 Flash";
+
+// Resolve a citation number to its source ("context") title for the tooltip.
+function citeTitle(ex: Exchange, n: number): string {
+  const raw = ex.sources[n - 1] ?? ex.sources[ex.sources.length - 1];
+  return raw ? cleanContextTitle(raw) : "Dr. Fuhrman's corpus";
+}
+---
+
+<section id="transcripts" class="bg-white py-20">
+  <div class="mx-auto max-w-3xl px-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold text-df-text md:text-4xl">
+        {t.heading}
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-700">
+        {t.subheading}
+      </p>
+    </div>
+
+    {/* Single chat window: header · scrollable messages · decoy composer */}
+    <div
+      class="mt-10 overflow-hidden rounded-3xl border border-df-green-dark/15 bg-gradient-to-b from-df-green-leaf/10 to-white shadow-lg ring-1 ring-black/5"
+    >
+      {/* Header */}
+      <div
+        class="flex items-center gap-2 border-b border-df-green-dark/10 bg-white/70 px-5 py-3 backdrop-blur-sm"
+      >
+        <span
+          class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15"
+        >
+          <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+        </span>
+        <span class="font-semibold text-df-green-dark">Dr. Fuhrman AI</span>
+        <span class="ml-auto inline-flex items-center gap-1.5 text-xs text-gray-500">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-df-green-mid"></span>
+          </span>
+          {t.online}
+        </span>
+      </div>
+
+      {/* Scrollable messages */}
+      <div class="df-chat-scroll h-[26rem] space-y-5 overflow-y-auto px-4 py-5 md:h-[32rem] md:px-6">
+        {/* Opening greeting */}
+        <div class="flex items-start gap-2">
+          <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
+            <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+          </span>
+          <p class="max-w-[88%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-df-text shadow-sm md:text-base">
+            {welcomeMessage}
+          </p>
+        </div>
+
+        {
+          exchanges.map((ex) => (
+            <>
+              {/* User question */}
+              <div class="flex justify-end">
+                <p class="max-w-[88%] rounded-2xl rounded-br-sm bg-df-green-dark px-4 py-2.5 text-left text-sm font-medium text-white md:text-base">
+                  {ex.question}
+                </p>
+              </div>
+
+              {/* Retrieved sources — the context bubbles */}
+              <div class="flex flex-wrap gap-1.5">
+                {ex.sources.map((s) => (
+                  <span class="inline-flex max-w-full items-center gap-1 rounded-md border border-df-green-dark/15 bg-white/80 px-2 py-1 text-xs text-gray-600">
+                    <span aria-hidden="true">{sourceIcon(s)}</span>
+                    <span class="truncate">{cleanContextTitle(s)}</span>
+                  </span>
+                ))}
+              </div>
+
+              {/* Assistant answer */}
+              <div class="flex items-start gap-2">
+                <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
+                  <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+                </span>
+                <div class="max-w-[88%]">
+                  <div class="space-y-2 rounded-2xl rounded-tl-sm bg-df-green-leaf/15 px-4 py-3 text-sm leading-relaxed text-df-text md:text-base">
+                    {ex.answer.map((para) => (
+                      <p>
+                        {parseInline(para).map((seg) =>
+                          seg.t === "b" ? (
+                            <strong class="font-semibold">{seg.v}</strong>
+                          ) : seg.t === "i" ? (
+                            <em>{seg.v}</em>
+                          ) : seg.t === "cite" ? (
+                            <sup
+                              tabindex="0"
+                              class="df-cite group relative ml-0.5 cursor-help rounded bg-df-green-leaf/30 px-1 py-0.5 text-[0.65em] font-semibold text-df-green-dark focus:outline-none focus-visible:ring-1 focus-visible:ring-df-green-dark"
+                            >
+                              {seg.n}
+                              <span
+                                role="tooltip"
+                                class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 hidden w-max max-w-[15rem] -translate-x-1/2 whitespace-normal rounded-md bg-df-text px-2.5 py-1.5 text-left text-xs font-normal not-italic leading-snug text-white shadow-lg group-hover:block group-focus-within:block"
+                              >
+                                {citeTitle(ex, seg.n)}
+                              </span>
+                            </sup>
+                          ) : (
+                            seg.v
+                          ),
+                        )}
+                      </p>
+                    ))}
+                  </div>
+                  <p class="mt-1 text-[0.7rem] text-gray-500">
+                    <span class="font-semibold text-df-green-dark">{t.assistantLabel}</span>
+                    {" · "}
+                    {ASSISTANT_MODEL}
+                  </p>
+                  {ex.recommendation && (
+                    <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-df-green-dark/20 bg-white px-3 py-1 text-xs text-df-green-dark">
+                      <span aria-hidden="true">💡</span>
+                      {t.recommendationPrefix}
+                      <span class="font-semibold">{ex.recommendation}</span>
+                      <span aria-hidden="true">→</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </>
+          ))
+        }
+      </div>
+
+      {/* Decoy composer — clicking jumps to the real hero chat */}
+      <div class="border-t border-df-green-dark/10 bg-white/70 p-3 backdrop-blur-sm">
+        <button
+          type="button"
+          id="df-transcript-cta"
+          aria-label={t.composerAria}
+          class="group flex w-full items-center gap-2 rounded-full border border-df-green-dark/20 bg-white px-4 py-2.5 text-left transition hover:border-df-green-dark hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-df-green-dark/40"
+        >
+          <span class="flex-1 truncate text-sm text-gray-400 group-hover:text-gray-500">
+            {t.composerPlaceholder}
+          </span>
+          <span
+            aria-hidden="true"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-df-green-dark/90 text-white transition group-hover:bg-df-green-mid"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+              <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <p class="mt-6 text-center text-xs text-gray-400">
+      Real responses from the live Dr. Fuhrman AI · {ASSISTANT_MODEL}
+    </p>
+  </div>
+</section>
+
+<script>
+  import { scrollToHeroChat } from "~/lib/scroll-to-hero";
+
+  // The decoy composer scrolls the visitor up into the real hero chat,
+  // centered, and focuses the email field so they can start a message.
+  const cta = document.getElementById("df-transcript-cta");
+  cta?.addEventListener("click", () => {
+    scrollToHeroChat({ focusEmail: true });
+  });
+
+  // Touch devices have no hover — tap a citation to toggle its tooltip.
+  document.querySelectorAll<HTMLElement>(".df-cite").forEach((cite) => {
+    cite.addEventListener("click", (e) => {
+      e.preventDefault();
+      cite.focus();
+    });
+  });
+</script>
+
+<style>
+  /* Slim, on-brand scrollbar for the chat window. */
+  .df-chat-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(22 101 52 / 0.3) transparent;
+  }
+  .df-chat-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .df-chat-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(22 101 52 / 0.25);
+    border-radius: 9999px;
+  }
+</style>

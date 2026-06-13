@@ -1,0 +1,91 @@
+---
+import { getUI, tokenize } from "~/i18n";
+import { DEFAULT_LOCALE, SUPPORTED_LANGUAGE_AUTONYMS } from "~/i18n/locales";
+import { brand } from "~/brand.config";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const t = getUI(lang).corpus;
+
+// Numbers/emoji stay here; the translatable unit + flavor come from
+// the dictionary. The first stat's value is the word "Every".
+const stats = [
+  { value: t.stats.everyWord, unit: t.stats.lecturesUnit, flavor: t.stats.lecturesFlavor },
+  { value: "12", unit: t.stats.booksUnit, flavor: t.stats.booksFlavor },
+  { value: "20,000+", unit: t.stats.qasUnit, flavor: t.stats.qasFlavor },
+  { value: "180", unit: t.stats.productsUnit, flavor: t.stats.productsFlavor },
+];
+
+// The supported-language display uses autonyms (each language in its
+// own name) — universal across page locales, so no translation needed.
+const languages = SUPPORTED_LANGUAGE_AUTONYMS;
+
+const headlineSegments = tokenize(t.headline);
+---
+
+<section id="corpus" class="relative overflow-hidden bg-df-cream py-20">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="grid items-center gap-10 md:grid-cols-2 md:gap-14">
+      <div
+        class="overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5 md:order-2"
+      >
+        <video
+          src={brand.media.corpusVideo ?? "/brand/corpus.webm"}
+          poster="/brand/corpus-poster.jpg"
+          class="aspect-[16/10] w-full object-cover"
+          autoplay
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          aria-label={t.videoAriaLabel}
+        ></video>
+      </div>
+      <div class="md:order-1">
+        <h2 class="text-3xl font-bold leading-tight text-df-text md:text-4xl">
+          {headlineSegments.map((seg) => (seg.kind === "br" ? <br /> : seg.kind === "text" ? seg.value : seg.value))}
+        </h2>
+        <p class="mt-4 text-lg text-gray-700">
+          {t.subheading}
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        stats.map((stat) => (
+          <article class="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+            <p class="text-4xl font-bold leading-none text-df-green-dark">
+              {stat.value}
+            </p>
+            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-gray-500">
+              {stat.unit}
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-gray-700">
+              {stat.flavor}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="mt-16">
+      <p
+        class="text-center text-sm font-medium uppercase tracking-wider text-df-green-dark"
+      >
+        {t.languagePrefix}
+      </p>
+      <ul class="mt-6 flex flex-wrap justify-center gap-2">
+        {
+          languages.map((autonym) => (
+            <li class="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700">
+              {autonym}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>

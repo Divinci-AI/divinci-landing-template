@@ -1,0 +1,116 @@
+---
+/**
+ * Language switcher — a globe ICON fixed in the upper-left corner that
+ * opens a list of all 36 locales by autonym.
+ *
+ * Switching navigates to that locale's URL, which re-renders the WHOLE
+ * page translated AND re-mounts the chat island with the new `lang` — so
+ * one control switches both the page language and the chat's response
+ * language (the chat derives its language from the page locale; see
+ * ChatIsland). Single landing page, so each locale's URL is just "/"
+ * (English) or "/<code>/" (others).
+ *
+ * Built on native <details>/<summary>: zero framework cost, full
+ * keyboard + screen-reader support, and every option is a real <a> link
+ * (works without JS, supports middle-click / open-in-new-tab, good for
+ * SEO). The inline script only adds polish — persist the choice to
+ * localStorage (a return visitor lands in their language; Landing.astro
+ * reads it) and close on outside-click / Escape.
+ *
+ * Fixed physically upper-left as requested; in RTL locales the page
+ * flows right-to-left but the control stays in the top-left so its
+ * position is predictable across languages.
+ */
+import { LOCALES, DEFAULT_LOCALE, getLocaleMeta } from "~/i18n/locales";
+import { getUI } from "~/i18n";
+
+interface Props {
+  lang?: string;
+}
+const { lang = DEFAULT_LOCALE } = Astro.props;
+const current = getLocaleMeta(lang);
+const switcherLabel = getUI(lang).nav.language;
+
+function hrefFor(code: string): string {
+  return code === DEFAULT_LOCALE ? "/" : `/${code}/`;
+}
+---
+
+<details
+  id="df-lang"
+  class="df-lang-switcher fixed right-4 top-4 z-50 [&::-webkit-details-marker]:hidden"
+>
+  <summary
+    class="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-df-green-dark text-white shadow-lg ring-1 ring-black/10 transition-colors hover:bg-df-green-mid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-df-green-leaf"
+    aria-label={switcherLabel}
+    title={switcherLabel}
+  >
+    <svg
+      class="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"></path>
+    </svg>
+    <span class="sr-only">{switcherLabel}: {current.autonym}</span>
+  </summary>
+
+  <ul
+    aria-label={switcherLabel}
+    class="absolute right-0 mt-2 max-h-[70vh] w-56 overflow-y-auto rounded-2xl bg-white p-1.5 text-df-text shadow-xl ring-1 ring-black/10"
+  >
+    {
+      LOCALES.map((l) => (
+        <li>
+          <a
+            href={hrefFor(l.code)}
+            data-code={l.code}
+            lang={l.code}
+            dir={l.dir}
+            aria-current={l.code === current.code ? "true" : undefined}
+            class:list={[
+              "flex items-center rounded-xl px-3 py-2 text-sm transition-colors hover:bg-df-green-leaf/20 focus-visible:bg-df-green-leaf/20 focus-visible:outline-none",
+              l.code === current.code &&
+                "bg-df-green-leaf/25 font-semibold text-df-green-dark",
+            ]}
+          >
+            {l.autonym}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</details>
+
+<script>
+  const root = document.getElementById("df-lang") as HTMLDetailsElement | null;
+  if (root) {
+    // Persist the chosen locale before the link navigates.
+    root.addEventListener("click", (e) => {
+      const a = (e.target as HTMLElement).closest(
+        "a[data-code]",
+      ) as HTMLAnchorElement | null;
+      if (a?.dataset.code) {
+        try {
+          localStorage.setItem("df-lang", a.dataset.code);
+        } catch {
+          /* storage may be blocked — navigation still works */
+        }
+      }
+    });
+    // Close on outside-click + Escape (native <details> handles open).
+    document.addEventListener("click", (e) => {
+      if (root.open && !root.contains(e.target as Node)) root.open = false;
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && root.open) {
+        root.open = false;
+        root.querySelector("summary")?.focus();
+      }
+    });
+  }
+</script>

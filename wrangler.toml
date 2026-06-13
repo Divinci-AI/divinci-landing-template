@@ -1,0 +1,107 @@
+name = "drfuhrman-ai-landing"
+main = "./src/worker.ts"
+compatibility_date = "2026-05-28"
+compatibility_flags = ["nodejs_compat"]
+
+# Pin the local `wrangler dev` port so it matches the vite /api proxy in
+# astro.config.mjs (which targets :8787). If wrangler reports 8787 is taken,
+# free it (usually a stale `wrangler dev`) rather than letting the port drift —
+# a mismatched port silently breaks the astro-dev /api proxy.
+[dev]
+port = 8787
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+run_worker_first = true
+
+# NOTE: KV ids are Cloudflare-account-scoped. The base + staging ids below
+# belong to the DIVINCI account. A DIFFERENT account (e.g. DrFuhrman) deploys
+# the [env.production] block at the bottom of this file instead — don't edit
+# these. See "Environments & multi-account deploys" in README.md.
+[[kv_namespaces]]
+binding = "EMAIL_QUOTA"
+id = "f4b81233948d4ce18fc97e9a01e1b480"
+
+[[durable_objects.bindings]]
+name = "QUOTA_DO"
+class_name = "EmailQuotaCoordinator"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["EmailQuotaCoordinator"]
+
+[vars]
+DIVINCI_API_BASE = "https://api.stage.divinci.app"
+DIVINCI_RELEASE_ID = "6a2ba698857d4d8b90fd6734"
+
+[env.staging]
+name = "drfuhrman-ai-landing-staging"
+
+[env.staging.assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+run_worker_first = true
+
+[[env.staging.kv_namespaces]]
+binding = "EMAIL_QUOTA"
+id = "d1e3e14491264163ae0946db867f8ec8"
+
+[[env.staging.durable_objects.bindings]]
+name = "QUOTA_DO"
+class_name = "EmailQuotaCoordinator"
+
+[[env.staging.migrations]]
+tag = "v1"
+new_sqlite_classes = ["EmailQuotaCoordinator"]
+
+[env.staging.vars]
+DIVINCI_API_BASE = "https://api.stage.divinci.app"
+DIVINCI_RELEASE_ID = "6a2ba698857d4d8b90fd6734"
+
+# ── Production: the DrFuhrman team's OWN Cloudflare account ──────────────────
+# Deployed with `wrangler deploy --env production`, authenticated to the
+# DrFuhrman account. It carries THAT account's KV id, so the committed file is
+# the source of truth for every account at once and never needs per-deploy
+# editing: Divinci keeps deploying the base + staging envs to the Divinci
+# account; the DrFuhrman team deploys ONLY this env to theirs. (Their CI must
+# always pass `--env production` — a bare `wrangler deploy` would try the base
+# env's Divinci KV id in their account and fail with code 10041.)
+#
+# ⚠️ ONE-TIME SETUP by the DrFuhrman team (then never again):
+#   1. In the DrFuhrman account:  wrangler kv namespace create EMAIL_QUOTA --env production
+#   2. Paste the printed id into `id` below (replacing the placeholder).
+#   3. Set secrets in that account:  wrangler secret put LANDING_PAGE_HMAC_KEY --env production
+#   The Durable Object is auto-created by the migration on first deploy.
+[env.production]
+name = "drfuhrman-ai-landing"
+
+[env.production.assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+run_worker_first = true
+
+[[env.production.kv_namespaces]]
+binding = "EMAIL_QUOTA"
+# DrFuhrman account's EMAIL_QUOTA namespace (provided by the DrFuhrman team).
+id = "e8fd0b02778f43c0b1cfaa5fe7fb77ec"
+
+[[env.production.durable_objects.bindings]]
+name = "QUOTA_DO"
+class_name = "EmailQuotaCoordinator"
+
+[[env.production.migrations]]
+tag = "v1"
+new_sqlite_classes = ["EmailQuotaCoordinator"]
+
+# Points at the Divinci STAGING API today (same as base/staging, so it works
+# out of the box). To move real drfuhrman.ai traffic onto the Divinci
+# PRODUCTION backend, change these to api.divinci.app + a prod release id — and
+# coordinate the Divinci side (prod HMAC key match + CORS allowlist for this
+# Worker's origin + a Release that permits anonymous chat).
+[env.production.vars]
+DIVINCI_API_BASE = "https://api.stage.divinci.app"
+DIVINCI_RELEASE_ID = "6a2ba698857d4d8b90fd6734"
