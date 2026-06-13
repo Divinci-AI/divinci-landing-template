@@ -64,6 +64,17 @@ const canonical = urlFor(lang);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href={brand.media.favicon} />
+    {/* Load the client's real webfont(s) so the brand font actually renders
+        (otherwise the named family falls through to a fallback / UA serif). */}
+    {brand.fonts.links && brand.fonts.links.length > 0 && (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        {brand.fonts.links.map((href) => (
+          <link rel="stylesheet" href={href} />
+        ))}
+      </>
+    )}
     <style is:inline set:html={brandVars}></style>
     <title>{m.title}</title>
     <meta name="description" content={m.description} />

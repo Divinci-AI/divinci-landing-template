@@ -23,7 +23,7 @@ export interface BrandConfig {
     primary: string; dark: string; mid: string; accent: string;
     cream: string; soft: string; bubble: string; text: string;
   };
-  fonts: { family: string; headingWeight: number; bodyWeight: number };
+  fonts: { family: string; headingWeight: number; bodyWeight: number; links?: string[] };
   links: {
     mainSite: string; signupUrl: string; loginUrl: string; bioCreditUrl: string;
     /** Divinci legal URLs are shared defaults — set only to override. */

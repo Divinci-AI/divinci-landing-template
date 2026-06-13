@@ -211,6 +211,9 @@ const t = getUI(lang).hero;
 
       .ai-shine {
         position: relative;
+        /* Match the client's extracted font (same as the logo wordmark style),
+           not the UA serif default. */
+        font-family: var(--font-sans);
         color: transparent;
         -webkit-text-fill-color: transparent;
         background-image: linear-gradient(
