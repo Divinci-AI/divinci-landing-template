@@ -30,7 +30,7 @@ export interface BrandConfig {
     terms?: string; privacy?: string; aiSafety?: string;
   };
   divinci: { releaseId: string; apiBase: string; whitelabelId: string };
-  bios: Array<{ name: string; title: string; blurbKey: string }>;
+  bios: Array<{ name: string; title: string; blurbKey: string; image?: string }>;
   corpus: { framing: string; stats: Array<{ value: string; label: string }> };
   chat: { fallbackWelcome: string; starters: string[] };
   media: {
