@@ -14,8 +14,9 @@ const mainSiteLabel = brand.links.mainSite.replace(/^https?:\/\//, "").replace(/
 const navItems = [
   { href: "#hero", label: ui.nav.chat },
   { href: "#corpus", label: ui.nav.corpus },
-  { href: "#examples", label: ui.nav.examples },
-  { href: "#coming-soon", label: ui.nav.comingSoon },
+  // Only link to sections that are actually rendered (see Landing.astro).
+  ...(brand.sections?.examples !== false ? [{ href: "#examples", label: ui.nav.examples }] : []),
+  ...(brand.sections?.comingSoon !== false ? [{ href: "#coming-soon", label: ui.nav.comingSoon }] : []),
   {
     href: withRef(brand.links.mainSite, "header-nav"),
     label: mainSiteLabel,
