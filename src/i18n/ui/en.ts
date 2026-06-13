@@ -1,33 +1,33 @@
 /**
- * English source-of-truth UI dictionary for the DrFurman.ai landing
- * page. Every other locale file (src/i18n/ui/<code>.ts) is typed as
- * `UIStrings` (derived from this object) so TypeScript enforces that
- * every locale has exactly the same keys.
+ * English source-of-truth UI dictionary for the landing-page template.
+ * `UIStrings` (below) is derived from this object, so it defines the shape
+ * every locale must satisfy.
  *
- * What's NOT here (stays in component code, never translated):
- *   - Brand names: Dr. Fuhrman, Dr. Joel/Cara Fuhrman, Nutritarian,
- *     DrFurman.ai, Divinci, Gemini 3.5 Flash, Gemma 4, DFO
- *   - Domains / URLs: drfuhrman.com, drfuhrman.ai
- *   - Numbers + emoji + the 4 stat values' digits (12, 20,000+, 180)
- *   - Book / publication titles (Eat to Live, New York Times, …)
- *   - The supported-language list (shown as autonyms — see locales.ts)
+ * This is NEUTRAL PLACEHOLDER copy ("Acme Expert"). Replace it with the
+ * customer's wording — by hand, or via the demo-pipeline brand extractor
+ * (Steps 2–3) which generates this file from the prospect's site. Brand
+ * nouns that recur (product name, person) are written inline here; swap
+ * them when re-skinning. The template ships ONLY this `en` dictionary;
+ * all other advertised locales fall back to it (see src/i18n/index.ts)
+ * until a customer adds src/i18n/ui/<code>.ts translations.
  *
- * Inline markup ({br}, {kbd}…{/kbd}) is represented as placeholder
- * tokens the components re-inflate, so translators never touch HTML.
+ * Inline markup ({br}, {kbd}…{/kbd}) is represented as placeholder tokens
+ * the components re-inflate, so translators never touch HTML. Showcase
+ * answers also use **bold**, *italic*, and [[n]] citation markers.
  */
 
 export const en = {
   meta: {
-    title: "DrFurman.ai — AI-powered Nutritarian guidance, 24/7",
+    title: "Acme Expert AI — answers from our knowledge base, 24/7",
     description:
-      "Chat with Dr. Fuhrman's AI, trained on his entire corpus — 12 books, every video lecture, 20,000+ member Q&As, and all 180 products. Available 24/7 in every language Gemini 3.5 Flash speaks.",
-    ogTitle: "DrFurman.ai — AI-powered Nutritarian guidance, 24/7",
+      "Chat with the Acme Expert AI, trained on our complete published work — articles, talks, and answered questions. Available 24/7, in your language.",
+    ogTitle: "Acme Expert AI — answers from our knowledge base, 24/7",
     ogDescription:
-      "Chat 24/7 with an assistant trained on Dr. Joel Fuhrman's complete body of work.",
-    ogImageAlt: "Dr. Fuhrman AI — every book, every lecture, every answer.",
-    twitterTitle: "DrFurman.ai — AI-powered Nutritarian guidance, 24/7",
+      "Chat 24/7 with an assistant trained on Acme Expert's complete body of work.",
+    ogImageAlt: "Acme Expert AI — every article, every talk, every answer.",
+    twitterTitle: "Acme Expert AI — answers from our knowledge base, 24/7",
     twitterDescription:
-      "Chat 24/7 with an assistant trained on Dr. Joel Fuhrman's complete body of work.",
+      "Chat 24/7 with an assistant trained on Acme Expert's complete body of work.",
   },
 
   nav: {
@@ -40,81 +40,73 @@ export const en = {
   },
 
   header: {
-    logoAriaLabel: "Dr. Fuhrman AI",
+    logoAriaLabel: "Acme Expert AI",
   },
 
   hero: {
-    memberLoginPrompt: "Already a drfuhrman.com member?",
+    memberLoginPrompt: "Already a member?",
     memberLoginCta: "Log in",
-    headline: "Every book. Every lecture. Every answer.",
+    headline: "Every article. Every talk. Every answer.",
   },
 
   corpus: {
     /** {br} is a literal line break. */
-    headline:
-      "Built on Dr. Fuhrman's{br}four decades of research.",
+    headline: "Built on Acme Expert's{br}years of work.",
     subheading:
-      "Three years in the making, the DFO AI doesn't guess — it answers from Dr. Fuhrman's real corpus.",
+      "The Acme Expert AI doesn't guess — it answers from our real, published knowledge base.",
     /** The four corpus stats. Numbers/emoji stay in the component;
      *  only `unit` + `flavor` (and stat 0's word "Every") translate. */
     stats: {
       everyWord: "Every",
-      lecturesUnit: "video lecture",
+      lecturesUnit: "talk",
       lecturesFlavor:
-        "Every recorded lecture Dr. Fuhrman has given, indexed and answerable in plain language.",
-      booksUnit: "books",
+        "Every recorded talk we've given, indexed and answerable in plain language.",
+      booksUnit: "articles",
       booksFlavor:
-        "Dr. Fuhrman's complete published library, from Eat to Live to Fast Food Genocide.",
-      qasUnit: "member Q&As",
+        "Our complete published library, searchable and citable.",
+      qasUnit: "answered questions",
       qasFlavor:
-        "Answers Dr. Fuhrman has personally given to his Member Center community over the years.",
-      productsUnit: "products",
+        "Real answers we've given our community over the years.",
+      productsUnit: "resources",
       productsFlavor:
-        "Every supplement and offering on DrFuhrman.com, with full ingredient + spec data.",
+        "Every offering in our catalog, with full detail and specs.",
     },
-    languagePrefix: "Spoken in every language Gemini 3.5 Flash supports",
+    languagePrefix: "Available in every language the model supports",
     videoAriaLabel:
-      "An open hardcover health book on a warm wooden table surrounded by fresh broccoli, kale, blueberries, walnuts, and a smartphone showing a chat interface",
+      "An open book on a warm wooden table beside a smartphone showing a chat interface",
   },
 
   examples: {
-    headline: "Try asking the DFO AI a real question.",
+    headline: "Try asking the Acme Expert AI a real question.",
     /** {kbd}Enter{/kbd} renders the Enter key as a <kbd> chip. */
     description:
       "Click any question to drop it into the chat above — your input gets focus so you can press {kbd}Enter{/kbd} to send.",
     questions: [
-      "What's the simplest way to start eating Nutritarian?",
-      "Tell me about insulin sensitivity.",
-      "What does Dr. Fuhrman recommend for high blood pressure?",
-      "How do I do a 5-day Nutritarian challenge?",
-      "What's the difference between cruciferous and leafy green vegetables?",
-      "Which of Dr. Fuhrman's books should I read first?",
+      "What's the simplest way to get started?",
+      "What do you specialize in?",
+      "What do you recommend for a beginner?",
+      "Can you walk me through the basics?",
+      "What's the difference between your core offerings?",
+      "Where should I begin?",
     ],
     ctaHint: "Drop into chat →",
     videoAriaLabel:
-      "A person in a sunlit kitchen checking the DFO AI on their smartphone over a bowl of berries and fresh greens",
+      "A person in a sunlit room checking the Acme Expert AI on their smartphone",
   },
 
   /**
    * The chat block (greeting, starters, gate form, errors, signup CTA).
-   * These render in the page locale so the chat switches language with
-   * the page.
-   *
-   * STOPGAP NOTE — `welcomeMessage` + `starters`: these render the chat
-   * opener client-side from this dict so they localize today. Per the
-   * FALLBACK_RELEASE comment in src/lib/divinci.ts they are destined to
-   * come from the Divinci Release config (server, English) once real
-   * release-fetch lands. At that point the durable fix is localized
-   * release content server-side (the response-language directive already
-   * handles the AI's replies). Until then, keep these translated here.
+   * `welcomeMessage` + `starters` render the opener client-side from this
+   * dict so they localize today; they fall back to brand.config.chat and
+   * are destined to come from the Divinci Release config server-side.
    */
   chat: {
     welcomeMessage:
-      "Hi, I'm Dr. Joel Fuhrman's AI. I'm here to help you take back control of your health — what's been on your mind lately?",
+      "Hi, I'm the Acme Expert AI. Ask me anything about our work — what's on your mind?",
     starters: [
-      "Hi, Dr. Fuhrman AI. Can you tell me steps I can take about starting a healthier lifestyle?",
-      "Hi Dr. Fuhrman AI, can you tell me what Nutritarian is all about?",
-      "Hi Dr. Fuhrman AI. Can you tell me about insulin sensitivity?",
+      "Hi! Can you tell me how to get started?",
+      "What does Acme Expert specialize in?",
+      "How can you help me?",
     ],
     /** Label above the conversation-starter pills (rendered uppercase). */
     tryAsking: "Try asking",
@@ -127,14 +119,14 @@ export const en = {
     emailPlaceholderSticky: "First, your email to start chatting…",
     askButton: "Ask",
     questionPlaceholder: "Type your question…",
-    questionAriaLabel: "Ask the Dr. Fuhrman AI",
+    questionAriaLabel: "Ask the Acme Expert AI",
     questionPlaceholderSticky:
-      "Ask the Dr. Fuhrman AI — eating, disease reversal, weight loss…",
+      "Ask the Acme Expert AI anything…",
     sendAriaLabel: "Send message",
     /** Three-line disclaimer under the composer (each line wraps separately). */
     disclaimer: [
       "Double-check important info.",
-      "Not a substitute for medical advice.",
+      "Not a substitute for professional advice.",
       "AI can make mistakes.",
     ],
     errorEmailRequired: "Please enter your email above to start the chat.",
@@ -146,98 +138,93 @@ export const en = {
       "Network error — that message wasn't delivered. Please try again.",
     /** Sticky bar nudge once the free message is spent. */
     quotaExhaustedNudge:
-      "You've used your free message — keep talking to Dr. Fuhrman's AI.",
-    signupHeadline: "Want to keep talking to Dr. Fuhrman's AI?",
+      "You've used your free message — keep talking to the Acme Expert AI.",
+    signupHeadline: "Want to keep talking to the Acme Expert AI?",
     signupBody:
-      "Continue the conversation — and unlock the full Nutritarian membership experience — at DrFuhrman.com.",
-    signupButton: "Sign up at DrFuhrman.com",
+      "Continue the conversation — and unlock full access — on our site.",
+    signupButton: "Sign up",
   },
 
   /**
    * The "Real answers, straight from the corpus" showcase — one real
-   * conversation rendered for the visitor to read.
-   *
-   * The answers carry the chat's inline markup, which MUST survive
-   * translation untouched: **bold**, *italic*, and [[n]] citation markers
-   * (the n maps to the nth retrieved source). Filenames (sources), book
-   * titles (recommendations), the model string, and "Dr. Fuhrman AI" stay
-   * in the component — only the prose below translates. The opening
-   * greeting reuses `chat.welcomeMessage`.
+   * conversation rendered for the visitor to read. Replace with a real
+   * exchange from the customer's own assistant. Markup (**bold**, *italic*,
+   * [[n]] citations) MUST survive translation untouched.
    */
   transcript: {
-    heading: "Real answers, straight from the corpus",
+    heading: "Real answers, straight from the knowledge base",
     subheading:
-      "One real conversation with the Dr. Fuhrman AI — every reply grounded in his own books, lectures, and shows, with the exact sources shown. Scroll to read the whole thing.",
+      "One conversation with the Acme Expert AI — every reply grounded in our own published work, with the exact sources shown. Scroll to read the whole thing.",
     online: "Online",
     assistantLabel: "Assistant",
     recommendationPrefix: "I noticed you might be interested in",
     composerAria: "Ask your own question in the chat",
-    composerPlaceholder: "Ask Dr. Fuhrman's AI your own question…",
+    composerPlaceholder: "Ask the Acme Expert AI your own question…",
     questions: [
-      "What are the first three steps to start a Nutritarian diet?",
-      "In one sentence, what is a Nutritarian diet?",
-      "Name three high-nutrient leafy greens.",
+      "What are the first steps to get started?",
+      "In one sentence, what do you do?",
+      "Name three things a beginner should know.",
     ],
     /** One string[] per question — paragraphs, in the same order. */
     answers: [
       [
-        "Based on my work in *Eat for Health*, the first three steps to transition to a healthful Nutritarian diet are [[7]]:",
-        "**1. Reprogram your thinking and tastes to prefer micronutrient-rich foods.** You have to shift your mindset. Instead of focusing on what you’re giving up, train yourself to desire the foods that do the most to nourish and protect your body—leafy greens, beans, onions, mushrooms, berries, and seeds. As you consume these foods, your taste buds actually change, and what once seemed plain or boring becomes vibrant and satisfying.",
-        "**2. Eliminate addictive hunger symptoms that lead to overeating by making micronutrient-rich foods the foundation of your diet.** Most people are trapped in cycles of “toxic hunger”—shakiness, headaches, and cravings caused by withdrawal from low-nutrient, processed foods. When you build your diet around foods with high nutrient density, that addictive pull diminishes. You experience true hunger in the throat, not uncomfortable detox symptoms in the stomach, and your body finally gets satisfied with the right amount of calories.",
-        "**3. Limit unhealthful foods in your daily diet.** As you crowd your plate with high-nutrient foods, you naturally reduce the processed, refined, and animal-derived products. It’s not about perfection in one day; it’s about making micronutrient-rich plant foods the main event and letting the unhealthful options fall to the periphery until they no longer have a hold on you.",
-        "These three steps work together—you can’t fully separate them. As the nutrient density of your diet goes up, your desire for low-nutrient foods goes down, and your ability to eat for genuine health rather than addiction becomes automatic [[7]].",
+        "Great question — here are the first three steps to get started [[1]]:",
+        "**1. Start with the fundamentals.** Begin with our introductory material so you have a solid foundation before moving on to more advanced topics.",
+        "**2. Practice consistently.** Small, regular steps compound — build a routine you can sustain rather than trying to do everything at once.",
+        "**3. Ask questions as you go.** Use this assistant whenever you're unsure; every answer is grounded in our published work and cites its sources.",
+        "These steps build on each other — start simple, stay consistent, and ask for help when you need it [[1]].",
       ],
       [
-        "A Nutritarian diet is a high-nutrient eating style built on the principle that Health equals Nutrients divided by Calories [[4]], where you maximize micronutrients per calorie by emphasizing green vegetables, beans, onions, mushrooms, berries, and seeds while avoiding processed foods, sugar, white flour, and refined oils [[1]][[5]].",
+        "In short, we help you get expert, sourced answers from our complete published knowledge base — available anytime, in your language [[2]].",
       ],
       [
-        "I’d point you to **kale, collard greens, and spinach**. These dark leafy greens score at the very top of the nutrient-density line—100 out of 100—because they are loaded with vitamins, minerals, and cancer-fighting phytochemicals that protect against disease [[1]][[7]].",
+        "Three things worth knowing up front: **start with the basics**, **stay consistent**, and **lean on the sources** — every answer here is backed by our real published material [[1]][[2]].",
       ],
     ],
   },
 
   comingSoon: {
     label: "Coming soon",
-    headline: "Take the DFO AI with you — everywhere.",
+    headline: "Take the Acme Expert AI with you — everywhere.",
     cards: [
       {
         badge: "iOS + Android",
-        title: "Native mobile app with food-photo recognition",
-        body: "Snap a picture of your food at the grocery store, in the kitchen, or at a restaurant. The DFO AI tells you instantly whether it fits a Nutritarian lifestyle — and what to swap in if it doesn't.",
+        title: "Native mobile app",
+        body: "Get expert, sourced answers on the go — in the field, at home, or anywhere you need them.",
         imageAlt:
-          "A person holding up a smartphone at a farmers market, the camera framed over fresh kale and tomatoes with a green analysis ring",
+          "A person holding up a smartphone, using the Acme Expert AI",
       },
       {
-        badge: "Offline · Gemma 4",
-        title: "The DFO AI, running entirely on your device",
-        body: "A compressed version of the DFO AI, powered by Google's Gemma 4 open model. Works on planes, in remote kitchens, in the back of the supplement aisle — no connection required.",
+        badge: "Offline",
+        title: "The Acme Expert AI, running on your device",
+        body: "A compressed, on-device version that works with no connection required.",
         imageAlt:
-          "A traveler in an airplane window seat using the DFO AI on their smartphone, soft golden-hour clouds visible through the window",
+          "A traveler using the Acme Expert AI on their smartphone with no signal",
       },
     ],
   },
 
   bios: {
-    headline: "The minds behind the AI.",
+    headline: "The team behind the AI.",
     subheading:
-      "The DFO AI's voice is grounded in decades of clinical practice and teaching by Dr. Joel and Dr. Cara Fuhrman.",
-    /** Names stay in component code; only role + body translate. */
+      "The Acme Expert AI's voice is grounded in years of real expertise and practice.",
+    /** Names come from brand.config.bios; only role + body translate. */
     roles: [
-      "Board-certified family physician, author, nutrition researcher",
-      "Family medicine physician, plant-based nutrition advocate",
+      "Founder",
+      "Co-founder",
     ],
     bodies: [
-      "Dr. Fuhrman is a #1 New York Times best-selling author and a board-certified family physician specializing in nutritional medicine. He coined the term Nutritarian to describe a diet that strives for nutritional excellence, and has devoted four decades of clinical practice and research to documenting how a diet rich in micronutrients can prevent and reverse chronic disease.",
-      "Dr. Cara Fuhrman is a family medicine physician with a passion for plant-based nutrition and helping families build lifelong healthy habits. She partners with Dr. Joel Fuhrman on educational programs that bring the Nutritarian approach to a wider audience. With her father, she co-founded LongevityRx, an advanced longevity-medicine clinic in San Diego.",
+      "Replace this with the founder's bio — credentials, focus, and the body of work the assistant is trained on.",
+      "Replace this with a second team member's bio, or remove the entry from brand.config.bios for a single-person layout.",
     ],
-    footerPrefix: "For full bios, books, and research, visit",
+    footerPrefix: "For full bios and resources, visit",
   },
 
   cta: {
-    headline: "Ready to ask Dr. Fuhrman's AI a question?",
+    headline: "Ready to ask the Acme Expert AI a question?",
     description:
       "Free to try. No account needed to start. The chat is right at the top of this page.",
-    buttonText: "Try the DFO AI now",
+    buttonText: "Try the Acme Expert AI now",
   },
 
   footer: {
@@ -250,7 +237,7 @@ export const en = {
 
 /**
  * The shape every locale dictionary must satisfy. `en` is intentionally
- * NOT `as const` — we want string fields typed as `string` (not their
- * English literal) so translated locale files satisfy the same shape.
+ * NOT `as const` — string fields stay typed as `string` so translated
+ * locale files satisfy the same shape.
  */
 export type UIStrings = typeof en;

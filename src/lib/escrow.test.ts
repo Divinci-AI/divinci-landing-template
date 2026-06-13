@@ -52,7 +52,7 @@ describe("escrow", () => {
 
     it("parses stored JSON", () => {
       storage.setItem(
-        "drfuhrman.escrow",
+        "divinci-landing.escrow",
         JSON.stringify({
           email: "mike@divinci.ai",
           firstName: "Mike",
@@ -70,7 +70,7 @@ describe("escrow", () => {
 
     it("fills missing fields with EMPTY defaults", () => {
       storage.setItem(
-        "drfuhrman.escrow",
+        "divinci-landing.escrow",
         JSON.stringify({ email: "x@y.com" }),
       );
       const out = loadEscrow();
@@ -81,7 +81,7 @@ describe("escrow", () => {
     });
 
     it("returns EMPTY on malformed JSON", () => {
-      storage.setItem("drfuhrman.escrow", "{not json");
+      storage.setItem("divinci-landing.escrow", "{not json");
       const out = loadEscrow();
       expect(out.email).toBe(null);
     });

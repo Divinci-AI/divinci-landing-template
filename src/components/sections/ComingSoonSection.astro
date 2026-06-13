@@ -18,27 +18,11 @@ const badgeParts: { logo: string; label: string }[][] = [
   [{ logo: "gemma", label: t.cards[1].badge }],
 ];
 
-const R2 = "https://pub-4381eeaa2126408e92be4a3b3267fd55.r2.dev";
-
+// Only `video` + `poster` are consumed below; the card text comes from the
+// i18n `comingSoon.cards` dict. Drop customer media into public/brand/.
 const cards = [
-  {
-    badge: "iOS + Android",
-    video: `${R2}/mobile-app.webm`,
-    poster: "/marketing/mobile-app.jpg",
-    imageAlt:
-      "A person holding up a smartphone at a farmers market, the camera framed over fresh kale and tomatoes with a green analysis ring",
-    title: "Native mobile app with food-photo recognition",
-    body: "Snap a picture of your food at the grocery store, in the kitchen, or at a restaurant. The DFO AI tells you instantly whether it fits a Nutritarian lifestyle — and what to swap in if it doesn't.",
-  },
-  {
-    badge: "Offline · Gemma 4",
-    video: `${R2}/offline-ai.webm`,
-    poster: "/marketing/offline-ai.jpg",
-    imageAlt:
-      "A traveler in an airplane window seat using the DFO AI on their smartphone, soft golden-hour clouds visible through the window",
-    title: "The DFO AI, running entirely on your device",
-    body: "A compressed version of the DFO AI, powered by Google's Gemma 4 open model. Works on planes, in remote kitchens, in the back of the supplement aisle — no connection required.",
-  },
+  { video: "/brand/coming-soon-1.webm", poster: "/brand/coming-soon-1.jpg" },
+  { video: "/brand/coming-soon-2.webm", poster: "/brand/coming-soon-2.jpg" },
 ];
 ---
 

@@ -82,8 +82,8 @@ export const brand: BrandConfig = {
       "Hi, I'm the Acme Expert AI. Ask me anything about our work — what's on your mind?",
     starters: [
       "What does Acme Expert specialize in?",
-      "How can you help me?",
-      "How do I get started?",
+      "How can you help me with my project?",
+      "How do I get started with Acme Expert?",
     ],
   },
   media: {

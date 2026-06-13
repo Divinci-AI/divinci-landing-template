@@ -29,14 +29,14 @@ describe("upstream-hmac", () => {
     const headers = await computeUpstreamHmacHeaders({
       hmacKey: KEY,
       releaseId: RELEASE,
-      newPrompt: "What is the Nutritarian diet?",
+      newPrompt: "What does Acme Expert do?",
       nowSeconds: 1_000_000,
     });
     expect(headers).not.toBeNull();
     const verify = await verifyUpstreamHmac({
       hmacKey: KEY,
       releaseId: RELEASE,
-      newPrompt: "What is the Nutritarian diet?",
+      newPrompt: "What does Acme Expert do?",
       providedTs: headers!["X-Landing-Page-Ts"],
       providedSig: headers!["X-Landing-Page-Sig"],
       nowSeconds: 1_000_005,

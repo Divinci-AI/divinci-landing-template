@@ -1,7 +1,7 @@
 ---
 /**
- * Transcript showcase — ONE real conversation from the live Dr. Fuhrman AI
- * (Fuhrman v8 + Gemini 3.5 Flash), rendered as a single scrollable chat
+ * Transcript showcase — ONE real conversation from the live assistant,
+ * rendered as a single scrollable chat
  * window. The messages area scrolls; a decoy composer pinned at the bottom
  * scrolls the visitor up into the real hero chat to ask their own question.
  *
@@ -21,6 +21,7 @@
 import { getUI } from "~/i18n";
 import { cleanContextTitle } from "~/lib/clean-context-title";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { brand } from "~/brand.config";
 
 interface Props {
   lang?: string;
@@ -71,40 +72,32 @@ const welcomeMessage = welcome;
 // Non-translatable per-exchange data — retrieved-source filenames and the
 // book recommendation — zipped by index with the translated question +
 // answer paragraphs from the `transcript` dictionary.
+// PLACEHOLDER showcase data — replace with a real exchange from the
+// customer's own assistant (retrieved-source filenames + recommendations),
+// zipped by index with the translated question + answer prose from the
+// `transcript` dictionary.
 const exchangeMeta: Array<{ sources: string[]; recommendation?: string }> = [
   {
     sources: [
-      "ENDofDIETING_2P.pdf",
-      "S2-E26-habits.txt",
-      "Nutritarian Handbook & Food Scoring Guide - Paperback.html",
-      "Eat To Live - Episode 9.txt",
-      "Eat for Health - ebook.html",
-      "Eat_For_Health.pdf",
-      "S2-E21-Ozempic.txt",
-      "Eat for Health - Paperback.html",
+      "getting-started-guide.pdf",
+      "intro-talk-episode-1.txt",
+      "knowledge-base-overview.html",
     ],
-    recommendation: "Eat for Health",
+    recommendation: "Getting Started Guide",
   },
   {
     sources: [
-      "Eat_For_Health.pdf",
-      "Ep 1 - final - 3_11_21, 6.58 AM.txt",
-      "Nutritarian Handbook & Food Scoring Guide - Paperback.html",
-      "ENDofDIETING_2P.pdf",
-      "S2-E21-Ozempic.txt",
-      "The End of Dieting - ebook.html",
-      "The End of Dieting - Paperback.html",
+      "about-us.html",
+      "knowledge-base-overview.html",
+      "core-offerings.pdf",
     ],
-    recommendation: "The End of Dieting",
+    recommendation: "About Acme Expert",
   },
   {
     sources: [
-      "EAT-TO-LIVE_Joel-Fuhrman_380.pdf",
-      "Eat To Live - Episode 9.txt",
-      "Complete Greens.html",
-      "10in20__58016.pdf",
-      "S2-E26-habits.txt",
-      "Organic Kale Chips - Cashew Cream & Onion.html",
+      "beginner-basics.pdf",
+      "intro-talk-episode-1.txt",
+      "faq.html",
     ],
   },
 ];
@@ -116,12 +109,12 @@ const exchanges: Exchange[] = exchangeMeta.map((meta, i) => ({
   recommendation: meta.recommendation,
 }));
 
-const ASSISTANT_MODEL = "Fuhrman v8 (Embedding-2) + Gemini 3.5 Flash";
+const ASSISTANT_MODEL = brand.identity.productName;
 
 // Resolve a citation number to its source ("context") title for the tooltip.
 function citeTitle(ex: Exchange, n: number): string {
   const raw = ex.sources[n - 1] ?? ex.sources[ex.sources.length - 1];
-  return raw ? cleanContextTitle(raw) : "Dr. Fuhrman's corpus";
+  return raw ? cleanContextTitle(raw) : `${brand.identity.siteName}'s knowledge base`;
 }
 ---
 
@@ -147,9 +140,9 @@ function citeTitle(ex: Exchange, n: number): string {
         <span
           class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15"
         >
-          <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+          <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
         </span>
-        <span class="font-semibold text-df-green-dark">Dr. Fuhrman AI</span>
+        <span class="font-semibold text-df-green-dark">{brand.identity.productName}</span>
         <span class="ml-auto inline-flex items-center gap-1.5 text-xs text-gray-500">
           <span class="relative flex h-2 w-2">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75"></span>
@@ -164,7 +157,7 @@ function citeTitle(ex: Exchange, n: number): string {
         {/* Opening greeting */}
         <div class="flex items-start gap-2">
           <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
-            <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+            <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
           </span>
           <p class="max-w-[88%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-df-text shadow-sm md:text-base">
             {welcomeMessage}
@@ -194,7 +187,7 @@ function citeTitle(ex: Exchange, n: number): string {
               {/* Assistant answer */}
               <div class="flex items-start gap-2">
                 <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
-                  <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+                  <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
                 </span>
                 <div class="max-w-[88%]">
                   <div class="space-y-2 rounded-2xl rounded-tl-sm bg-df-green-leaf/15 px-4 py-3 text-sm leading-relaxed text-df-text md:text-base">
@@ -270,7 +263,7 @@ function citeTitle(ex: Exchange, n: number): string {
     </div>
 
     <p class="mt-6 text-center text-xs text-gray-400">
-      Real responses from the live Dr. Fuhrman AI · {ASSISTANT_MODEL}
+      Real responses from the live {ASSISTANT_MODEL}
     </p>
   </div>
 </section>

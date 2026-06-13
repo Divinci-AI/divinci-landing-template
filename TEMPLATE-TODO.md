@@ -21,13 +21,17 @@ Step 1 (fork + parameterize) status. The **foundation spine is wired to
 - placeholder `public/brand/{logo,favicon}.svg`
 
 ## Remaining
-1. **i18n noun extraction (biggest item).** `src/i18n/ui/*.ts` (36 locales)
-   still contain "Dr. Fuhrman", "Nutritarian", "DFO AI", "DrFurman.ai" and
-   Fuhrman-specific corpus/transcript/comingSoon copy. Decide the split: brand
-   *nouns* (product name, person) come from `brand.config`; translatable *prose*
-   stays in i18n. At minimum, rewrite `en.ts` to neutral Acme copy and templatize
-   the brand nouns; the other 35 locales can be regenerated/translated.
-2. **Corpus stats.** Values are still i18n-driven (`12`, `20,000+`, `180` +
+1. **DONE (2026-06-13): i18n + all component copy neutralized.** `en.ts`
+   rewritten to neutral "Acme Expert" copy; the 35 Fuhrman locale files deleted
+   (the loader's English fallback serves all 36 advertised locales until a
+   customer adds translations). Also neutralized the component-level refs the
+   i18n split left behind: TranscriptShowcase (sources, labels, model →
+   brand.config), ChatIsland/Transcript (labels, corpus fallback, logo, event
+   name `divinci:populateInput`), ComingSoon (dropped dead Fuhrman card copy),
+   Footer, links.ts REF_SOURCE, escrow storage key, verify-email templates
+   (→ brand.identity.siteName), and the test fixtures. Deleted the dormant
+   `worker-v2.ts`. **`grep -ri fuhrman src/` → zero.** Build = 36 pages.
+2. **Corpus stats.** Values are still i18n-driven (`Every`, `talk`, etc. +
    unit/flavor). Move to `brand.config.corpus.stats` (value + label); decide
    whether to keep the per-stat "flavor" paragraph (add to schema if so).
 3. **Bios layout.** Names come from config, but the radial face-mask geometry

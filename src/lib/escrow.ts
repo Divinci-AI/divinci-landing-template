@@ -1,4 +1,4 @@
-const STORAGE_KEY = "drfuhrman.escrow";
+const STORAGE_KEY = "divinci-landing.escrow";
 
 export interface EscrowState {
   firstName: string | null;

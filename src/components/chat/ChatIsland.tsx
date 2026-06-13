@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { brand } from "../../brand.config";
 import { FREE_MESSAGE_QUOTA, getDivinci } from "../../lib/divinci";
 import { loadEscrow, saveEscrow } from "../../lib/escrow";
 import { WelcomeMessage } from "./WelcomeMessage";
@@ -198,7 +199,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       // from CLAUDE.md — log metadata only, never the raw email.
       const trimmedEmail = email.trim();
       const atIdx = trimmedEmail.lastIndexOf("@");
-      console.info("[DrFurman.ai] email captured (v1 stub)", {
+      console.info("[divinci-landing] email captured (v1 stub)", {
         hasEmail: true,
         emailDomain: atIdx > 0 ? trimmedEmail.slice(atIdx + 1) : "unknown",
       });
@@ -323,7 +324,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         // shift.) The chips collapse to one row in the Transcript, so showing
         // every item — including same-file chunks — stays tidy.
         const sources = (lastMsg?.context ?? []).map(
-          (c) => c.metadata?.originalName || "Dr. Fuhrman's corpus",
+          (c) => c.metadata?.originalName || `${brand.identity.siteName}'s knowledge base`,
         );
         // Medical-safety advisory (server-side medicalSafety check). Carried
         // verbatim from the signed payload → rendered as an amber banner
@@ -393,7 +394,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
     [anonTranscript, signiture, email],
   );
 
-  // Example-card clicks dispatch drfuhrman:populateInput — pre-fill the
+  // Example-card clicks dispatch divinci:populateInput — pre-fill the
   // draft and focus the textarea instead of auto-sending. The user then
   // hits Enter to send (which gives them a chance to edit first).
   useEffect(() => {
@@ -403,9 +404,9 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       setDraft(detail.text);
       setFocusSignal((n) => n + 1);
     };
-    window.addEventListener("drfuhrman:populateInput", handler);
+    window.addEventListener("divinci:populateInput", handler);
     return () =>
-      window.removeEventListener("drfuhrman:populateInput", handler);
+      window.removeEventListener("divinci:populateInput", handler);
   }, []);
 
   // Accept the gated ToS version for this visitor's sessionId, then re-send
@@ -494,10 +495,10 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
               ) : (
-                <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" className="h-4 w-4" width={16} height={16} />
+                <img src={brand.media.logo} alt="" aria-hidden="true" className="h-4 w-4" width={16} height={16} />
               )}
             </span>
-            <span className="font-semibold text-df-green-dark">Dr. Fuhrman AI</span>
+            <span className="font-semibold text-df-green-dark">{brand.identity.productName}</span>
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-gray-500">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75" />

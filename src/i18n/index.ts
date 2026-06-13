@@ -1,66 +1,28 @@
 /**
- * i18n runtime for the DrFurman.ai landing page.
+ * i18n runtime for the landing-page template.
  *
- * - `getUI(code)` returns the typed UI dictionary for a locale,
- *   falling back to English for any locale not yet translated (so the
- *   page always renders while locales are being filled in).
- * - `tokenize(str)` turns a source string's inline markup placeholders
- *   ({br}, {kbd}…{/kbd}) into a flat list of segments the .astro
- *   components re-inflate into real <br> / <kbd> — translators never
- *   touch HTML.
+ * - `getUI(code)` returns the typed UI dictionary for a locale, falling
+ *   back to English for any locale without its own dictionary (so all
+ *   advertised locales render while translations are filled in).
+ * - `tokenize(str)` turns inline markup placeholders ({br}, {kbd}…{/kbd})
+ *   into a flat segment list the .astro components re-inflate into real
+ *   <br> / <kbd> — translators never touch HTML.
  *
- * Adding a locale = create src/i18n/ui/<code>.ts + add one import +
- * one registry line here. Nothing else.
+ * The template ships ONLY the neutral English dictionary; every other
+ * advertised locale (see LOCALES in ./locales) falls back to it. To
+ * translate a locale, create src/i18n/ui/<code>.ts (typed as UIStrings)
+ * and add one import + one registry line below.
  */
 import { DEFAULT_LOCALE } from "./locales";
 import { en, type UIStrings } from "./ui/en";
-import { es } from "./ui/es";
-import { fr } from "./ui/fr";
-import { de } from "./ui/de";
-import { it } from "./ui/it";
-import { pt } from "./ui/pt";
-import { nl } from "./ui/nl";
-import { pl } from "./ui/pl";
-import { ru } from "./ui/ru";
-import { uk } from "./ui/uk";
-import { cs } from "./ui/cs";
-import { ro } from "./ui/ro";
-import { el } from "./ui/el";
-import { tr } from "./ui/tr";
-import { ar } from "./ui/ar";
-import { he } from "./ui/he";
-import { hi } from "./ui/hi";
-import { bn } from "./ui/bn";
-import { ta } from "./ui/ta";
-import { te } from "./ui/te";
-import { mr } from "./ui/mr";
-import { gu } from "./ui/gu";
-import { pa } from "./ui/pa";
-import { ur } from "./ui/ur";
-import { fa } from "./ui/fa";
-import { th } from "./ui/th";
-import { vi } from "./ui/vi";
-import { id } from "./ui/id";
-import { ms } from "./ui/ms";
-import { fil } from "./ui/fil";
-import { ja } from "./ui/ja";
-import { ko } from "./ui/ko";
-import { zhHans } from "./ui/zh-hans";
-import { zhHant } from "./ui/zh-hant";
-import { sw } from "./ui/sw";
-import { zu } from "./ui/zu";
 
 /**
- * Locale dictionary registry — all 36 advertised languages. English is
- * the source; a locale absent here would render in English (graceful
- * fallback). Keys are the BCP-47 codes used in the URL.
+ * Locale dictionary registry. English is the source; any advertised
+ * locale absent here renders in English (graceful fallback via getUI).
+ * Keys are the BCP-47 codes used in the URL.
  */
 const DICTS: Record<string, UIStrings> = {
-  en, es, fr, de, it, pt, nl, pl, ru, uk, cs, ro, el, tr, ar, he, hi, bn,
-  ta, te, mr, gu, pa, ur, fa, th, vi, id, ms, fil, ja, ko,
-  "zh-hans": zhHans,
-  "zh-hant": zhHant,
-  sw, zu,
+  en,
 };
 
 export function getUI(code: string): UIStrings {

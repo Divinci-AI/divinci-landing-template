@@ -1,12 +1,12 @@
 /**
  * UTM tagging helper for outbound links.
  *
- * Every link that leaves drfuhrman.ai for one of our own properties
- * (drfuhrman.com, divinci.ai) goes through `withRef()` so the receiving
- * site can attribute traffic back to this landing page in its analytics.
+ * Every link that leaves this landing page for one of the customer's own
+ * properties goes through `withRef()` so the receiving site can attribute
+ * traffic back to this landing page in its analytics.
  *
  * Tag set:
- *   utm_source   = drfuhrman-ai
+ *   utm_source   = brand.referral.source
  *   utm_medium   = referral
  *   utm_campaign = <optional, per-link>
  *
@@ -14,7 +14,9 @@
  * (existing keys with the same name win, so a hand-written ?utm_campaign
  * on the source URL isn't clobbered).
  */
-export const REF_SOURCE = "drfuhrman-ai";
+import { brand } from "../brand.config";
+
+export const REF_SOURCE = brand.referral.source;
 export const REF_MEDIUM = "referral";
 
 export function withRef(rawUrl: string, campaign?: string): string {

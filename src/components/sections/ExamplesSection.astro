@@ -84,7 +84,7 @@ const descSegments = tokenize(t.description);
         if (!question) return;
         scrollToHeroChat();
         window.dispatchEvent(
-          new CustomEvent("drfuhrman:populateInput", {
+          new CustomEvent("divinci:populateInput", {
             detail: { text: question },
           }),
         );

@@ -14,7 +14,7 @@ describe("isDisposableEmail", () => {
     expect(isDisposableEmail("user@protonmail.com")).toBe(false);
     expect(isDisposableEmail("user@outlook.com")).toBe(false);
     expect(isDisposableEmail("ceo@divinci.ai")).toBe(false);
-    expect(isDisposableEmail("hi@drfuhrman.com")).toBe(false);
+    expect(isDisposableEmail("hi@acme.example")).toBe(false);
   });
 
   it("is case-insensitive on the domain", () => {

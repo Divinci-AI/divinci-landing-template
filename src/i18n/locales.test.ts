@@ -2,7 +2,7 @@
  * Cross-repo drift tripwire for the platform language registry.
  *
  * The 36-language registry is duplicated by necessity in two places:
- *   - DrFurman:  LOCALES (this repo, src/i18n/locales.ts)
+ *   - Template:  LOCALES (this repo, src/i18n/locales.ts)
  *   - server:    PLATFORM_LANGUAGES (@divinci-ai/models in the server repo)
  *
  * This repo needs its copy at BUILD time (static locale-page generation,
@@ -55,7 +55,7 @@ function canonicalSha256(
     .digest("hex");
 }
 
-describe("DrFurman locale registry — drift tripwire", () => {
+describe("Template locale registry — drift tripwire", () => {
   it(`has exactly ${EXPECTED_COUNT} locales`, () => {
     expect(LOCALES).toHaveLength(EXPECTED_COUNT);
   });

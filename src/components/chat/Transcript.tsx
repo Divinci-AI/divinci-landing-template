@@ -1,4 +1,5 @@
 import { cleanContextTitle } from "../../lib/clean-context-title";
+import { brand } from "../../brand.config";
 import {
   useCallback,
   useEffect,
@@ -127,7 +128,7 @@ function DfAvatar({ avatarUrl }: { avatarUrl?: string | null }) {
       {avatarUrl ? (
         <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
       ) : (
-        <img src="/drfuhrman-logo.svg" alt="" aria-hidden="true" className="h-4 w-4" width={16} height={16} />
+        <img src={brand.media.logo} alt="" aria-hidden="true" className="h-4 w-4" width={16} height={16} />
       )}
     </span>
   );
@@ -433,7 +434,7 @@ function sourceIcon(name: string): string {
 
 /** Resolve a citation number to its source ("context") title for the tooltip. */
 function citeTitle(sources: string[] | undefined, n: number): string {
-  if (!sources || sources.length === 0) return "Dr. Fuhrman's corpus";
+  if (!sources || sources.length === 0) return `${brand.identity.siteName}'s knowledge base`;
   return cleanContextTitle(sources[n - 1] ?? sources[sources.length - 1]);
 }
 
