@@ -22,6 +22,7 @@ const bios = brand.bios.map((b, i) => ({
   name: b.name,
   role: t.roles[i] ?? b.title,
   body: t.bodies[i] ?? "",
+  image: b.image,
 }));
 
 function initials(name: string): string {
