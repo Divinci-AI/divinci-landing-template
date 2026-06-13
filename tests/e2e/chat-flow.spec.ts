@@ -4,17 +4,17 @@ test.describe("Chat send flow (mocked /api/chat-send)", () => {
   test("starter populates input → Enter triggers mocked AI reply", async ({
     page,
   }) => {
-    await mockChatSendOk(page, { reply: "Mock answer about Nutritarian." });
+    await mockChatSendOk(page, { reply: "Mock answer about getting started." });
     await page.goto("/");
     await page.getByPlaceholder("you@example.com").fill("qa@divinci.ai");
     await page
-      .getByRole("button", { name: /Nutritarian is all about/i })
+      .getByRole("button", { name: /specialize in/i })
       .first()
       .click();
     // Starter now POPULATES instead of auto-sending — press Enter to fire.
     await page.getByPlaceholder(/Type your question/i).press("Enter");
     await expect(
-      page.getByText("Mock answer about Nutritarian."),
+      page.getByText("Mock answer about getting started."),
     ).toBeVisible({ timeout: 10_000 });
   });
 
@@ -25,7 +25,7 @@ test.describe("Chat send flow (mocked /api/chat-send)", () => {
     await page.getByPlaceholder("you@example.com").fill("qa@divinci.ai");
     // Textarea is now enabled — type a custom prompt and press Enter
     const textarea = page.getByPlaceholder(/Type your question/i);
-    await textarea.fill("What is a Nutritarian diet?");
+    await textarea.fill("What does Acme Expert do?");
     await textarea.press("Enter");
     await expect(page.getByText("Typed-path synthetic reply.")).toBeVisible({
       timeout: 10_000,

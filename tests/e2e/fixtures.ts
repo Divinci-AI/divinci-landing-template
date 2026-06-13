@@ -64,7 +64,7 @@ export async function mockChatSendQuota(page: Page) {
       body: JSON.stringify({
         error: "quota_exhausted",
         message:
-          "You've already used your free message. Sign up at DrFuhrman.com to continue.",
+          "You've already used your free message. Sign up to continue.",
       }),
     }),
   );

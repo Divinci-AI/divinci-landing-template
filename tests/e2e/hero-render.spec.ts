@@ -6,14 +6,14 @@ test.describe("Hero render", () => {
   }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("img", { name: /^Dr\. Fuhrman$/i }).first(),
+      page.getByRole("img", { name: /^Acme Expert$/i }).first(),
     ).toBeVisible();
     await expect(
       page.getByText("Every book. Every lecture. Every answer."),
     ).toBeVisible();
     // Welcome bubble copy comes from FALLBACK_RELEASE.
     await expect(
-      page.getByText("Hi, I'm Dr. Joel Fuhrman's AI"),
+      page.getByText("Hi, I'm the Acme Expert AI"),
     ).toBeVisible();
     // Email gate is the initial state for a clean session.
     await expect(page.getByPlaceholder("you@example.com")).toBeVisible();

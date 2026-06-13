@@ -8,8 +8,9 @@ interface Props {
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const t = getUI(lang).examples;
 
-// Emoji stay in code; the question text comes from the dictionary by index.
-const emojis = ["🥗", "🩺", "❤️", "📅", "🥦", "📚"];
+// Generic emoji stay in code; the question text comes from the dictionary by
+// index. Swap these to suit the customer's domain.
+const emojis = ["💬", "❓", "💡", "📅", "✨", "📚"];
 const examples = emojis.map((emoji, i) => ({ emoji, text: t.questions[i] }));
 
 // description contains a {kbd}Enter{/kbd} chip — render via tokens, no raw HTML.
@@ -21,8 +22,8 @@ const descSegments = tokenize(t.description);
     <div class="grid items-center gap-10 md:grid-cols-2 md:gap-14">
       <div class="overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5">
         <video
-          src="https://pub-4381eeaa2126408e92be4a3b3267fd55.r2.dev/examples.webm"
-          poster="/marketing/examples.jpg"
+          src="/brand/examples.webm"
+          poster="/brand/examples-poster.jpg"
           class="aspect-[16/10] w-full object-cover"
           autoplay
           loop

@@ -21,16 +21,16 @@
  *
  * Env:
  *   LANDING_PAGE_HMAC_KEY  (required)  — the shared HMAC key (Infisical / wrangler secret)
- *   PREWARM_API_BASE       (default https://api.stage.divinci.app)
- *   PREWARM_RELEASE_ID     (default 6a118e81e44ce78e97327aa8 — DrFuhrman.ai)
- *   PREWARM_ORIGIN         (default https://drfuhrman.ai)
+ *   PREWARM_API_BASE       (default https://api.divinci.app)
+ *   PREWARM_RELEASE_ID     (required — your Divinci release id)
+ *   PREWARM_ORIGIN         (default your demo domain)
  */
 import { createHmac } from "node:crypto";
 
 const HMAC_KEY = process.env.LANDING_PAGE_HMAC_KEY;
-const API_BASE = process.env.PREWARM_API_BASE || "https://api.stage.divinci.app";
-const RELEASE_ID = process.env.PREWARM_RELEASE_ID || "6a118e81e44ce78e97327aa8";
-const ORIGIN = process.env.PREWARM_ORIGIN || "https://drfuhrman.ai";
+const API_BASE = process.env.PREWARM_API_BASE || "https://api.divinci.app";
+const RELEASE_ID = process.env.PREWARM_RELEASE_ID || "REPLACE_WITH_RELEASE_ID";
+const ORIGIN = process.env.PREWARM_ORIGIN || "https://demo.acme.example";
 
 if (!HMAC_KEY) {
   console.error("✗ LANDING_PAGE_HMAC_KEY is required (the landing-page HMAC signing key).");
@@ -46,9 +46,9 @@ const langsArg = args.find((a) => a.startsWith("--langs="));
 // Used as-is for the default English warm AND as the fallback when the localized
 // i18n can't be imported (e.g. running without --experimental-strip-types).
 const EN_STARTERS = [
-  "Hi, Dr. Fuhrman AI. Can you tell me steps I can take about starting a healthier lifestyle?",
-  "Hi Dr. Fuhrman AI, can you tell me what Nutritarian is all about?",
-  "Hi Dr. Fuhrman AI. Can you tell me about insulin sensitivity?",
+  "Hi! Can you tell me how to get started?",
+  "What does Acme Expert specialize in?",
+  "How can you help me?",
 ];
 
 /** Build the warm jobs: [{ code, languageName|null, prompt }]. */

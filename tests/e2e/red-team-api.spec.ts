@@ -18,10 +18,10 @@ import { test, expect, request as playwrightRequest } from "@playwright/test";
 
 const DEPLOYED =
   process.env.E2E_DEPLOYED_URL ??
-  "https://drfuhrman-ai-landing.divinci-ai.workers.dev";
+  "https://REPLACE-landing.example.workers.dev";
 
 const CREDS = {
-  username: process.env.E2E_BASIC_AUTH_USER ?? "dfo",
+  username: process.env.E2E_BASIC_AUTH_USER ?? "preview",
   password: process.env.E2E_BASIC_AUTH_PASS ?? "",
 };
 
@@ -80,7 +80,7 @@ test.describe("Red-team: Basic Auth boundary on the API endpoint", () => {
     const resp = await ctx.post(`${DEPLOYED}/api/chat-send`, {
       failOnStatusCode: false,
       headers: {
-        Authorization: "Basic " + Buffer.from("dfo:bad").toString("base64"),
+        Authorization: "Basic " + Buffer.from("preview:bad").toString("base64"),
         "Content-Type": "application/json",
       },
       data: { email: uniqueEmail("bad-auth"), newPrompt: "hi" },

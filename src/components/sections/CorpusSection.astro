@@ -9,14 +9,10 @@ interface Props {
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const t = getUI(lang).corpus;
 
-// Numbers/emoji stay here; the translatable unit + flavor come from
-// the dictionary. The first stat's value is the word "Every".
-const stats = [
-  { value: t.stats.everyWord, unit: t.stats.lecturesUnit, flavor: t.stats.lecturesFlavor },
-  { value: "12", unit: t.stats.booksUnit, flavor: t.stats.booksFlavor },
-  { value: "20,000+", unit: t.stats.qasUnit, flavor: t.stats.qasFlavor },
-  { value: "180", unit: t.stats.productsUnit, flavor: t.stats.productsFlavor },
-];
+// Corpus stats come from brand.config.corpus.stats (value + label) so they're
+// filled per customer by the brand-kit process. The framing line is config-driven
+// too; the headline/subheading/language list stay translatable in i18n.
+const stats = brand.corpus.stats;
 
 // The supported-language display uses autonyms (each language in its
 // own name) — universal across page locales, so no translation needed.
@@ -53,7 +49,7 @@ const headlineSegments = tokenize(t.headline);
       </div>
     </div>
 
-    <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class={`mt-14 grid gap-6 sm:grid-cols-2 ${stats.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
       {
         stats.map((stat) => (
           <article class="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
@@ -61,10 +57,7 @@ const headlineSegments = tokenize(t.headline);
               {stat.value}
             </p>
             <p class="mt-1 text-sm font-medium uppercase tracking-wider text-gray-500">
-              {stat.unit}
-            </p>
-            <p class="mt-4 text-sm leading-relaxed text-gray-700">
-              {stat.flavor}
+              {stat.label}
             </p>
           </article>
         ))

@@ -31,24 +31,30 @@ Step 1 (fork + parameterize) status. The **foundation spine is wired to
    Footer, links.ts REF_SOURCE, escrow storage key, verify-email templates
    (→ brand.identity.siteName), and the test fixtures. Deleted the dormant
    `worker-v2.ts`. **`grep -ri fuhrman src/` → zero.** Build = 36 pages.
-2. **Corpus stats.** Values are still i18n-driven (`Every`, `talk`, etc. +
-   unit/flavor). Move to `brand.config.corpus.stats` (value + label); decide
-   whether to keep the per-stat "flavor" paragraph (add to schema if so).
-3. **Bios layout.** Names come from config, but the radial face-mask geometry
-   (`LAYOUT_SLOTS`) is tuned to the drfuhrman 2-person hero portrait. Generalize
-   to a simpler avatar layout, or document the per-portrait re-tune.
-4. **wrangler.toml.** Still has drfuhrman worker names, KV ids, and
-   `DIVINCI_RELEASE_ID`. Templatize: worker name from `deploy.workerName`; the
-   customer creates their own KV namespace; document the secrets
-   (`LANDING_PAGE_HMAC_KEY`, etc.). NOTE the drfuhrman bug to NOT carry over:
-   prod env pointed at the **staging** API — template prod must use prod.
-5. **worker.ts** `DEFAULT_FROM_NAME` (verification email sender) — from config.
-6. **Strip leftovers** — drfuhrman `public/favicon.svg` (replaced by
-   `public/brand/favicon.svg`); `src/worker-v2.ts` (dormant experiment); any
-   remaining `df-lang` localStorage key rename.
-7. **examples/** — add `acme.brand.config.ts` (neutral) and
-   `drfuhrman.brand.config.ts` (real values, proves extraction parity).
-8. **Build/deploy verification** + a smoke e2e against a deployed Acme instance.
+2. **DONE: Corpus stats** → `brand.config.corpus.stats` (value + label); the
+   per-stat "flavor" paragraph was dropped (grid adapts to 3 or 4 stats).
+3. **DONE: Bios layout** rewritten bare — initial-letter avatar cards driven by
+   `brand.config.bios` (any count; 1 = centered, 2+ = grid). No hero-portrait /
+   face-mask dependency. Swap the avatar `<span>` for an `<img>` when the brand
+   kit supplies headshots.
+4. **DONE: wrangler.toml** rewritten as a single-env template — placeholder
+   worker name + KV id + `REPLACE_WITH_RELEASE_ID`; default API is now
+   **prod** (`api.divinci.app`), not staging (the drfuhrman bug is not carried
+   over). Multi-account staging/prod blocks removed (documented as optional).
+5. **DONE: worker.ts** from-name, basic-auth realm/user, all quota messages,
+   and the verify-email subject derive from `brand.config`.
+6. **DONE: leftovers stripped** — orphaned `public/favicon.svg`, `worker-v2.ts`,
+   ExamplesSection R2 video, ComingSoon `/logos/` badges, `prewarm-starters.mjs`
+   defaults, all e2e fixtures. og.png/og-card.svg now gitignored (generated).
+7. **DONE: examples/** — `riverside-dental.brand.config.ts` shows a fully
+   filled config (the neutral Acme default lives in `src/brand.config.ts`).
+8. **Remaining: assets.** Customer media (`hero.webp`, `examples.webm`,
+   `corpus.webm`, `coming-soon-*.webm`, headshots) are referenced under
+   `public/brand/` but ship empty — the brand-kit collection process supplies
+   them. Sections degrade (alt/poster) when absent. Document the asset manifest.
+9. **Remaining: dead i18n keys.** `corpus.stats.*` sub-keys in `en.ts` are now
+   unused (stats come from config) — harmless, prune when convenient.
+10. **Remaining: deploy verification** + smoke e2e against a deployed instance.
 
 ## Then
 - **Step 4**: publish this repo public under `Divinci-AI`, add a

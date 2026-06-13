@@ -49,7 +49,7 @@ test.describe("Network-error retry: failed sends don't trip the quota gate", () 
 
     // SignupCTA must NOT be visible — the failed send didn't count.
     await expect(
-      page.getByText(/Want to keep talking to Dr\. Fuhrman's AI\?/i),
+      page.getByText(/Want to keep talking to the Acme Expert AI/i),
     ).toBeHidden();
 
     // Send button is still around (MessageInput is still rendered).

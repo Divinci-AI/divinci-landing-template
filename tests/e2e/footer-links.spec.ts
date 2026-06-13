@@ -22,7 +22,7 @@ test.describe("Footer outbound links carry UTM ref params", () => {
       const href = await a.getAttribute("href");
       expect(href).toBeTruthy();
       expect(href).toContain(link.mustContain);
-      expect(href).toContain("utm_source=drfuhrman-ai");
+      expect(href).toContain("utm_source=acme-demo");
       expect(href).toContain("utm_medium=referral");
       expect(await a.getAttribute("target")).toBe("_blank");
       expect(await a.getAttribute("rel")).toContain("noopener");

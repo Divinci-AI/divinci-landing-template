@@ -8,16 +8,6 @@ interface Props {
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const t = getUI(lang).comingSoon;
 
-// Badge = logo + label pairs. iPhone / Android / Gemma are brand names (kept
-// in component code, not translated); card 1 reuses its i18n badge text.
-const badgeParts: { logo: string; label: string }[][] = [
-  [
-    { logo: "apple", label: "iPhone" },
-    { logo: "android", label: "Android" },
-  ],
-  [{ logo: "gemma", label: t.cards[1].badge }],
-];
-
 // Only `video` + `poster` are consumed below; the card text comes from the
 // i18n `comingSoon.cards` dict. Drop customer media into public/brand/.
 const cards = [
@@ -55,24 +45,7 @@ const cards = [
             />
             <div class="flex flex-1 flex-col p-8">
               <span class="inline-flex w-fit items-center gap-2 rounded-full bg-df-green-leaf/20 px-3 py-1 text-xs font-medium tracking-wide text-df-green-dark">
-                {badgeParts[i].map((part, j) => (
-                  <>
-                    {j > 0 && (
-                      <span aria-hidden="true" class="text-df-green-dark/40">·</span>
-                    )}
-                    <span class="inline-flex items-center gap-1">
-                      <img
-                        src={`/logos/${part.logo}.svg`}
-                        alt=""
-                        aria-hidden="true"
-                        width="16"
-                        height="16"
-                        class="h-4 w-4"
-                      />
-                      {part.label}
-                    </span>
-                  </>
-                ))}
+                {t.cards[i].badge}
               </span>
               <h3 class="mt-4 text-xl font-semibold text-df-text">
                 {t.cards[i].title}

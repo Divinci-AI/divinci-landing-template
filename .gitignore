@@ -40,3 +40,7 @@ yarn.lock
 
 # env files (none tracked today — future-proofing)
 *.env
+
+# generated OG card (run `npm run og`)
+public/og.png
+public/og-card.svg
