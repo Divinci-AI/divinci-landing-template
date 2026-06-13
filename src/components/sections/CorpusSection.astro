@@ -64,21 +64,18 @@ const headlineSegments = tokenize(t.headline);
       }
     </div>
 
-    <div class="mt-16">
-      <p
-        class="text-center text-sm font-medium uppercase tracking-wider text-df-green-dark"
-      >
+    <div class="mt-16 text-center">
+      <p class="text-sm font-medium uppercase tracking-wider text-df-green-dark">
         {t.languagePrefix}
       </p>
-      <ul class="mt-6 flex flex-wrap justify-center gap-2">
-        {
-          languages.map((autonym) => (
-            <li class="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700">
-              {autonym}
-            </li>
-          ))
-        }
-      </ul>
+      {/* One clean line instead of a noisy 35-chip cloud: a few native names +
+          a count. Keeps the multilingual flex without the visual weight. */}
+      <p class="mx-auto mt-3 max-w-2xl text-base text-gray-600">
+        {languages.slice(0, 6).join("  ·  ")}
+        {languages.length > 6 && (
+          <span class="text-gray-400">{`  ·  +${languages.length - 6} more`}</span>
+        )}
+      </p>
     </div>
   </div>
 </section>
