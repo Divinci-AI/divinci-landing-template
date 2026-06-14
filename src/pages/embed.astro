@@ -1,0 +1,51 @@
+---
+/**
+ * Bare chat embed — renders ONLY the branded SDK chat island (no header /
+ * sections / footer), full-bleed on a transparent background, so it can be
+ * iframed into any host page (e.g. a generated bespoke shell) while keeping the
+ * real @divinci-ai/client integration, worker-side HMAC signing, per-email
+ * quota, and brand styling. Same brand-var + font injection as Landing.
+ */
+import "~/styles/global.css";
+import { ChatIsland } from "~/components/chat/ChatIsland";
+import { getUI } from "~/i18n";
+import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { brand } from "~/brand.config";
+
+const lang = DEFAULT_LOCALE;
+const m = getUI(lang).meta;
+const p = brand.palette;
+const brandVars = `:root{` +
+  `--color-df-navy:${p.primary};--color-df-green-dark:${p.dark};` +
+  `--color-df-green-mid:${p.mid};--color-df-green-leaf:${p.accent};` +
+  `--color-df-cream:${p.cream};--color-df-cream-soft:${p.soft};` +
+  `--color-df-bubble-user:${p.bubble};--color-df-text:${p.text};` +
+  `--font-sans:${brand.fonts.family};` +
+  `--logo-url:url("${brand.media.logo}");}` +
+  // Transparent so the host shell's background shows through.
+  `html,body{background:transparent !important;}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{brand.identity.productName}</title>
+    <meta name="description" content={m.description} />
+    <link rel="icon" type="image/svg+xml" href={brand.media.favicon} />
+    {brand.fonts.links && brand.fonts.links.length > 0 && (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        {brand.fonts.links.map((href) => <link rel="stylesheet" href={href} />)}
+      </>
+    )}
+    <style is:inline set:html={brandVars}></style>
+  </head>
+  <body>
+    <main class="mx-auto w-full max-w-2xl px-4 py-6">
+      <ChatIsland client:load lang={lang} />
+    </main>
+  </body>
+</html>
