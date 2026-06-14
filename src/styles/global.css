@@ -54,18 +54,19 @@ body {
 }
 .send-glow-wrap.is-active,
 .email-glow-wrap.is-active {
+  /* Brand-tinted (color-mix on the injected palette vars) — not the template greens. */
   background: conic-gradient(
     from var(--send-glow-ang, 0deg),
-    #9ec947 0deg,
-    rgba(158, 201, 71, 0.15) 60deg,
-    #3b6b3f 180deg,
-    rgba(59, 107, 63, 0.15) 300deg,
-    #9ec947 360deg
+    var(--color-df-green-leaf) 0deg,
+    color-mix(in srgb, var(--color-df-green-leaf) 15%, transparent) 60deg,
+    var(--color-df-green-dark) 180deg,
+    color-mix(in srgb, var(--color-df-green-dark) 15%, transparent) 300deg,
+    var(--color-df-green-leaf) 360deg
   );
   animation: send-glow-spin 2.2s linear infinite;
   box-shadow:
-    0 0 18px rgba(158, 201, 71, 0.55),
-    0 0 4px rgba(59, 107, 63, 0.45);
+    0 0 18px color-mix(in srgb, var(--color-df-green-leaf) 55%, transparent),
+    0 0 4px color-mix(in srgb, var(--color-df-green-dark) 45%, transparent);
 }
 .send-glow-wrap > button,
 .email-glow-wrap > input {

@@ -291,13 +291,13 @@ function citeTitle(ex: Exchange, n: number): string {
   /* Slim, on-brand scrollbar for the chat window. */
   .df-chat-scroll {
     scrollbar-width: thin;
-    scrollbar-color: rgb(22 101 52 / 0.3) transparent;
+    scrollbar-color: color-mix(in srgb, var(--color-df-green-dark) 35%, transparent) transparent;
   }
   .df-chat-scroll::-webkit-scrollbar {
     width: 8px;
   }
   .df-chat-scroll::-webkit-scrollbar-thumb {
-    background-color: rgb(22 101 52 / 0.25);
+    background-color: color-mix(in srgb, var(--color-df-green-dark) 30%, transparent);
     border-radius: 9999px;
   }
 </style>

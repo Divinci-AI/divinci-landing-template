@@ -123,7 +123,7 @@ export function StickyChatBar({
       }`}
     >
       <div className="mx-auto w-full max-w-3xl px-4 pb-3 sm:pb-4">
-        <div className="rounded-2xl border border-df-green-dark/20 bg-df-cream/85 p-3 shadow-[0_-8px_40px_rgba(59,107,63,0.18)] backdrop-blur-xl sm:p-4">
+        <div className="rounded-2xl border border-df-green-dark/20 bg-df-cream/85 p-3 shadow-[0_-8px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-4">
           {quotaExhausted ? (
             // Free message spent — nudge to sign up instead of a dead field.
             <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
