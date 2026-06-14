@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { brand } from "../../brand.config";
+import { brandInitials } from "../../lib/initials";
 import { FREE_MESSAGE_QUOTA, getDivinci } from "../../lib/divinci";
 import { loadEscrow, saveEscrow } from "../../lib/escrow";
 import { WelcomeMessage } from "./WelcomeMessage";
@@ -495,7 +496,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
               ) : (
-                <img src={brand.media.logo} alt="" aria-hidden="true" className="h-4 w-4" width={16} height={16} />
+                <span className="text-[11px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
               )}
             </span>
             <span className="font-semibold text-df-green-dark">{brand.identity.productName}</span>

@@ -1,5 +1,6 @@
 import { cleanContextTitle } from "../../lib/clean-context-title";
 import { brand } from "../../brand.config";
+import { brandInitials } from "../../lib/initials";
 import {
   useCallback,
   useEffect,
@@ -128,7 +129,7 @@ function DfAvatar({ avatarUrl }: { avatarUrl?: string | null }) {
       {avatarUrl ? (
         <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
       ) : (
-        <img src={brand.media.logo} alt="" aria-hidden="true" className="h-4 w-4" width={16} height={16} />
+        <span className="text-[11px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
       )}
     </span>
   );

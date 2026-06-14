@@ -83,16 +83,18 @@ body {
    following the cursor across the page. Falls back gracefully (just
    the cream base) if JS doesn't set the custom props. */
 body {
+  /* Cursor aurora tinted with the CLIENT brand palette (not the template
+     greens) via color-mix on the injected --color-df-* vars. */
   background-image:
     radial-gradient(
       640px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(158, 201, 71, 0.18),
+      color-mix(in srgb, var(--color-df-green-leaf) 18%, transparent),
       transparent 65%
     ),
     radial-gradient(
       960px circle at calc(var(--mouse-x, 50%) - 200px)
         calc(var(--mouse-y, 50%) + 120px),
-      rgba(59, 107, 63, 0.10),
+      color-mix(in srgb, var(--color-df-green-dark) 12%, transparent),
       transparent 70%
     );
   background-attachment: fixed;
