@@ -26,6 +26,9 @@ export interface BrandConfig {
   fonts: { family: string; headingWeight: number; bodyWeight: number; links?: string[] };
   links: {
     mainSite: string; signupUrl: string; loginUrl: string; bioCreditUrl: string;
+    /** True only when the client's site actually offers a member/patient login —
+     *  gates the "Already a patient? Log in" affordances. */
+    hasLogin?: boolean;
     /** Divinci legal URLs are shared defaults — set only to override. */
     terms?: string; privacy?: string; aiSafety?: string;
   };

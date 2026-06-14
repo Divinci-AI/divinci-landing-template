@@ -9,6 +9,7 @@ import { SIGNUP_URL, LOGIN_URL } from "../../lib/divinci";
 import { scrollToHeroChat } from "../../lib/scroll-to-hero";
 import { DEFAULT_LOCALE } from "../../i18n/locales";
 import { getUI } from "../../i18n";
+import { brand } from "../../brand.config";
 
 const MAX_MESSAGE_LEN = 2000;
 
@@ -130,12 +131,14 @@ export function StickyChatBar({
                 {t.quotaExhaustedNudge}
               </p>
               <div className="flex shrink-0 items-center gap-2">
-                <a
-                  href={LOGIN_URL}
-                  className="inline-flex items-center rounded-full border border-df-green-dark/40 px-4 py-2 text-sm font-semibold text-df-green-dark transition hover:bg-df-green-dark/5"
-                >
-                  {ui.hero.memberLoginCta}
-                </a>
+                {brand.links.hasLogin && (
+                  <a
+                    href={LOGIN_URL}
+                    className="inline-flex items-center rounded-full border border-df-green-dark/40 px-4 py-2 text-sm font-semibold text-df-green-dark transition hover:bg-df-green-dark/5"
+                  >
+                    {ui.hero.memberLoginCta}
+                  </a>
+                )}
                 <a
                   href={SIGNUP_URL}
                   className="inline-flex items-center gap-2 rounded-full bg-df-green-dark px-5 py-2 text-sm font-semibold text-white transition hover:bg-df-green-mid"

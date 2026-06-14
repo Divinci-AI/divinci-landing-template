@@ -101,47 +101,6 @@ body {
   transition: background-position 0.2s ease-out;
 }
 
-/* Green-tinted classic cursors. Same NW-arrow / I-beam / pointing-hand
-   shapes a user expects, just rendered in the brand greens with a soft
-   white outline for OS-agnostic visibility. */
-
-/* Default — classic NW-pointing arrow, dark-green fill + white outline.
-   Hotspot at the tip (2, 2). */
-*,
-*::before,
-*::after {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><path d='M2 2 L2 17 L6 13 L9 20 L11.5 19 L8.5 12 L14 12 Z' fill='%233b6b3f' stroke='%23ffffff' stroke-width='1' stroke-linejoin='round'/></svg>")
-      2 2,
-    auto;
-}
-
-/* Text inputs / textareas — classic green I-beam. Hotspot center (7, 11). */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="url"],
-input[type="tel"],
-input[type="number"],
-input:not([type]),
-textarea,
-[contenteditable="true"] {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='22' viewBox='0 0 14 22'><path d='M3 1 L11 1 L11 3 L8 3 L8 19 L11 19 L11 21 L3 21 L3 19 L6 19 L6 3 L3 3 Z' fill='%233b6b3f' stroke='%23ffffff' stroke-width='0.5'/></svg>")
-      7 11,
-    text !important;
-}
-
-/* Clickable elements — green pointing-hand. Hotspot at the index-finger
-   tip (9, 1). */
-a,
-button,
-[role="button"],
-input[type="submit"],
-input[type="button"],
-.example-card,
-summary,
-label {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='24' viewBox='0 0 22 24'><path d='M8 1 L8 12 L5 9 L3 11 L8 18 L8 20 L14 23 L18 21 L19 14 L19 9 L17 9 L17 12 L16 12 L16 7 L14 7 L14 12 L13 12 L13 5 L11 5 L11 12 L10 12 L10 1 Z' fill='%239ec947' stroke='%233b6b3f' stroke-width='1' stroke-linejoin='round'/></svg>")
-      9 1,
-    pointer !important;
-}
+/* Cursors: use the OS defaults (clean + professional + never off-brand). The
+   old custom green pointer/I-beam was a drfuhrman flourish that clashed on a
+   re-skinned clinic site. */
