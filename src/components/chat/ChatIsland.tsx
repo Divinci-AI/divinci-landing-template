@@ -465,7 +465,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
     <div className="flex flex-col gap-5">
       {showStarters && (
         <>
-          <WelcomeMessage text={serverWelcome ?? t.welcomeMessage} />
+          <WelcomeMessage text={serverWelcome ?? t.welcomeMessage} avatarUrl={avatarUrl} />
           <ConversationStarters
             label={t.tryAsking}
             starters={t.starters}
