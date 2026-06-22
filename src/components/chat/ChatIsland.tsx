@@ -88,6 +88,9 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   const [tosError, setTosError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [focusSignal, setFocusSignal] = useState(0);
+  // Message queued by an external prefill (the landing example composer) to
+  // auto-send once the prefilled email has propagated into state.
+  const [pendingExampleSend, setPendingExampleSend] = useState<string | null>(null);
 
   const handleSendRef = useRef<(text: string) => void>(() => {});
 
@@ -415,14 +418,31 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   // example carries into the live chat — then the visitor just hits send.
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      const d = e.data as { type?: string; text?: string } | null;
-      if (!d || d.type !== "divinci-prefill" || typeof d.text !== "string") return;
-      setDraft(d.text);
-      setFocusSignal((n) => n + 1);
+      const d = e.data as { type?: string; text?: string; email?: string; send?: boolean } | null;
+      if (!d || d.type !== "divinci-prefill") return;
+      if (typeof d.email === "string" && isValidEmail(d.email)) {
+        setEmail(d.email.trim());
+        saveEscrow({ email: d.email.trim() });
+      }
+      if (typeof d.text === "string") {
+        setDraft(d.text);
+        setFocusSignal((n) => n + 1);
+        if (d.send) setPendingExampleSend(d.text);
+      }
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
   }, []);
+
+  // Once the prefilled email is valid in state, fire the queued example
+  // message via the always-current handleSend ref (avoids stale-closure email).
+  useEffect(() => {
+    if (pendingExampleSend && isValidEmail(email)) {
+      const text = pendingExampleSend;
+      setPendingExampleSend(null);
+      handleSendRef.current(text);
+    }
+  }, [pendingExampleSend, email]);
 
   // Accept the gated ToS version for this visitor's sessionId, then re-send
   // the message that was blocked. A 409 means a newer version was published
