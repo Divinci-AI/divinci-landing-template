@@ -410,6 +410,20 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       window.removeEventListener("divinci:populateInput", handler);
   }, []);
 
+  // When embedded (e.g. the landing's example showcase), the host page can
+  // pre-fill this composer via postMessage so a message typed in the static
+  // example carries into the live chat — then the visitor just hits send.
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data as { type?: string; text?: string } | null;
+      if (!d || d.type !== "divinci-prefill" || typeof d.text !== "string") return;
+      setDraft(d.text);
+      setFocusSignal((n) => n + 1);
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
   // Accept the gated ToS version for this visitor's sessionId, then re-send
   // the message that was blocked. A 409 means a newer version was published
   // mid-flight — surface it and let the next send refetch the fresh gate.
