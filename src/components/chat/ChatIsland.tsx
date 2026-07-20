@@ -398,6 +398,19 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
     [anonTranscript, signiture, email],
   );
 
+  // ?prompt= (or ?q=) deep link: arrive with a question pre-filled in the
+  // composer and skip the conversation starters — the visitor already has
+  // intent, so the input takes the hero instead.
+  const [urlPrompt, setUrlPrompt] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const prompt = params.get("prompt") || params.get("q");
+    if (!prompt) return;
+    setUrlPrompt(true);
+    setDraft(prompt);
+    setFocusSignal((n) => n + 1);
+  }, []);
+
   // Example-card clicks dispatch divinci:populateInput — pre-fill the
   // draft and focus the textarea instead of auto-sending. The user then
   // hits Enter to send (which gives them a chance to edit first).
@@ -479,7 +492,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
     }
   }, [tosGate, tosBusy, ensureSessionId, handleSend]);
 
-  const showStarters = messages.length === 0;
+  const showStarters = messages.length === 0 && !urlPrompt;
   const emailRequired = !isValidEmail(email);
   // EVERY user message counts toward the free-message quota — clicking a
   // conversation-starter OR typing a question both spend the one free answer,
