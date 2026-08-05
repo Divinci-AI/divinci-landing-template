@@ -299,7 +299,14 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
           transcript?: Array<{
             prompt?: string;
             response?: string;
-            context?: Array<{ metadata?: { originalName?: string } }>;
+            context?: Array<{
+              content?: string;
+              metadata?: {
+                originalName?: string;
+                sourceUrl?: string;
+                tileImages?: Array<{ url?: string }>;
+              };
+            }>;
             safetyAdvisory?: {
               severity: "review" | "severe";
               text: string;
@@ -330,6 +337,17 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         const sources = (lastMsg?.context ?? []).map(
           (c) => c.metadata?.originalName || `${brand.identity.siteName}'s knowledge base`,
         );
+        // Detail behind each chip, INDEX-ALIGNED with `sources` above so a
+        // citation [n] and its bubble describe the same retrieval. Built from
+        // the same response — no extra request, nothing else to keep in sync.
+        const sourceDetails = (lastMsg?.context ?? []).map((c, i) => ({
+          name: sources[i]!,
+          excerpt: typeof c.content === "string" ? c.content.trim().slice(0, 320) : undefined,
+          url: typeof c.metadata?.sourceUrl === "string" ? c.metadata.sourceUrl : undefined,
+          // A rendered page beats an excerpt: for a scanned insert it IS the
+          // evidence. Only ever the first tile — the bubble is a glance.
+          image: c.metadata?.tileImages?.[0]?.url,
+        }));
         // Medical-safety advisory (server-side medicalSafety check). Carried
         // verbatim from the signed payload → rendered as an amber banner
         // under the reply bubble.
@@ -341,7 +359,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantPlaceholder.id
-              ? { ...m, content: reply, sources, safetyAdvisory, pending: false }
+              ? { ...m, content: reply, sources, sourceDetails, safetyAdvisory, pending: false }
               : m,
           ),
         );

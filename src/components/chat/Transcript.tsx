@@ -10,6 +10,25 @@ import {
   type ReactNode,
 } from "react";
 
+/**
+ * What a citation chip reveals when a visitor checks it.
+ *
+ * The chips alone assert that an answer came from somewhere; they do not show
+ * it. The point of this is falsifiability — a reader can open one and see the
+ * retrieved passage and the page it came from. For a scanned PDF, `image` is a
+ * render of the actual page, which is far more convincing than any excerpt.
+ *
+ * Parallel to `sources: string[]` rather than replacing it: the model's inline
+ * [n] citations index into that array, and repointing it to reorder or reshape
+ * would silently renumber every citation.
+ */
+export interface SourceDetail {
+  name: string;
+  excerpt?: string;
+  url?: string;
+  image?: string;
+}
+
 export interface TranscriptMessage {
   id: string;
   role: "user" | "assistant";
@@ -21,6 +40,8 @@ export interface TranscriptMessage {
    * single free manual message, so the quota math excludes them.
    */
   isStarter?: boolean;
+  /** Per-source detail for the citation bubble; index-aligned with `sources`. */
+  sourceDetails?: SourceDetail[];
   /**
    * Deduped retrieved-source filenames (from the response's `context`
    * metadata.originalName) — rendered as chips above the assistant reply,
@@ -112,6 +133,7 @@ export function Transcript({ messages, onFeedback, avatarUrl }: TranscriptProps)
               content={m.content}
               pending={m.pending}
               sources={m.sources}
+              sourceDetails={m.sourceDetails}
               messageIndex={exchangeIndexById.get(m.id)}
               onFeedback={onFeedback}
               avatarUrl={avatarUrl}
@@ -154,6 +176,7 @@ function AssistantTurn({
   content,
   pending,
   sources,
+  sourceDetails,
   messageIndex,
   onFeedback,
   avatarUrl,
@@ -161,6 +184,7 @@ function AssistantTurn({
   content: string;
   pending?: boolean;
   sources?: string[];
+  sourceDetails?: SourceDetail[];
   messageIndex?: number;
   onFeedback?: (messageIndex: number, input: TranscriptFeedbackInput) => Promise<void>;
   avatarUrl?: string | null;
@@ -233,6 +257,7 @@ function AssistantTurn({
       {sources && sources.length > 0 && (
         <SourceChips
           sources={sources}
+          sourceDetails={sourceDetails}
           expanded={expanded}
           onToggle={() => setExpanded((v) => !v)}
           highlight={highlight}
@@ -356,6 +381,122 @@ function MessageRating({
 }
 
 /**
+ * One citation chip, and the bubble it reveals.
+ *
+ * Collapsed by default and identical to the old chip at rest — the point is
+ * that a reader CAN check a source, not that the page keeps telling them it
+ * has some. The bubble opens on hover (pointer) and on click/tap or keyboard
+ * focus (touch + a11y), and closes on Escape or blur.
+ *
+ * `onMouseDown` is prevented for the same reason the "Show all" button does it:
+ * focusing a partially-offscreen chip makes the browser scroll it into view
+ * BEFORE mouseup, the target moves, and the click never fires — the bug that
+ * made every first tap on this page do nothing.
+ */
+function SourceChip({
+  index,
+  label,
+  detail,
+  highlighted,
+  chipRefs,
+}: {
+  index: number;
+  label: string;
+  detail?: SourceDetail;
+  highlighted: boolean;
+  chipRefs: MutableRefObject<Array<HTMLSpanElement | null>>;
+}) {
+  const [open, setOpen] = useState(false);
+  const title = cleanContextTitle(label);
+  const hasDetail = Boolean(detail?.excerpt || detail?.url || detail?.image);
+
+  return (
+    <span
+      ref={(el) => {
+        chipRefs.current[index] = el;
+      }}
+      className="relative inline-flex shrink-0"
+      onMouseEnter={() => hasDetail && setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        title={title}
+        aria-expanded={hasDetail ? open : undefined}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (hasDetail) setOpen((v) => !v);
+        }}
+        onFocus={() => hasDetail && setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+        className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-left text-xs transition ${
+          highlighted
+            ? "border-df-green-dark bg-df-green-leaf/40 text-df-green-dark ring-2 ring-df-green-dark/50"
+            : "border-df-green-dark/15 bg-white/80 text-gray-600"
+        } ${hasDetail ? "cursor-help hover:border-df-green-dark/40" : ""}`}
+      >
+        <span className="text-[0.7rem] font-semibold text-df-green-dark/70" aria-hidden="true">
+          {index + 1}
+        </span>
+        <span aria-hidden="true">{sourceIcon(label)}</span>
+        <span className="max-w-[10rem] truncate">{title}</span>
+      </button>
+
+      {open && hasDetail && (
+        <span
+          role="tooltip"
+          className="absolute bottom-full left-0 z-30 mb-2 w-[min(22rem,80vw)] rounded-lg border border-df-green-dark/15 bg-white p-3 text-left shadow-lg"
+        >
+          <span className="block text-xs font-semibold text-df-green-dark">{title}</span>
+          {detail?.image && (
+            // The rendered page itself. For a scanned insert this IS the
+            // evidence — an excerpt of a scan would be empty.
+            <img
+              src={detail.image}
+              alt={`Page from ${title}`}
+              // NOT lazy. The bubble is only in the DOM once a reader has
+              // deliberately opened it, and a lazy image inside a popover that
+              // was just revealed can sit un-fetched — the one place where lazy
+              // loading costs the thing it was meant to save.
+              decoding="async"
+              // A page render is wide; fixing the box keeps the bubble from
+              // collapsing to nothing while the bytes arrive.
+              className="mt-2 h-32 w-full rounded border border-df-green-dark/10 bg-df-green-leaf/10 object-cover object-top"
+              onError={(e) => {
+                // A missing tile must not leave a broken-image icon sitting in
+                // the evidence panel — that undercuts the whole point of it.
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+              }}
+            />
+          )}
+          {detail?.excerpt && (
+            <span className="mt-2 block whitespace-pre-wrap text-[0.72rem] leading-relaxed text-gray-600">
+              {detail.excerpt}
+              {detail.excerpt.length >= 320 ? "…" : ""}
+            </span>
+          )}
+          {detail?.url && (
+            <a
+              href={detail.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onMouseDown={(e) => e.stopPropagation()}
+              className="mt-2 inline-block text-[0.72rem] font-medium text-df-green-dark underline"
+            >
+              View source →
+            </a>
+          )}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/**
  * Retrieved-source chips ("context bubbles"). Collapsed by default to a SINGLE
  * row — the chips sit in a horizontally-scrollable strip (no visible
  * scrollbar) so a long source list never balloons the reply to several rows.
@@ -364,12 +505,14 @@ function MessageRating({
  */
 function SourceChips({
   sources,
+  sourceDetails,
   expanded,
   onToggle,
   highlight,
   chipRefs,
 }: {
   sources: string[];
+  sourceDetails?: SourceDetail[];
   expanded: boolean;
   onToggle: () => void;
   highlight: number | null;
@@ -385,24 +528,14 @@ function SourceChips({
         }
       >
         {sources.map((s, i) => (
-          <span
+          <SourceChip
             key={`${s}-${i}`}
-            ref={(el) => {
-              chipRefs.current[i] = el;
-            }}
-            title={cleanContextTitle(s)}
-            className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-xs transition ${
-              highlight === i
-                ? "border-df-green-dark bg-df-green-leaf/40 text-df-green-dark ring-2 ring-df-green-dark/50"
-                : "border-df-green-dark/15 bg-white/80 text-gray-600"
-            }`}
-          >
-            <span className="text-[0.7rem] font-semibold text-df-green-dark/70" aria-hidden="true">
-              {i + 1}
-            </span>
-            <span aria-hidden="true">{sourceIcon(s)}</span>
-            <span className="max-w-[10rem] truncate">{cleanContextTitle(s)}</span>
-          </span>
+            index={i}
+            label={s}
+            detail={sourceDetails?.[i]}
+            highlighted={highlight === i}
+            chipRefs={chipRefs}
+          />
         ))}
       </div>
       {sources.length > SOURCE_TOGGLE_THRESHOLD && (
