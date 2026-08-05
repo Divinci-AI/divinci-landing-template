@@ -359,12 +359,31 @@ const t = getUI(lang).hero;
             block: rect.height > vh ? "end" : "center",
           });
         }
-        wrapper.addEventListener("focusin", ensurePanelInView, {
-          passive: true,
-        });
-        wrapper.addEventListener("pointerdown", ensurePanelInView, {
-          passive: true,
-        });
+        // Scroll on CLICK, never on POINTERDOWN.
+        //
+        // A smooth scrollIntoView started on pointerdown moves the element out
+        // from under the cursor before mouseup, so the browser never generates
+        // a click at all. Every first tap on a conversation starter was
+        // swallowed this way: no handler ran, nothing was logged, nothing
+        // happened. The second tap worked only because the panel was already
+        // centred (and the throttle suppressed a repeat), so nothing moved.
+        // Listening on `click` runs the scroll AFTER the activation it was
+        // reacting to, which is the behaviour that was wanted anyway.
+        wrapper.addEventListener("click", ensurePanelInView, { passive: true });
+
+        // Focus moving into a TEXT FIELD means the visitor is about to type —
+        // worth bringing the panel into view. Buttons are excluded: they are
+        // focused by the very gesture that activates them, so scrolling there
+        // reintroduces the same cancelled-click bug through another door.
+        wrapper.addEventListener(
+          "focusin",
+          (e) => {
+            const t = e.target;
+            if (t instanceof Element && t.closest("button, a, [role='button']")) return;
+            ensurePanelInView();
+          },
+          { passive: true },
+        );
       }
     </script>
     <div class="text-center">
