@@ -2,6 +2,7 @@
   "name": "divinci-landing-template",
   "version": "0.1.0",
   "private": false,
+  "allowScripts": [],
   "license": "MIT",
   "type": "module",
   "description": "Divinci SDK landing-page template \u2014 Astro + React islands + Cloudflare Workers. Re-skin per customer via src/brand.config.ts.",
