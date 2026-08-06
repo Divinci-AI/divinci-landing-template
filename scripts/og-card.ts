@@ -215,6 +215,15 @@ export interface OgBrand {
   palette: { primary: string; dark: string; mid: string; accent: string; cream: string; text: string };
   ogTagline: string;
   ogSubtitle: string;
+  /**
+   * The logo is designed for a DARK background (light/knocked-out artwork).
+   * The card is light, so such a logo needs a dark plate behind it or it is
+   * invisible — which is exactly how Centeno-Schultz's card came out: the
+   * clinic's name and strapline rendered white-on-white while everything
+   * around them was correct. The flag was already in brand.config; the card
+   * simply ignored it.
+   */
+  logoIsLight?: boolean;
 }
 
 /**
@@ -245,17 +254,33 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
     ? Math.min(720, brand.siteName.length * LOGO_H * 0.52)
     : LOGO_H * logo.aspect;
 
-  const totalW = logoW + GAP + AI_W;
-  const startX = (1200 - totalW) / 2;
+  // A light/knocked-out logo gets a dark plate (below). The plate extends
+  // PLATE_PAD_X past the logo on each side, so the gap has to grow by the same
+  // amount or it eats the space between the logo and the "AI" mark — measured
+  // as 2px of clearance, with the A sitting on the plate's corner.
+  const PLATE_PAD_X = 28;
+  const PLATE_PAD_Y = 18;
+  const plated = !usingText && brand.logoIsLight === true;
+  const gap = GAP + (plated ? PLATE_PAD_X : 0);
+
+  const totalW = logoW + gap + AI_W + (plated ? PLATE_PAD_X : 0);
+  const startX = (1200 - totalW) / 2 + (plated ? PLATE_PAD_X : 0);
   const logoY = ROW_CENTER_Y - LOGO_H / 2;
-  const aiX = startX + logoW + GAP;
+  const aiX = startX + logoW + gap;
   const aiBaseline = ROW_CENTER_Y + AI_FONT * 0.34;
+
+  // Only the LOGO gets the plate, not the whole lockup: the "AI" mark is drawn
+  // in a dark gradient and would disappear on top of it.
+  const plate = plated
+    ? `<rect x="${startX - PLATE_PAD_X}" y="${logoY - PLATE_PAD_Y}" width="${logoW + PLATE_PAD_X * 2}" ` +
+      `height="${LOGO_H + PLATE_PAD_Y * 2}" rx="18" fill="${GREEN_DARK}"/>\n  `
+    : "";
 
   const wordmark = usingText
     ? `<text x="${startX}" y="${aiBaseline}" font-family="Helvetica, Arial, sans-serif" font-size="${Math.round(
         LOGO_H * 0.82,
       )}" font-weight="700" letter-spacing="-1" fill="${TEXT}">${escapeXml(brand.siteName)}</text>`
-    : `<image x="${startX}" y="${logoY}" width="${logoW}" height="${LOGO_H}" preserveAspectRatio="xMidYMid meet" xlink:href="${logo.href}"/>`;
+    : `${plate}<image x="${startX}" y="${logoY}" width="${logoW}" height="${LOGO_H}" preserveAspectRatio="xMidYMid meet" xlink:href="${logo.href}"/>`;
 
   const star = (cx: number, cy: number, s: number, fill: string) => {
     const u = s / 24;

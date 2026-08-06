@@ -156,3 +156,41 @@ describe("composeOgCard", () => {
     expect(x).toBeGreaterThanOrEqual(0);
   });
 });
+
+describe("logoIsLight", () => {
+  const LIGHT_LOGO = { href: "data:image/png;base64,AAAA", aspect: 4, note: "" };
+
+  it("puts a dark plate behind a knocked-out logo so it is not invisible", () => {
+    // Centeno-Schultz's logo is white artwork. On the light card its name and
+    // strapline rendered white-on-white while everything around them was
+    // correct — and `logoIsLight` was already set in brand.config; the card
+    // just ignored it.
+    const { svg } = composeOgCard({ ...BRAND, logoIsLight: true }, LIGHT_LOGO);
+    const plate = svg.match(/<rect x="[\d.-]+" y="[\d.-]+" width="[\d.]+" height="[\d.]+" rx="18" fill="([^"]+)"\/>/);
+    expect(plate?.[1]).toBe(BRAND.palette.dark);
+  });
+
+  it("draws no plate for an ordinary dark logo", () => {
+    const { svg } = composeOgCard(BRAND, LIGHT_LOGO);
+    expect(svg).not.toContain('rx="18"');
+  });
+
+  it("does not plate the TEXT wordmark — it is drawn in the brand's text colour", () => {
+    // A plate behind text we control would only reduce contrast.
+    const { svg } = composeOgCard({ ...BRAND, logoIsLight: true }, { href: null, aspect: 4, note: "" });
+    expect(svg).not.toContain('rx="18"');
+  });
+
+  it("keeps the plate behind the logo only, never under the AI mark", () => {
+    // The AI mark is a dark gradient; on the plate it would vanish in turn.
+    const { svg } = composeOgCard({ ...BRAND, logoIsLight: true }, LIGHT_LOGO);
+    const plateRight =
+      Number(svg.match(/<rect x="([\d.-]+)"[^>]*rx="18"/)![1]) +
+      Number(svg.match(/<rect x="[\d.-]+" y="[\d.-]+" width="([\d.]+)"[^>]*rx="18"/)![1]);
+    const aiX = Number(svg.match(/<text x="([\d.]+)"[^>]*font-size="96"/)![1]);
+    // Not merely "does not overlap" — the first version cleared the AI mark by
+    // 2px, so the A visibly sat on the plate's rounded corner. Require real
+    // breathing room, which is what the widened gap buys.
+    expect(aiX - plateRight).toBeGreaterThanOrEqual(24);
+  });
+});
