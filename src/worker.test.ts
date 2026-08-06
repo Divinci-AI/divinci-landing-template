@@ -148,6 +148,9 @@ interface MockEnv {
   BASIC_AUTH_USERNAME?: string;
   DIVINCI_API_BASE: string;
   DIVINCI_RELEASE_ID: string;
+  NO_EMAIL_GATE?: string;
+  DEMO_QUOTA_LIMIT?: string;
+  FREE_MESSAGES_BEFORE_EMAIL?: string;
   RESEND_API_KEY?: string;
   VERIFY_TOKEN_SECRET?: string;
   ADMIN_RESET_TOKEN?: string;
@@ -255,8 +258,11 @@ describe("worker: Basic Auth gate", () => {
 });
 
 describe("worker: /api/chat-send quota gate", () => {
-  it("400 email_invalid when payload missing email", async () => {
-    const env = makeEnv();
+  it("400 email_invalid when payload missing email AND the grace window is off", async () => {
+    // FREE_MESSAGES_BEFORE_EMAIL="0" is the pre-grace behaviour, kept as a
+    // supported configuration rather than deleted — a cold-outreach demo where
+    // the address IS the lead may still want to ask up front.
+    const env = makeEnv({ FREE_MESSAGES_BEFORE_EMAIL: "0" });
     const resp = await fetchHandler(
       new Request("https://x.workers.dev/api/chat-send", {
         method: "POST",
@@ -272,6 +278,27 @@ describe("worker: /api/chat-send quota gate", () => {
     expect(resp.status).toBe(400);
     const body = (await resp.json()) as { error: string };
     expect(body.error).toBe("email_invalid");
+  });
+
+  it("400 email_invalid for a MALFORMED address even inside the grace window", async () => {
+    // The grace window means "we have not asked yet", not "anything goes".
+    // A supplied-but-broken address must still be rejected, or the grace
+    // becomes a way to bypass validation entirely by sending garbage.
+    const env = makeEnv();
+    const resp = await fetchHandler(
+      new Request("https://x.workers.dev/api/chat-send", {
+        method: "POST",
+        headers: {
+          Authorization: authHeader("preview", "secret-pw"),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: "not-an-email", newPrompt: "hi" }),
+      }),
+      // @ts-expect-error
+      env,
+    );
+    expect(resp.status).toBe(400);
+    expect(((await resp.json()) as { error: string }).error).toBe("email_invalid");
   });
 
   it("400 email_disposable on a known blocklist domain", async () => {
@@ -897,6 +924,119 @@ describe("worker: /api/admin/reset-quota", () => {
       expect((await sendManual()).status).toBe(200);
     } finally {
       fetchSpy.mockRestore();
+    }
+  });
+});
+
+describe("worker: anonymous grace window (FREE_MESSAGES_BEFORE_EMAIL)", () => {
+  const SUCCESS_UPSTREAM = JSON.stringify({
+    transcript: [{ role: "assistant", content: "ok" }],
+    signiture: "s",
+  });
+
+  function mockUpstreamOk() {
+    return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : (input as Request).url;
+      if (url.includes("/ai-chat/anonymous-chat")) {
+        return new Response(SUCCESS_UPSTREAM, {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response("", { status: 200 });
+    });
+  }
+
+  /** A send with NO email, from a fixed IP so the grace counter is stable. */
+  function anonSend(env: MockEnv, ip = "203.0.113.7", body: Record<string, unknown> = {}) {
+    return fetchHandler(
+      new Request("https://x.workers.dev/api/chat-send", {
+        method: "POST",
+        headers: {
+          Authorization: authHeader("preview", "secret-pw"),
+          "Content-Type": "application/json",
+          "CF-Connecting-IP": ip,
+        },
+        body: JSON.stringify({ newPrompt: "hi", ...body }),
+      }),
+      // @ts-expect-error — MockEnv is structurally sufficient
+      env,
+    );
+  }
+
+  it("allows exactly FREE_MESSAGES_BEFORE_EMAIL sends with no address, then asks", async () => {
+    const env = makeEnv({ FREE_MESSAGES_BEFORE_EMAIL: "3" });
+    const spy = mockUpstreamOk();
+    try {
+      for (let i = 1; i <= 3; i++) {
+        const r = await anonSend(env);
+        expect(r.status, `send #${i} should be allowed`).toBe(200);
+      }
+      // The 4th is refused with the signal the client watches for to reveal
+      // the email field — NOT quota_exhausted, which would tell the visitor
+      // they were out of messages when they are one field away from more.
+      const r4 = await anonSend(env);
+      expect(r4.status).toBe(402);
+      expect(((await r4.json()) as { error: string }).error).toBe("email_required");
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("keys the grace on the visitor, so a different IP gets its own window", async () => {
+    const env = makeEnv({ FREE_MESSAGES_BEFORE_EMAIL: "1" });
+    const spy = mockUpstreamOk();
+    try {
+      expect((await anonSend(env, "203.0.113.7")).status).toBe(200);
+      expect((await anonSend(env, "203.0.113.7")).status).toBe(402);
+      // A second visitor is unaffected by the first one's spend.
+      expect((await anonSend(env, "198.51.100.4")).status).toBe(200);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("spends ONE budget whether the visitor types or taps a starter", async () => {
+    // Starters normally draw on a separate, more generous budget. An
+    // unidentified caller must not be able to spend both.
+    const env = makeEnv({ FREE_MESSAGES_BEFORE_EMAIL: "2" });
+    const spy = mockUpstreamOk();
+    try {
+      expect((await anonSend(env, "203.0.113.9", { starter: true })).status).toBe(200);
+      expect((await anonSend(env, "203.0.113.9")).status).toBe(200);
+      const r3 = await anonSend(env, "203.0.113.9", { starter: true });
+      expect(r3.status).toBe(402);
+      expect(((await r3.json()) as { error: string }).error).toBe("email_required");
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("does not consume the identified visitor's own free message", async () => {
+    // Spending the anonymous grace must not burn the lifetime claim keyed on
+    // the real address — otherwise giving us an email would be a downgrade.
+    const env = makeEnv({ FREE_MESSAGES_BEFORE_EMAIL: "1" });
+    const spy = mockUpstreamOk();
+    try {
+      await anonSend(env);
+      expect(env.QUOTA_DO.claims.size).toBe(0);
+      const withEmail = await fetchHandler(
+        new Request("https://x.workers.dev/api/chat-send", {
+          method: "POST",
+          headers: {
+            Authorization: authHeader("preview", "secret-pw"),
+            "Content-Type": "application/json",
+            "CF-Connecting-IP": "203.0.113.7",
+          },
+          body: JSON.stringify({ email: "real@example.com", newPrompt: "hi" }),
+        }),
+        // @ts-expect-error
+        env,
+      );
+      expect(withEmail.status).toBe(200);
+      expect(env.QUOTA_DO.claims.size).toBe(1);
+    } finally {
+      spy.mockRestore();
     }
   });
 });

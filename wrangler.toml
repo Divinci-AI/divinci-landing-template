@@ -43,6 +43,12 @@ new_sqlite_classes = ["EmailQuotaCoordinator"]
 [vars]
 DIVINCI_API_BASE = "https://api.divinci.app"
 DIVINCI_RELEASE_ID = "REPLACE_WITH_RELEASE_ID"
+# Messages a visitor may send before being asked for an email. MUST match
+# FREE_MESSAGES_BEFORE_EMAIL in src/brand.config.ts — the worker is the
+# authority (it bounds an otherwise unauthenticated LLM endpoint, keyed on the
+# visitor's IP), and the constant only decides when the UI asks. Set "0" to
+# demand an address before the first answer.
+FREE_MESSAGES_BEFORE_EMAIL = "3"
 
 # Optional: add a [env.staging] block (own name + KV id + staging API) if you
 # run a separate staging worker. See the Divinci SDK docs for the full pattern.

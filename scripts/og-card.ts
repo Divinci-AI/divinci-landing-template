@@ -1,0 +1,308 @@
+/**
+ * Social-share unfurl card (1200x630) — SVG composition + PNG rasterization.
+ *
+ * Split out of build-og.ts so the pure parts are unit-testable: composing the
+ * SVG and measuring a logo are just functions of bytes, and both are where the
+ * bugs were.
+ *
+ * WHY THIS EXISTS AT ALL. `og:image` pointed at `/og.png`, but the card was
+ * only ever produced by `npm run og`, which was NOT part of `npm run build` and
+ * shelled out to `rsvg-convert` — a binary nobody had installed. So every
+ * pipeline-built demo shipped og tags naming an image that did not exist. The
+ * worker's SPA fallback then served index.html for /og.png with HTTP 200, so
+ * an unfurler got a 200 with `content-type: text/html` and silently rendered no
+ * preview. A 404 would at least have been visible.
+ *
+ * TWO ASSUMPTIONS THE ORIGINAL MADE THAT ARE FALSE ACROSS REAL BRANDS:
+ *
+ *   1. "the logo is an SVG" — it was embedded as `data:image/svg+xml`
+ *      unconditionally. Of the 18 live demos, 8 have a PNG logo and 2 a WebP.
+ *      A PNG under an SVG mime type renders as nothing.
+ *   2. "the logo is 200x42" — LOGO_W was `LOGO_H * 200 / 42`. Any other aspect
+ *      ratio comes out stretched, which is worse than not shipping a card.
+ *
+ * Both are now measured from the actual bytes. WebP is transcoded via `dwebp`
+ * (resvg reads PNG/JPEG/GIF/SVG, not WebP).
+ *
+ * DEGRADATION POLICY. A brand whose logo cannot be embedded still gets a card —
+ * the wordmark is drawn as text instead. The build must not fail over an unfurl
+ * image, but it must also never go back to producing NOTHING silently, because
+ * that is the failure this file exists to end. `composeOgCard` reports which
+ * path it took so the caller can log it.
+ */
+import { execFileSync } from "node:child_process";
+
+/** Escape text for interpolation into SVG. Brand names really do contain `&`. */
+export function escapeXml(s: string): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export interface LogoImage {
+  /** data: URI ready for xlink:href, or null when the logo is unusable. */
+  href: string | null;
+  /** Intrinsic aspect ratio (width / height). */
+  aspect: number;
+  /** Why we fell back, for logging. Empty when the logo embedded cleanly. */
+  note: string;
+}
+
+/** PNG intrinsic size — IHDR is always the first chunk, at a fixed offset. */
+function pngSize(buf: Buffer): { w: number; h: number } | null {
+  if (buf.length < 24 || buf.readUInt32BE(0) !== 0x89504e47) return null;
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+
+/** JPEG intrinsic size — walk the segment chain to the first SOF marker. */
+function jpegSize(buf: Buffer): { w: number; h: number } | null {
+  if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8) return null;
+  let i = 2;
+  while (i + 9 < buf.length) {
+    if (buf[i] !== 0xff) { i++; continue; }
+    const marker = buf[i + 1];
+    // SOF0..SOF15, excluding the non-frame markers DHT(c4)/JPG(c8)/DAC(cc).
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+    }
+    if (i + 3 >= buf.length) break;
+    i += 2 + buf.readUInt16BE(i + 2);
+  }
+  return null;
+}
+
+/**
+ * SVG intrinsic aspect — prefer viewBox (authoritative and unitless); fall back
+ * to width/height attributes, which may carry units we ignore deliberately
+ * since only the RATIO matters here.
+ */
+function svgAspect(source: string): number | null {
+  const vb = source.match(/viewBox\s*=\s*["']\s*[-\d.eE]+[,\s]+[-\d.eE]+[,\s]+([\d.eE]+)[,\s]+([\d.eE]+)/);
+  if (vb) {
+    const w = Number(vb[1]);
+    const h = Number(vb[2]);
+    if (w > 0 && h > 0) return w / h;
+  }
+  const w = Number((source.match(/\bwidth\s*=\s*["']\s*([\d.]+)/) ?? [])[1]);
+  const h = Number((source.match(/\bheight\s*=\s*["']\s*([\d.]+)/) ?? [])[1]);
+  if (w > 0 && h > 0) return w / h;
+  return null;
+}
+
+/** Fallback aspect when a logo is unusable — matches the template's old default. */
+export const DEFAULT_LOGO_ASPECT = 200 / 42;
+
+/**
+ * Turn raw logo bytes into an embeddable data URI plus its true aspect ratio.
+ * `path` is used only for its extension; content is sniffed where possible so a
+ * mislabelled file still works.
+ */
+export function prepareLogo(
+  bytes: Buffer,
+  path: string,
+  opts: { transcodeWebp?: (b: Buffer) => Buffer | null; currentColor?: string } = {},
+): LogoImage {
+  const ext = (path.match(/\.([a-z0-9]+)$/i)?.[1] ?? "").toLowerCase();
+  const isPng = bytes.length > 8 && bytes.readUInt32BE(0) === 0x89504e47;
+  const isJpeg = bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8;
+  const isWebp =
+    bytes.length > 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+  // Sniffing SVG: it is text, and may open with a comment or an XML decl.
+  const head = bytes.toString("utf8", 0, Math.min(bytes.length, 1024));
+  const isSvg = /<svg[\s>]/i.test(head) || ext === "svg";
+
+  if (isPng) {
+    const size = pngSize(bytes);
+    return {
+      href: `data:image/png;base64,${bytes.toString("base64")}`,
+      aspect: size && size.h > 0 ? size.w / size.h : DEFAULT_LOGO_ASPECT,
+      note: size ? "" : "png header unreadable — assumed default aspect",
+    };
+  }
+
+  if (isJpeg) {
+    const size = jpegSize(bytes);
+    return {
+      href: `data:image/jpeg;base64,${bytes.toString("base64")}`,
+      aspect: size && size.h > 0 ? size.w / size.h : DEFAULT_LOGO_ASPECT,
+      note: size ? "" : "jpeg header unreadable — assumed default aspect",
+    };
+  }
+
+  if (isWebp) {
+    // resvg has no WebP decoder, so this MUST be transcoded or dropped.
+    const png = opts.transcodeWebp?.(bytes) ?? null;
+    if (!png) return { href: null, aspect: DEFAULT_LOGO_ASPECT, note: "webp logo and no dwebp available" };
+    const size = pngSize(png);
+    return {
+      href: `data:image/png;base64,${png.toString("base64")}`,
+      aspect: size && size.h > 0 ? size.w / size.h : DEFAULT_LOGO_ASPECT,
+      note: "transcoded webp → png",
+    };
+  }
+
+  if (isSvg) {
+    let source = bytes.toString("utf8");
+    const aspect = svgAspect(source);
+
+    // resvg does NOT render <text> inside an SVG embedded via <image>: the
+    // font database is not propagated into the sub-tree, so shapes draw and
+    // glyphs come out empty. Measured, not assumed — a nested <rect> fills
+    // exactly 8400px where the identical nested <text> yields 0.
+    //
+    // This matters because the wordmarks the pipeline generates are a single
+    // <text> element, so embedding them would leave a brand-shaped hole in the
+    // middle of the card while every other element rendered correctly — the
+    // silent-blank failure this whole file exists to end. Hand those back to
+    // the caller as "no usable image" and let it draw the name as real text in
+    // the OUTER document, where fonts work.
+    const hasText = /<text[\s>]/i.test(source);
+    const hasShapes = /<(path|rect|circle|ellipse|polygon|polyline|line|image|use)[\s>]/i.test(source);
+    if (hasText && !hasShapes) {
+      return { href: null, aspect: aspect ?? DEFAULT_LOGO_ASPECT, note: "text-only svg wordmark" };
+    }
+
+    // `currentColor` inherits from the CSS `color` of the element the SVG is
+    // rendered INTO. Embedded via <image> there is no such element, so it
+    // resolves to nothing and the mark renders invisible — which is exactly
+    // what happened: the wordmarks the pipeline generates are a single <text
+    // fill="currentColor">, so the first card came out with the brand name
+    // simply absent while everything around it drew correctly. Bind it to a
+    // concrete colour at embed time.
+    let boundColor = "";
+    if (opts.currentColor && /currentColor/i.test(source)) {
+      source = source.replace(/currentColor/gi, opts.currentColor);
+      boundColor = `bound currentColor → ${opts.currentColor}`;
+    }
+
+    const notes = [
+      aspect ? "" : "svg has neither viewBox nor width/height — assumed default aspect",
+      boundColor,
+      // Mixed shape+text: the shapes will render, the glyphs will not. Embed it
+      // (a partial mark still reads as the brand) but say so, because it is a
+      // degradation and silence is how the original bug survived.
+      hasText ? "⚠ svg contains <text>, which will not render inside the card" : "",
+    ].filter(Boolean);
+
+    return {
+      href: `data:image/svg+xml;base64,${Buffer.from(source, "utf8").toString("base64")}`,
+      aspect: aspect ?? DEFAULT_LOGO_ASPECT,
+      note: notes.join("; "),
+    };
+  }
+
+  return { href: null, aspect: DEFAULT_LOGO_ASPECT, note: `unrecognized logo format (.${ext || "?"})` };
+}
+
+/** Transcode WebP → PNG using libwebp's `dwebp`. Returns null if unavailable. */
+export function dwebpTranscode(bytes: Buffer): Buffer | null {
+  try {
+    return execFileSync("dwebp", ["-quiet", "-o", "-", "--", "-"], {
+      input: bytes,
+      maxBuffer: 32 * 1024 * 1024,
+    });
+  } catch {
+    return null;
+  }
+}
+
+export interface OgBrand {
+  siteName: string;
+  productName: string;
+  palette: { primary: string; dark: string; mid: string; accent: string; cream: string; text: string };
+  ogTagline: string;
+  ogSubtitle: string;
+}
+
+/**
+ * Compose the 1200x630 card. Pure: same inputs → same SVG, no I/O.
+ * Returns the SVG plus a note describing any degradation.
+ */
+export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; note: string } {
+  const { primary: NAVY, dark: GREEN_DARK, mid: GREEN_MID, accent: GREEN_LEAF, cream: CREAM, text: TEXT } =
+    brand.palette;
+
+  const TAGLINE = escapeXml(brand.ogTagline);
+  const SUBTITLE = escapeXml(brand.ogSubtitle);
+  const PLACEHOLDER = escapeXml(`Ask the ${brand.productName}…`);
+
+  // Lockup geometry — wordmark + gradient "AI", centered as a row.
+  const LOGO_H = 86;
+  const GAP = 30;
+  const AI_FONT = 96;
+  const AI_W = 122;
+  const ROW_CENTER_Y = 196;
+
+  // The wordmark: the real logo when we could embed it, else the site name as
+  // text. Text is measured at roughly 0.62em per character for Helvetica-ish
+  // bold — approximate, but it only has to keep the row centered, and being a
+  // little off is vastly better than an empty space where the brand should be.
+  const usingText = logo.href === null;
+  const logoW = usingText
+    ? Math.min(720, brand.siteName.length * LOGO_H * 0.52)
+    : LOGO_H * logo.aspect;
+
+  const totalW = logoW + GAP + AI_W;
+  const startX = (1200 - totalW) / 2;
+  const logoY = ROW_CENTER_Y - LOGO_H / 2;
+  const aiX = startX + logoW + GAP;
+  const aiBaseline = ROW_CENTER_Y + AI_FONT * 0.34;
+
+  const wordmark = usingText
+    ? `<text x="${startX}" y="${aiBaseline}" font-family="Helvetica, Arial, sans-serif" font-size="${Math.round(
+        LOGO_H * 0.82,
+      )}" font-weight="700" letter-spacing="-1" fill="${TEXT}">${escapeXml(brand.siteName)}</text>`
+    : `<image x="${startX}" y="${logoY}" width="${logoW}" height="${LOGO_H}" preserveAspectRatio="xMidYMid meet" xlink:href="${logo.href}"/>`;
+
+  const star = (cx: number, cy: number, s: number, fill: string) => {
+    const u = s / 24;
+    return `<path transform="translate(${cx - 12 * u} ${cy - 12 * u}) scale(${u})" d="M12 2L13.4 9.6 21 12L13.4 14.4 12 22 10.6 14.4 3 12 10.6 9.6Z" fill="${fill}"/>`;
+  };
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="aiGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${GREEN_DARK}"/>
+      <stop offset="55%" stop-color="${GREEN_MID}"/>
+      <stop offset="100%" stop-color="${GREEN_LEAF}"/>
+    </linearGradient>
+    <radialGradient id="glowLeaf" cx="22%" cy="20%" r="55%">
+      <stop offset="0%" stop-color="${GREEN_LEAF}" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="${GREEN_LEAF}" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowDark" cx="82%" cy="92%" r="60%">
+      <stop offset="0%" stop-color="${GREEN_DARK}" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="${GREEN_DARK}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="${CREAM}"/>
+  <rect width="1200" height="630" fill="url(#glowLeaf)"/>
+  <rect width="1200" height="630" fill="url(#glowDark)"/>
+
+  <rect x="0" y="0" width="1200" height="6" fill="${GREEN_LEAF}"/>
+  <rect x="0" y="624" width="1200" height="6" fill="${GREEN_DARK}"/>
+
+  ${wordmark}
+  <text x="${aiX}" y="${aiBaseline}" font-family="Helvetica, Arial, sans-serif" font-size="${AI_FONT}" font-weight="800" letter-spacing="-2" fill="url(#aiGrad)">AI</text>
+  ${star(aiX + AI_W - 6, ROW_CENTER_Y - AI_FONT * 0.34, 26, GREEN_LEAF)}
+  ${star(aiX - 4, ROW_CENTER_Y + AI_FONT * 0.36, 18, GREEN_MID)}
+
+  <text x="600" y="360" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="58" font-weight="700" letter-spacing="-1" fill="${TEXT}">${TAGLINE}</text>
+
+  <text x="600" y="418" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="${NAVY}">${SUBTITLE}</text>
+
+  <g>
+    <rect x="320" y="476" width="560" height="72" rx="36" fill="#ffffff" fill-opacity="0.94" stroke="${GREEN_DARK}" stroke-opacity="0.28" stroke-width="1.5"/>
+    <text x="356" y="521" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#7c8390">${PLACEHOLDER}</text>
+    <circle cx="844" cy="512" r="28" fill="${GREEN_DARK}"/>
+    <path transform="translate(830 498) scale(1.15)" d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="#ffffff"/>
+  </g>
+</svg>`;
+
+  const note = usingText ? `wordmark drawn as TEXT (${logo.note})` : logo.note;
+  return { svg, note };
+}

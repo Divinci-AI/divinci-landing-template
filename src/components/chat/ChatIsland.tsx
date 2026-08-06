@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { brand } from "../../brand.config";
 import { brandInitials } from "../../lib/initials";
-import { FREE_MESSAGE_QUOTA, getDivinci } from "../../lib/divinci";
+import { FREE_MESSAGE_QUOTA, FREE_MESSAGES_BEFORE_EMAIL, getDivinci } from "../../lib/divinci";
 import { loadEscrow, saveEscrow } from "../../lib/escrow";
 import { WelcomeMessage } from "./WelcomeMessage";
 import { ConversationStarters } from "./ConversationStarters";
@@ -73,6 +73,27 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   const signitureRef = useRef<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * Set when the WORKER says the anonymous grace window is spent, which can
+   * happen before this tab's own count reaches the limit — the server keys the
+   * grace on the visitor's IP, so a second tab, a reload, or a colleague behind
+   * the same NAT can consume it. The server is authoritative; this makes the
+   * client agree with it instead of re-sending into a refusal.
+   */
+  const [graceOverride, setGraceOverride] = useState(false);
+
+  // Derived here — ABOVE the effects — rather than next to the other derived
+  // render flags further down. An effect's dependency array is evaluated
+  // during render, so a `const` declared later would be in its temporal dead
+  // zone and throw on first paint.
+  const graceSpent =
+    graceOverride ||
+    messages.filter((m) => m.role === "user").length >= FREE_MESSAGES_BEFORE_EMAIL;
+  // An address is required only once the grace window is spent. MessageInput
+  // hides the email row entirely while this is false and the field is empty,
+  // so a first-time visitor sees a chat box, not a form standing in front of
+  // one.
+  const emailRequired = graceSpent && !isValidEmail(email);
   const [chatStarted, setChatStarted] = useState(false);
   // Terms-of-Service gate (medical disclaimer): set when chat-send returns
   // 403 TERMS_NOT_ACCEPTED. Holds the gate payload + the blocked message so
@@ -169,17 +190,22 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       const content = rawContent.trim();
       const isStarter = opts?.starter === true;
       if (!content) return;
-      if (!isValidEmail(email)) {
-        setError(t.errorEmailRequired);
-        return;
-      }
-      // Quota gate — anonymous visitors get FREE_MESSAGE_QUOTA free answer(s)
-      // total: a clicked conversation-starter OR a typed question both spend
-      // it, after which the input is replaced by the sign-up / log-in CTA.
+      // Grace window — the first FREE_MESSAGES_BEFORE_EMAIL sends need no
+      // address. Asking before the visitor has seen a single answer was the
+      // most common complaint about the demos: it reads as a lead-capture
+      // form standing in front of the product rather than a product.
       const userMessagesSoFar = messages.filter(
         (m) => m.role === "user",
       ).length;
-      if (userMessagesSoFar >= FREE_MESSAGE_QUOTA) return;
+      const withinGrace = !graceOverride && userMessagesSoFar < FREE_MESSAGES_BEFORE_EMAIL;
+      if (!withinGrace && !isValidEmail(email)) {
+        setError(t.errorEmailRequired);
+        return;
+      }
+      // Quota gate — after the grace window a visitor gets FREE_MESSAGE_QUOTA
+      // further answer(s), after which the input is replaced by the sign-up /
+      // log-in CTA.
+      if (userMessagesSoFar >= FREE_MESSAGES_BEFORE_EMAIL + FREE_MESSAGE_QUOTA) return;
       if (pending) return;
       setError(null);
 
@@ -236,6 +262,24 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         });
 
         if (resp.status === 402) {
+          // `email_required` is the end of the anonymous grace window, NOT the
+          // end of the free tier: the visitor has more messages available as
+          // soon as they identify themselves. Reveal the field and roll the
+          // bubbles back so their question is not lost — flipping to the
+          // SignupCTA here would tell them they were out of messages when they
+          // were one text field away from continuing.
+          const q = (await resp.json().catch(() => null)) as { error?: string; message?: string } | null;
+          if (q?.error === "email_required") {
+            setGraceOverride(true);
+            setMessages((prev) =>
+              prev.filter(
+                (m) => m.id !== assistantPlaceholder.id && m.id !== userMsg.id,
+              ),
+            );
+            setDraft(content);
+            setError(q.message ?? t.errorEmailRequired);
+            return;
+          }
           // A starter-budget 402 must NOT flip the page to the SignupCTA —
           // the visitor still has their free manual message. Just clear
           // the bubbles so they can ask their own question.
@@ -468,12 +512,14 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   // Once the prefilled email is valid in state, fire the queued example
   // message via the always-current handleSend ref (avoids stale-closure email).
   useEffect(() => {
-    if (pendingExampleSend && isValidEmail(email)) {
+    // Inside the grace window there is nothing to wait for — fire straight
+    // away rather than stalling on an address we are not asking for.
+    if (pendingExampleSend && !emailRequired) {
       const text = pendingExampleSend;
       setPendingExampleSend(null);
       handleSendRef.current(text);
     }
-  }, [pendingExampleSend, email]);
+  }, [pendingExampleSend, email, emailRequired]);
 
   // Accept the gated ToS version for this visitor's sessionId, then re-send
   // the message that was blocked. A 409 means a newer version was published
@@ -511,12 +557,12 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   }, [tosGate, tosBusy, ensureSessionId, handleSend]);
 
   const showStarters = messages.length === 0 && !urlPrompt;
-  const emailRequired = !isValidEmail(email);
   // EVERY user message counts toward the free-message quota — clicking a
   // conversation-starter OR typing a question both spend the one free answer,
   // after which the input swaps to the sign-up / log-in CTA.
   const userMessageCount = messages.filter((m) => m.role === "user").length;
-  const quotaExhausted = userMessageCount >= FREE_MESSAGE_QUOTA && !pending;
+  const quotaExhausted =
+    userMessageCount >= FREE_MESSAGES_BEFORE_EMAIL + FREE_MESSAGE_QUOTA && !pending;
   // Medical-safety advisory: pinned at the bottom of the chat card (always
   // visible, not buried in the scrollback). Shows the most recent advisory
   // the server attached to any completed reply in this conversation.
@@ -536,13 +582,12 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
             starters={t.starters}
             disabled={pending}
             onSelect={(text) => {
-              // If the visitor already has a valid email, send the starter
-              // immediately — one tap, no extra "Ask" click (starters are
-              // cheap/cached and use a separate budget, so this doesn't
-              // burn their free manual message). Otherwise fall back to
-              // pre-filling the input + focusing so they can enter their
-              // email first, then send.
-              if (isValidEmail(email)) {
+              // Send the starter immediately when nothing is being asked of
+              // the visitor — either they are inside the grace window, or they
+              // have already given a valid address. One tap, no extra "Ask"
+              // click. Only when an email IS required do we fall back to
+              // pre-filling the input so they can fill the field first.
+              if (!emailRequired) {
                 handleSend(text, { starter: true });
               } else {
                 setDraft(text);

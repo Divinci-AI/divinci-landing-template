@@ -109,3 +109,20 @@ export const brand: BrandConfig = {
 
 /** Anonymous-visitor quota before the upgrade gate (foundation default). */
 export const FREE_MESSAGE_QUOTA = 1;
+
+/**
+ * Messages a visitor may send BEFORE being asked for an email address.
+ *
+ * Set to 0 to restore the original behaviour (address demanded before the
+ * first answer). That was the most-complained-about thing about the demos: a
+ * stranger was asked to identify themselves before seeing that the assistant
+ * worked at all, so the page read as a lead-capture form rather than a
+ * product.
+ *
+ * ⚠️ This is only HALF the control. The worker enforces the same window
+ * server-side (`FREE_MESSAGES_BEFORE_EMAIL` in wrangler.toml [vars]) keyed on
+ * the visitor's IP — that is what actually bounds an unauthenticated LLM
+ * endpoint. Changing this constant alone loosens the UI while the server keeps
+ * refusing; changing the var alone leaves the UI asking too early. Move both.
+ */
+export const FREE_MESSAGES_BEFORE_EMAIL = 3;
