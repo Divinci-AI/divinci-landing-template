@@ -41,6 +41,7 @@ export const en = {
 
   header: {
     logoAriaLabel: "Acme Expert AI",
+    menuAriaLabel: "Menu",
   },
 
   hero: {

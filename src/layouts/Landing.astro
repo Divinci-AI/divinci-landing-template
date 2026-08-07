@@ -131,7 +131,7 @@ const ogImage = new URL("/og.png", `${site}/`).href;
       <TranscriptShowcase lang={lang} />
       {brand.sections?.examples !== false && <ExamplesSection lang={lang} />}
       {brand.sections?.comingSoon !== false && <ComingSoonSection lang={lang} />}
-      <BiosSection lang={lang} />
+      {brand.sections?.bios !== false && <BiosSection lang={lang} />}
       <CTASection lang={lang} />
     </main>
     <Footer lang={lang} />

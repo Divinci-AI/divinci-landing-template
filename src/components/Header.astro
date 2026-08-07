@@ -79,8 +79,38 @@ const navItems = [
           ))
         }
       </nav>
+      {/* The desktop nav is `hidden md:flex`, so below md every link in the
+          header was unreachable — no menu, no alternative, just a logo. This is
+          the mobile half of the same nav, not a second source of links. */}
+      <button
+        id="nav-toggle"
+        type="button"
+        class="-mr-1 inline-flex items-center justify-center rounded-lg p-2 text-white transition-colors hover:bg-white/10 md:hidden"
+        aria-controls="mobile-nav"
+        aria-expanded="false"
+        aria-label={ui.header.menuAriaLabel ?? "Menu"}
+      >
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </button>
     </div>
   </div>
+
+  <nav id="mobile-nav" hidden class="mx-auto mt-3 max-w-6xl flex-col gap-1 border-t border-white/10 pt-3 md:hidden">
+    {
+      navItems.map((item) => (
+        <a
+          href={item.href}
+          class="rounded-lg px-2 py-2.5 text-base transition-colors hover:bg-white/10 hover:text-df-green-leaf"
+          target={item.external ? "_blank" : undefined}
+          rel={item.external ? "noopener" : undefined}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
 </header>
 
 <style is:global>
@@ -92,6 +122,31 @@ const navItems = [
 </style>
 
 <script>
+  // Mobile menu. `hidden` (the attribute) is the closed state so the links are
+  // still in the DOM for crawlers and for anyone with JS off — for whom the
+  // toggle simply never appears, rather than appearing and doing nothing.
+  const navToggle = document.getElementById("nav-toggle");
+  const mobileNav = document.getElementById("mobile-nav");
+  if (navToggle && mobileNav) {
+    const setOpen = (open: boolean) => {
+      mobileNav.hidden = !open;
+      mobileNav.classList.toggle("flex", open);
+      navToggle.setAttribute("aria-expanded", String(open));
+    };
+    navToggle.addEventListener("click", () => setOpen(mobileNav.hidden));
+    // Every link is an in-page anchor, so leaving the panel open would cover
+    // the section the visitor just asked to see.
+    mobileNav.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setOpen(false);
+    });
+    // Crossing the md breakpoint with the panel open leaves it stuck open
+    // underneath the desktop nav.
+    window.matchMedia("(min-width: 768px)").addEventListener("change", (e) => {
+      if (e.matches) setOpen(false);
+    });
+  }
+
   // Hide the header while the hero section is in view; reveal it once the
   // visitor scrolls past the hero.
   const header = document.getElementById("site-header");

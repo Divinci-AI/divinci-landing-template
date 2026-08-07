@@ -48,7 +48,11 @@ export interface BrandConfig {
   /** Optional section toggles. A section renders unless its flag is explicitly
    *  false — so existing configs are unaffected, and demos can hide aspirational
    *  sections (examples, coming-soon) that would otherwise show empty media. */
-  sections?: { examples?: boolean; comingSoon?: boolean };
+  /** `bios: false` hides the team section outright. Needed when no real person
+   *  could be identified: the card falls back to the ORGANISATION's name under
+   *  a personal role, which reads as "The Space Finance Group — Founder". An
+   *  absent section is honest; a wrong one is not. */
+  sections?: { examples?: boolean; comingSoon?: boolean; bios?: boolean };
 }
 
 export const brand: BrandConfig = {
