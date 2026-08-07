@@ -88,6 +88,18 @@ const navItems = [
         class="-mr-1 inline-flex items-center justify-center rounded-lg p-2 text-white transition-colors hover:bg-white/10 md:hidden"
         aria-controls="mobile-nav"
         aria-expanded="false"
+        {/* Fallback, NOT a key in the neutral en.ts — deliberately.
+
+            Every demo's per-customer copy is validated against that file's
+            shape, and a generated file missing a key is rejected WHOLESALE:
+            the run silently keeps the neutral copy, so the demo ships branded
+            "Acme Expert AI" in its title, og:title, chat welcome and CTA.
+            Adding `menuAriaLabel` there did exactly that to mach33, and it is
+            the second time this class has reverted live demos.
+
+            Rule: a new UI string gets a literal fallback in the component. Only
+            add a key to the neutral en.ts alongside regenerating every demo's
+            copy. */}
         aria-label={ui.header.menuAriaLabel ?? "Menu"}
       >
         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

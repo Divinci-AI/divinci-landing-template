@@ -68,3 +68,19 @@ describe("the bios section is optional", () => {
     expect(landing).not.toMatch(/brand\.sections\?\.bios && <BiosSection/);
   });
 });
+
+describe("new UI strings must not break existing demos", () => {
+  it("the menu label is a component fallback, NOT a neutral-copy key", () => {
+    // Per-customer copy is validated against the neutral en.ts SHAPE, and a
+    // generated file missing a key is rejected wholesale — the run keeps the
+    // neutral copy, so the demo ships branded "Acme Expert AI" in its title,
+    // og:title, chat welcome and CTA. Adding `menuAriaLabel` to en.ts did
+    // exactly that to a live mach33 demo, and it is the second time this class
+    // has silently reverted demos.
+    //
+    // Rule: a new UI string gets a literal fallback in the component. A key in
+    // en.ts is only correct alongside regenerating every demo's copy.
+    expect(src("i18n/ui/en.ts")).not.toContain("menuAriaLabel");
+    expect(header).toMatch(/menuAriaLabel \?\? "Menu"/);
+  });
+});
