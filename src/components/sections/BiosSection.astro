@@ -14,13 +14,25 @@ const creditLabel = brand.links.mainSite.replace(/^https?:\/\//, "").replace(/\/
 const creditUrl = withRef(brand.links.bioCreditUrl, "bios-credit");
 
 // Bare, generic bio cards — one per entry in brand.config.bios (any number).
-// Name comes from config; role + body come from the i18n `bios` dict by index
-// (falling back to the config title / empty when a locale has fewer entries).
+// Name comes from config; role + body come from the i18n `bios` dict by index.
 // No portrait dependency: a simple initial-letter avatar keeps the foundation
 // asset-free until the brand-kit process supplies real headshots.
+//
+// ⚠️ THE ROLE FALLBACK IS LOCALE-DEPENDENT, deliberately.
+//
+// `brand.config` has no localized form — there is one config for all 35
+// languages. So falling back to `b.title` on a translated page renders ENGLISH
+// text among the translation. EvoNexus shipped six cards reading "Team" in the
+// middle of an otherwise fluent French page, and it looked exactly like a
+// half-finished translation because that is what it was.
+//
+// On the default locale the config title is correct and useful, so keep it.
+// Anywhere else, an untranslated role is worse than no role: the card still
+// carries the person's name and photograph, which is the part that matters.
+const isDefaultLocale = lang === DEFAULT_LOCALE;
 const bios = brand.bios.map((b, i) => ({
   name: b.name,
-  role: t.roles[i] ?? b.title,
+  role: t.roles[i] ?? (isDefaultLocale ? b.title : ""),
   body: t.bodies[i] ?? "",
   image: b.image,
 }));
