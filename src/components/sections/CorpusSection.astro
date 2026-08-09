@@ -24,11 +24,17 @@ const headlineSegments = tokenize(t.headline);
 <section id="corpus" class="relative overflow-hidden bg-df-cream py-20">
   <div class="mx-auto max-w-6xl px-6">
     <div class="grid items-center gap-10 md:grid-cols-2 md:gap-14">
+      {/* The default that used to live here pointed at a /brand/ path the
+          template has never shipped, so a site with no corpus video rendered a
+          permanently-empty video well. The section keeps its copy and simply
+          drops the media column.
+          NOTE: braces, not an HTML comment — Astro ships <!-- --> to the visitor. */}
+      {brand.media.corpusVideo && (
       <div
         class="overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5 md:order-2"
       >
         <video
-          src={brand.media.corpusVideo ?? "/brand/corpus.webm"}
+          src={brand.media.corpusVideo}
           poster="/brand/corpus-poster.jpg"
           class="aspect-[16/10] w-full object-cover"
           autoplay
@@ -39,6 +45,7 @@ const headlineSegments = tokenize(t.headline);
           aria-label={t.videoAriaLabel}
         ></video>
       </div>
+      )}
       <div class="md:order-1">
         <h2 class="text-3xl font-bold leading-tight text-df-text md:text-4xl">
           {headlineSegments.map((seg) => (seg.kind === "br" ? <br /> : seg.kind === "text" ? seg.value : seg.value))}

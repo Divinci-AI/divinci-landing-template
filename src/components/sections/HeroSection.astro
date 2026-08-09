@@ -20,6 +20,13 @@ const t = getUI(lang).hero;
        not a literal illustration competing with it. Fades further on first
        message via ChatIsland. Generalizes to any auto-generated art (no
        per-image fitting, unlike the legacy drfuhrman circle-over-illustration). -->
+  {/* Only rendered when a hero image actually exists. It used to fall back to
+      a /brand/ path the template has never shipped, so every site without
+      generated art emitted a broken img. Worse, the Worker's SPA fallback
+      answers a missing asset with 200 + HTML, so nothing failed loudly — it
+      just rendered blank. No art is a fine hero; a broken image is not.
+      NOTE: braces, not an HTML comment — Astro ships <!-- --> to the visitor. */}
+  {brand.media.heroImage && (
   <div
     id="hero-bg"
     class="pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-out"
@@ -36,6 +43,7 @@ const t = getUI(lang).hero;
       fetchpriority="high"
     />
   </div>
+  )}
   <!-- Soft top/bottom cream fade so the section blends into the page bg below. -->
   <div
     class="pointer-events-none absolute inset-0 bg-gradient-to-b from-df-cream/20 via-transparent to-df-cream/95"

@@ -37,7 +37,7 @@ export interface BrandConfig {
   corpus: { framing: string; stats: Array<{ value: string; label: string }> };
   chat: { fallbackWelcome: string; starters: string[] };
   media: {
-    logo: string; favicon: string; heroImage: string; corpusVideo?: string;
+    logo: string; favicon: string; heroImage?: string; corpusVideo?: string;
     ogTagline: string; ogSubtitle: string;
     /** True when the logo is light/white (built for a dark header) — the hero
      *  darkens it so it doesn't wash out on the light background. */
@@ -103,7 +103,11 @@ export const brand: BrandConfig = {
   media: {
     logo: "/brand/logo.svg",
     favicon: "/brand/favicon.svg",
-    heroImage: "/brand/hero.webp",
+    // No heroImage / corpusVideo default ON PURPOSE. The template ships
+    // logo.svg and favicon.svg, so those paths resolve; it has never shipped
+    // hero.webp or corpus.webm, so naming them here produced a broken <img>
+    // on every site generated without art. Both fields are optional and their
+    // sections render only when a real asset is supplied.
     ogTagline: "Every answer, 24/7.",
     ogSubtitle: "AI-powered guidance — chat anytime, in any language.",
   },
