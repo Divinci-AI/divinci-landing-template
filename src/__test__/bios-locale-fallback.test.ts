@@ -54,3 +54,18 @@ describe("bios role fallback", () => {
     expect(src.replace(/^\s*\/\/.*$/gm, "")).not.toMatch(/^\s*\/\/ ⚠️/m);
   });
 });
+
+describe("preflight contract hook", () => {
+  it("marks the role element with data-bio-role", () => {
+    // The demo pipeline's preflight selects roles by this attribute. Selecting
+    // by styling matched the card wrapper (name AND role), so a page missing
+    // every translated role still read as non-empty and passed.
+    expect(src).toMatch(/data-bio-role/);
+  });
+
+  it("puts the hook on the role, not on the name or the body", () => {
+    const roleBlock = src.slice(src.indexOf("{bio.role &&"), src.indexOf("{bio.body &&"));
+    expect(roleBlock).toContain("data-bio-role");
+    expect(src.slice(src.indexOf("{bio.body &&"))).not.toContain("data-bio-role");
+  });
+});

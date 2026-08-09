@@ -91,7 +91,19 @@ const gridCols = bios.length === 1 ? "md:grid-cols-1 max-w-md mx-auto" : "md:gri
               <div class="min-w-0">
                 <h3 class="text-2xl font-bold leading-tight text-df-text [overflow-wrap:anywhere]">{bio.name}</h3>
                 {bio.role && (
-                  <p class="mt-1 text-sm font-medium uppercase tracking-wider text-df-green-dark">
+                  /* data-bio-role is a CONTRACT HOOK for the demo pipeline's
+                     preflight, which compares the roles rendered on the default
+                     page against a translated one to catch a localized bios
+                     dictionary that is shorter than the team list. Selecting the
+                     element by its styling instead was the first attempt and it
+                     silently matched the card wrapper — name AND role — so both
+                     pages read as non-empty and the check passed on a page that
+                     was visibly wrong. Keep the attribute even if the classes
+                     change. */
+                  <p
+                    data-bio-role
+                    class="mt-1 text-sm font-medium uppercase tracking-wider text-df-green-dark"
+                  >
                     {bio.role}
                   </p>
                 )}
