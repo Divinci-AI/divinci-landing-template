@@ -1,4 +1,4 @@
-import { test, expect, mockChatSendOk } from "./fixtures";
+import { test, expect, mockChatSendOk, enterValidEmail } from "./fixtures";
 
 test.describe("Chat send flow (mocked /api/chat-send)", () => {
   test("starter populates input → Enter triggers mocked AI reply", async ({
@@ -6,11 +6,8 @@ test.describe("Chat send flow (mocked /api/chat-send)", () => {
   }) => {
     await mockChatSendOk(page, { reply: "Mock answer about getting started." });
     await page.goto("/");
-    await page.getByPlaceholder("you@example.com").fill("qa@divinci.ai");
-    await page
-      .getByRole("button", { name: /specialize in/i })
-      .first()
-      .click();
+    await enterValidEmail(page);
+    await page.locator(".starter-pill").first().click();
     // Starter now POPULATES instead of auto-sending — press Enter to fire.
     await page.getByPlaceholder(/Type your question/i).press("Enter");
     await expect(
@@ -22,7 +19,7 @@ test.describe("Chat send flow (mocked /api/chat-send)", () => {
     await mockChatSendOk(page, { reply: "Typed-path synthetic reply." });
     await page.goto("/");
     // Pass the email gate
-    await page.getByPlaceholder("you@example.com").fill("qa@divinci.ai");
+    await enterValidEmail(page);
     // Textarea is now enabled — type a custom prompt and press Enter
     const textarea = page.getByPlaceholder(/Type your question/i);
     await textarea.fill("What does Acme Expert do?");

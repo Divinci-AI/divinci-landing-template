@@ -1,4 +1,4 @@
-import { test, expect, mockChatSendQuota } from "./fixtures";
+import { test, expect, mockChatSendQuota, enterValidEmail } from "./fixtures";
 
 test.describe("Quota exhaustion → SignupCTA", () => {
   test("402 from /api/chat-send replaces input with SignupCTA", async ({
@@ -6,11 +6,8 @@ test.describe("Quota exhaustion → SignupCTA", () => {
   }) => {
     await mockChatSendQuota(page);
     await page.goto("/");
-    await page.getByPlaceholder("you@example.com").fill("qa@divinci.ai");
-    await page
-      .getByRole("button", { name: /specialize in/i })
-      .first()
-      .click();
+    await enterValidEmail(page);
+    await page.locator(".starter-pill").first().click();
     // Starter populates; press Enter to actually fire the send → 402.
     await page.getByPlaceholder(/Type your question/i).press("Enter");
     // SignupCTA card replaces the MessageInput

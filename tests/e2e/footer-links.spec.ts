@@ -22,7 +22,11 @@ test.describe("Footer outbound links carry UTM ref params", () => {
       const href = await a.getAttribute("href");
       expect(href).toBeTruthy();
       expect(href).toContain(link.mustContain);
-      expect(href).toContain("utm_source=acme-demo");
+      // utm_source is PER-BRAND ("caseymeans-demo", "aurapath-demo", …), so
+      // pinning the template's own "acme-demo" asserted that the pipeline had
+      // failed to brand the page. Assert the parameter is present and
+      // non-empty; its value is the thing that is supposed to vary.
+      expect(new URL(href!).searchParams.get("utm_source")).toMatch(/.+-demo$/);
       expect(href).toContain("utm_medium=referral");
       expect(await a.getAttribute("target")).toBe("_blank");
       expect(await a.getAttribute("rel")).toContain("noopener");

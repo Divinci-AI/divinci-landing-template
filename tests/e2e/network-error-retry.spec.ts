@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { test, expect, enterValidEmail, sendButton } from "./fixtures";
 
 test.describe("Network-error retry: failed sends don't trip the quota gate", () => {
   test("500 from chat-send removes the user message + lets user retry", async ({
@@ -36,11 +36,11 @@ test.describe("Network-error retry: failed sends don't trip the quota gate", () 
     });
 
     await page.goto("/");
-    await page.getByPlaceholder("you@example.com").fill("qa@divinci.ai");
+    await enterValidEmail(page);
     await page
       .getByPlaceholder(/Type your question/i)
       .fill("first try (will fail)");
-    await page.getByRole("button", { name: "Send" }).click();
+    await sendButton(page).click();
 
     // Error toast renders
     await expect(
@@ -53,13 +53,13 @@ test.describe("Network-error retry: failed sends don't trip the quota gate", () 
     ).toBeHidden();
 
     // Send button is still around (MessageInput is still rendered).
-    await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
+    await expect(sendButton(page)).toBeVisible();
 
     // Retry: type a fresh prompt + send. This time it succeeds.
     await page
       .getByPlaceholder(/Type your question/i)
       .fill("second try (succeeds)");
-    await page.getByRole("button", { name: "Send" }).click();
+    await sendButton(page).click();
     await expect(page.getByText("Real reply on retry.")).toBeVisible({
       timeout: 10_000,
     });

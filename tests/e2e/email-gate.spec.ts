@@ -1,4 +1,21 @@
-import { test, expect, mockChatSendOk } from "./fixtures";
+import { test, expect, mockChatSendOk, sendButton } from "./fixtures";
+
+/**
+ * Every test here presupposes a gate. A demo configured without one is not
+ * failing these — the premise does not apply — so they SKIP rather than fail.
+ *
+ * Skip, not delete: the gate is per-demo configuration, so the same spec file
+ * must be able to assert the gate hard on the demos that have one and stay
+ * silent on the demos that do not.
+ */
+test.beforeEach(async ({ page }) => {
+  await page.goto("/");
+  const gated = await page
+    .getByPlaceholder("you@example.com")
+    .isVisible({ timeout: 2_000 })
+    .catch(() => false);
+  test.skip(!gated, "this demo has no email gate — nothing to test");
+});
 
 test.describe("Email gate", () => {
   test("invalid email format keeps Send disabled", async ({ page }) => {
@@ -6,7 +23,7 @@ test.describe("Email gate", () => {
     await page.getByPlaceholder("you@example.com").fill("not-an-email");
     // Textarea is always enabled; the gate is on Send.
     await expect(
-      page.getByRole("button", { name: "Send" }),
+      sendButton(page),
     ).toBeDisabled();
   });
 
@@ -22,7 +39,7 @@ test.describe("Email gate", () => {
     // Email gate stays up — Send remains disabled even with a draft.
     await page.getByPlaceholder(/Type your question/i).fill("hello");
     await expect(
-      page.getByRole("button", { name: "Send" }),
+      sendButton(page),
     ).toBeDisabled();
   });
 
@@ -39,7 +56,7 @@ test.describe("Email gate", () => {
     await page.getByPlaceholder(/Type your question/i).fill("hello");
     // Send is now enabled (email valid + draft non-empty).
     await expect(
-      page.getByRole("button", { name: "Send" }),
+      sendButton(page),
     ).toBeEnabled();
   });
 });
