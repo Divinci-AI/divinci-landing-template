@@ -112,6 +112,16 @@ export async function enterValidEmail(page: Page, email = "qa@divinci.ai"): Prom
  * button says anything but "Send".
  */
 export function sendButton(page: Page) {
+  // Demos render TWO chat widgets — the hero island and a sticky bar — each
+  // with its own textarea and send control, so "which button" is genuinely
+  // ambiguous and the choice is not cosmetic.
+  //
+  // MEASURED, not reasoned: .last() leaves 3 failures on caseymeans/aurapath/
+  // evonexus; switching to .first() fixed one spec and broke two others on the
+  // gated demos (3 → 5 failures on both aurapath and evonexus). Neither end of
+  // the list is right, because the correct control is the one belonging to the
+  // textarea a given spec typed into. Pinning .last() is the measured-better
+  // of the two until the specs scope both locators to a shared container.
   return page.getByRole("button", { name: /send message|^send$|^ask$/i }).last();
 }
 

@@ -7,9 +7,12 @@ test.describe("Chat send flow (mocked /api/chat-send)", () => {
     await mockChatSendOk(page, { reply: "Mock answer about getting started." });
     await page.goto("/");
     await enterValidEmail(page);
+    // The starter SENDS on click. The comment here used to say it only
+    // populates the draft and that Enter fires it — that was true once and is
+    // not now: on the deployed fleet the click posts immediately, the draft is
+    // left empty, and the textarea unmounts, so the follow-up Enter could
+    // never land. It failed on 37 of 37 demos.
     await page.locator(".starter-pill").first().click();
-    // Starter now POPULATES instead of auto-sending — press Enter to fire.
-    await page.getByPlaceholder(/Type your question/i).press("Enter");
     await expect(
       page.getByText("Mock answer about getting started."),
     ).toBeVisible({ timeout: 10_000 });
