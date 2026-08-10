@@ -112,26 +112,75 @@ export async function enterValidEmail(page: Page, email = "qa@divinci.ai"): Prom
  * button says anything but "Send".
  */
 export function sendButton(page: Page) {
-  // Demos render TWO chat widgets — the hero island and a sticky bar — each
-  // with its own textarea and send control, so "which button" is genuinely
-  // ambiguous and the choice is not cosmetic.
+  // Scoped to the FORM that owns the textarea, not picked by position.
   //
-  // MEASURED, not reasoned: .last() leaves 3 failures on caseymeans/aurapath/
-  // evonexus; switching to .first() fixed one spec and broke two others on the
-  // gated demos (3 → 5 failures on both aurapath and evonexus). Neither end of
-  // the list is right, because the correct control is the one belonging to the
-  // textarea a given spec typed into. Pinning .last() is the measured-better
-  // of the two until the specs scope both locators to a shared container.
-  return page.getByRole("button", { name: /send message|^send$|^ask$/i }).last();
+  // Demos render two chat widgets: the hero form (a <textarea> + its button)
+  // and a sticky bar (an <input> + its own button). Both buttons match any
+  // name-based locator, so .first()/.last() is a guess about DOM order —
+  // and it was a losing one either way: .last() left network-error-retry and
+  // quota failing on every demo, while .first() fixed one spec and broke two
+  // others (3 → 5 failures on aurapath and evonexus).
+  //
+  // The specs type into the textarea, so the button they mean is the one in
+  // the same form. `form:has(textarea)` says exactly that, and stays correct
+  // if either widget moves in the DOM.
+  return chatForm(page).getByRole("button", { name: /send message|^send$|^ask$/i }).first();
+}
+
+/** The hero chat form — the one containing the textarea the specs type into. */
+export function chatForm(page: Page) {
+  return page.locator("form:has(textarea)").first();
 }
 
 export async function clearLocalStorage(page: Page) {
   await page.evaluate(() => window.localStorage.clear());
 }
 
+/**
+ * Block until every Astro island has hydrated.
+ *
+ * THIS IS THE FLAKINESS. The chat UI is an island: its markup is server-
+ * rendered, so the textarea and all three `.starter-pill` buttons are in the
+ * DOM — visible, enabled, and passing every actionability check Playwright
+ * has — for roughly 300ms BEFORE any event listener is attached. A click in
+ * that window is silently swallowed. Nothing errors; the page simply does not
+ * respond, and the test fails later with "element not found" for a reply that
+ * was never requested.
+ *
+ * Measured on a deployed demo: at `load`, islands=1 unhydrated=1 pills=3.
+ * By +300ms, unhydrated=0. Whether a spec landed its click was therefore a
+ * race against its own overhead — which is why three consecutive runs of
+ * identical code gave 4, 4 and 5 failures.
+ *
+ * `astro-island[ssr]` is the signal: Astro sets the attribute in the SSR
+ * output and removes it on hydration, so counting it to zero is a direct
+ * observation of hydration rather than a sleep.
+ */
+export async function awaitHydration(page: Page): Promise<void> {
+  await page
+    .waitForFunction(() => document.querySelectorAll("astro-island[ssr]").length === 0, null, {
+      timeout: 15_000,
+    })
+    // Never fail a spec here. A page with no islands at all (or one that
+    // genuinely never hydrates) is a real defect, but it belongs to whatever
+    // assertion the spec was going to make — not to a helper whose only job is
+    // to stop racing.
+    .catch(() => {});
+}
+
 export const test = base.extend({
   // Always start with a clean escrow state so test ordering doesn't bleed.
   page: async ({ page }, use) => {
+    // goto is wrapped rather than exposing a gotoReady() helper the specs must
+    // remember to call. The failure this prevents is SILENT — a swallowed
+    // click, not an error — so an opt-in guard would be forgotten exactly
+    // where it matters and the flake would come straight back.
+    const origGoto = page.goto.bind(page);
+    page.goto = (async (url: string, opts?: Parameters<Page["goto"]>[1]) => {
+      const res = await origGoto(url, opts);
+      await awaitHydration(page);
+      return res;
+    }) as Page["goto"];
     await page.addInitScript(() => {
       try {
         window.localStorage.clear();

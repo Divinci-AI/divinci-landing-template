@@ -37,10 +37,13 @@ test.describe("Network-error retry: failed sends don't trip the quota gate", () 
 
     await page.goto("/");
     await enterValidEmail(page);
-    await page
-      .getByPlaceholder(/Type your question/i)
-      .fill("first try (will fail)");
-    await sendButton(page).click();
+    // Sends via Enter, not the button. The button does not submit at all —
+    // see send-button.spec.ts, which owns that defect. Routing this spec
+    // through the broken control made it fail for a reason that has nothing
+    // to do with retry-after-network-error, which is what it exists to test.
+    const ta = page.getByPlaceholder(/Type your question/i);
+    await ta.fill("first try (will fail)");
+    await ta.press("Enter");
 
     // Error toast renders
     await expect(
@@ -49,17 +52,17 @@ test.describe("Network-error retry: failed sends don't trip the quota gate", () 
 
     // SignupCTA must NOT be visible — the failed send didn't count.
     await expect(
-      page.getByText(/Want to keep talking to the Acme Expert AI/i),
+      // Assistant name is brand copy; only the leading clause is invariant.
+      page.getByText(/Want to keep talking to/i),
     ).toBeHidden();
 
     // Send button is still around (MessageInput is still rendered).
     await expect(sendButton(page)).toBeVisible();
 
     // Retry: type a fresh prompt + send. This time it succeeds.
-    await page
-      .getByPlaceholder(/Type your question/i)
-      .fill("second try (succeeds)");
-    await sendButton(page).click();
+    const ta2 = page.getByPlaceholder(/Type your question/i);
+    await ta2.fill("second try (succeeds)");
+    await ta2.press("Enter");
     await expect(page.getByText("Real reply on retry.")).toBeVisible({
       timeout: 10_000,
     });
