@@ -232,6 +232,44 @@ const t = getUI(lang).hero;
         font-variation-settings: var(--font-display-variation, normal);
         color: var(--color-df-text);
         line-height: 1;
+        position: relative;
+      }
+
+      /* The sweep, extended across the brand's name.
+
+         Originally the wave had two pieces — the logo IMAGE (masked by its own
+         silhouette) and "AI". For a brand whose logo is a mark the image is not
+         rendered, so the name appeared and the wave started halfway across the
+         lockup.
+
+         This is an OVERLAY, not a gradient fill: the name keeps its own solid
+         colour and a white band passes over it. The earlier decision not to run
+         the ai-shine gradient across a customer's name still holds — that would
+         RECOLOUR their wordmark. A highlight travelling over it does not.
+
+         content comes from data-word because the name is per-brand; a literal
+         like ai-shine's "AI" cannot work here. */
+      .brand-word::after {
+        content: attr(data-word);
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(
+          110deg,
+          transparent 38%,
+          rgba(255, 255, 255, 0.95) 50%,
+          transparent 62%
+        );
+        background-repeat: no-repeat;
+        background-size: 200% 100%;
+        background-position: 200% 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        /* No delay: the name leads and "AI" (0.4s) trails it, preserving the
+           original left-to-right reading order of the wave. */
+        animation: ai-shine-sweep 6.5s ease-in-out infinite;
       }
 
       .ai-shine {
@@ -308,11 +346,13 @@ const t = getUI(lang).hero;
       @media (prefers-reduced-motion: reduce) {
         .logo-gleam::before,
         .ai-shine::after,
+        .brand-word::after,
         .ai-sparkle {
           animation: none;
         }
         .logo-gleam::before,
-        .ai-shine::after {
+        .ai-shine::after,
+        .brand-word::after {
           opacity: 0;
         }
       }
@@ -459,7 +499,10 @@ const t = getUI(lang).hero;
             without that, a brand already called "AuraPath AI" reads
             "AuraPath AI AI". */}
         {brand.media.logoIsMark && (
-          <span class="brand-word text-4xl tracking-tight md:text-5xl">
+          <span
+            class="brand-word text-4xl tracking-tight md:text-5xl"
+            data-word={brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
+          >
             {brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
           </span>
         )}
