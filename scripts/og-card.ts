@@ -339,7 +339,16 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   const PLATE_PAD_X = 28;
   const PLATE_PAD_Y = 18;
   const plated = !usingText && brand.logoIsLight === true;
-  const gap = GAP + (plated ? PLATE_PAD_X : 0);
+  // A TEXT wordmark needs a wider gap than a logo image does. 30px measures as
+  // ~28px of ink, which is fine beside a logo but reads as ZERO between two
+  // runs of type at 71px — "Applied BioCodeAI". An italic serif gets away with
+  // it (the slant separates them); bold sans against bold sans does not, and
+  // the brand name is the half that loses.
+  //
+  // Proportional to the type size rather than a fixed pixel value, so it stays
+  // right if the size ever changes.
+  const textGap = Math.round(AI_FONT * 0.55);
+  const gap = (usingText ? textGap : GAP) + (plated ? PLATE_PAD_X : 0);
 
   const totalW = logoW + gap + AI_W + (plated ? PLATE_PAD_X : 0);
   const startX = (1200 - totalW) / 2 + (plated ? PLATE_PAD_X : 0);
