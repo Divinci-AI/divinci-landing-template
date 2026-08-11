@@ -231,6 +231,18 @@ export interface OgBrand {
    * image people actually see in Slack and iMessage.
    */
   logoIsMark?: boolean;
+  /**
+   * The brand's DISPLAY typeface, matching the hero lockup.
+   *
+   * The card is rasterized by resvg, which only sees fonts on disk — a webfont
+   * named in CSS is invisible to it, so the wordmark fell back to Helvetica
+   * while the live page rendered Fraunces italic. Same brand, two different
+   * lockups, and the card is the one people see first.
+   *
+   * `family` must name a font actually loaded into the rasterizer (see
+   * build-og.ts, which downloads it), or resvg silently substitutes.
+   */
+  displayFont?: { family: string; style?: string; weight?: string; letterSpacing?: string };
 }
 
 /**
@@ -299,10 +311,19 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
       `height="${LOGO_H + PLATE_PAD_Y * 2}" rx="18" fill="${GREEN_DARK}"/>\n  `
     : "";
 
+  // The brand's own display face when we have one, else the neutral default.
+  // Weight and style come from the same extraction the hero uses, so the card
+  // and the page render the same lockup rather than two different ones.
+  const df = brand.displayFont;
+  const wmFamily = df?.family ? `${df.family}, Helvetica, Arial, sans-serif` : "Helvetica, Arial, sans-serif";
+  const wmStyle = df?.style === "italic" ? ` font-style="italic"` : "";
+  const wmWeight = df?.weight || "700";
+  const wmTracking = df?.letterSpacing && /^-?[\d.]+(px|em)?$/.test(df.letterSpacing) ? df.letterSpacing : "-1";
+
   const wordmark = usingText
-    ? `<text x="${startX}" y="${aiBaseline}" font-family="Helvetica, Arial, sans-serif" font-size="${Math.round(
+    ? `<text x="${startX}" y="${aiBaseline}" font-family="${escapeXml(wmFamily)}"${wmStyle} font-size="${Math.round(
         LOGO_H * 0.82,
-      )}" font-weight="700" letter-spacing="-1" fill="${TEXT}">${escapeXml(wordmarkText)}</text>`
+      )}" font-weight="${escapeXml(wmWeight)}" letter-spacing="${escapeXml(wmTracking)}" fill="${TEXT}">${escapeXml(wordmarkText)}</text>`
     : `${plate}<image x="${startX}" y="${logoY}" width="${logoW}" height="${LOGO_H}" preserveAspectRatio="xMidYMid meet" xlink:href="${logo.href}"/>`;
 
   const star = (cx: number, cy: number, s: number, fill: string) => {
