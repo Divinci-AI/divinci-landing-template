@@ -66,6 +66,13 @@ export function buttonColors(
   const accentWorks =
     contrastRatio(accent, sectionBg) >= AA_LARGE && contrastRatio(label, accent) >= AA_TEXT;
   if (accentWorks) return { bg: accent, text: label };
-  // Cream against a dark section, with the darkest available label on it.
-  return { bg: cream, text: readableOn(cream, sectionBg, "#000000") };
+  // Cream against a dark section. Label in the brand's own dark whenever that
+  // clears AA — not simply the highest-contrast colour available, which is
+  // always pure black and reads as off-brand on a warm palette. These pages
+  // exist to look like the customer's site; maximising a ratio past the point
+  // of legibility trades brand fidelity for a number nobody sees.
+  return {
+    bg: cream,
+    text: contrastRatio(sectionBg, cream) >= AA_TEXT ? sectionBg : "#000000",
+  };
 }

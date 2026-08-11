@@ -56,6 +56,20 @@ describe("buttonColors", () => {
     expect(contrastRatio(c.bg, AURAPATH.primary)).toBeGreaterThanOrEqual(3);
   });
 
+  it("labels in the brand's own dark, not pure black, when that clears AA", () => {
+    // These pages exist to look like the customer's site. Pure black always
+    // wins on ratio and reads as off-brand on a warm palette, so legibility is
+    // a threshold to clear, not a number to maximise.
+    const c = buttonColors(AURAPATH.primary, AURAPATH.accent, AURAPATH.primary, AURAPATH.cream);
+    expect(c.text).toBe(AURAPATH.primary);
+  });
+
+  it("still falls back to black when the brand's dark is not dark enough", () => {
+    const c = buttonColors("#8a8a8a", "#8a8a8a", "#8a8a8a", "#f7fafc");
+    expect(c.text).toBe("#000000");
+    expect(contrastRatio(c.text, c.bg)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
   it("leaves a bright accent alone — this must not restyle working demos", () => {
     const c = buttonColors(BRIGHT.primary, BRIGHT.accent, BRIGHT.primary, BRIGHT.cream);
     expect(c.bg).toBe(BRIGHT.accent);
