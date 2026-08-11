@@ -219,9 +219,12 @@ const t = getUI(lang).hero;
 
       .ai-shine {
         position: relative;
-        /* Match the client's extracted font (same as the logo wordmark style),
-           not the UA serif default. */
-        font-family: var(--font-sans);
+        /* The brand's DISPLAY face — this glyph pair sits beside the logo, so
+           it belongs with the wordmark, not with the body copy. Reading
+           --font-sans put AuraPath's "AI" in a heavy IBM Plex grotesque next to
+           a Fraunces serif logo. --font-display falls back to --font-sans, so
+           brands with a single face are unaffected. */
+        font-family: var(--font-display, var(--font-sans));
         color: transparent;
         -webkit-text-fill-color: transparent;
         background-image: linear-gradient(

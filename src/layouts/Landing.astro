@@ -49,6 +49,12 @@ const brandVars = `:root{` +
   `--color-df-cream:${p.cream};--color-df-cream-soft:${p.soft};` +
   `--color-df-bubble-user:${p.bubble};--color-df-text:${p.text};` +
   `--font-sans:${brand.fonts.family};` +
+  // The brand's DISPLAY face, for the "AI" wordmark beside the logo. Falls back
+  // to the body font, so a brand whose headings and body share a face is
+  // unchanged. AuraPath is why this exists: its body is IBM Plex Sans and its
+  // headings are Fraunces, so rendering "AI" in the body font put a heavy
+  // grotesque next to a serif wordmark.
+  `--font-display:${brand.fonts.display ?? brand.fonts.family};` +
   `--logo-url:url("${brand.media.logo}");}`;
 
 function urlFor(code: string): string {

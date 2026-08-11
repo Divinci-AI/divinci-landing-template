@@ -23,7 +23,16 @@ export interface BrandConfig {
     primary: string; dark: string; mid: string; accent: string;
     cream: string; soft: string; bubble: string; text: string;
   };
-  fonts: { family: string; headingWeight: number; bodyWeight: number; links?: string[] };
+  fonts: {
+    family: string;
+    /** The brand's display/heading face, when it differs from `family`. Used
+     *  for the "AI" wordmark so it sits with the logo rather than the body
+     *  copy. Optional: most brands set one face for both. */
+    display?: string;
+    headingWeight: number;
+    bodyWeight: number;
+    links?: string[];
+  };
   links: {
     mainSite: string; signupUrl: string; loginUrl: string; bioCreditUrl: string;
     /** True only when the client's site actually offers a member/patient login —
