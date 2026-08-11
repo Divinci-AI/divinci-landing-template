@@ -92,14 +92,26 @@ const displayFamily = fontFile ? (displayStack || "").split(",")[0].replace(/["'
 // laid out around a phantom width and a visible gap opened between the wordmark
 // and "AI". Rasterizing a probe with the SAME font files gives the real width.
 const usesTextWordmark = logo.href === null || brand.media.logoIsMark === true;
+
+// ONE description of the wordmark's type, used by both the probe and the card.
+//
+// They were built separately and disagreed: the probe measured at weight 500
+// (the extraction default) while the card rendered at 700 (its own fallback for
+// a brand with no display font). The measurement was therefore for a narrower
+// rendering than the one drawn, so the layout reserved 511px for 554px of type
+// and "AI" was positioned INSIDE the wordmark — "Applied BioCodeAI" with a
+// 4px overlap. A measurement is only as good as its agreement with what is
+// actually drawn, so there is now a single object rather than two call sites
+// that happen to look similar.
+const displayFont = displayFamily
+  ? { family: displayFamily, style: displayStyle, weight: displayWeight, letterSpacing: brand.fonts.displayLetterSpacing }
+  : undefined;
+
 let measuredWordmarkWidth: number | undefined;
 if (usesTextWordmark) {
   try {
     const probe = new Resvg(
-      wordmarkProbeSvg(nameBesideAi(brand.identity.siteName), {
-        family: displayFamily, style: displayStyle, weight: displayWeight,
-        letterSpacing: brand.fonts.displayLetterSpacing,
-      }),
+      wordmarkProbeSvg(nameBesideAi(brand.identity.siteName), displayFont ?? {}),
       { font: { loadSystemFonts: true, fontFiles: fontFile ? [fontFile] : [] } },
     );
     const box = probe.getBBox();
@@ -119,9 +131,7 @@ const { svg, note } = composeOgCard(
     logoIsLight: brand.media.logoIsLight,
     logoIsMark: brand.media.logoIsMark,
     measuredWordmarkWidth,
-    displayFont: displayFamily
-      ? { family: displayFamily, style: displayStyle, weight: displayWeight, letterSpacing: brand.fonts.displayLetterSpacing }
-      : undefined,
+    displayFont,
   },
   logo,
 );
