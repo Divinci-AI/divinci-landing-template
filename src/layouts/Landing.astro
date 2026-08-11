@@ -29,6 +29,7 @@ import {
   dirFor,
 } from "~/i18n/locales";
 import { brand } from "~/brand.config";
+import { OG_VERSION } from "~/og-version";
 
 interface Props {
   lang?: string;
@@ -73,7 +74,13 @@ const canonical = urlFor(lang);
 // inconsistently — so `content="/og.png"` was a preview that worked nowhere
 // reliably. `site` is already absolute, so derive from it rather than asking
 // each caller to remember.
-const ogImage = new URL("/og.png", `${site}/`).href;
+// The card's CONTENT HASH is part of the URL. Slack, iMessage and LinkedIn
+// cache the unfurl image keyed by URL, independently of page re-scrapes — so a
+// fixed card is never shown while the URL stays `/og.png`. Re-scraping with
+// ?v=2 made Slack report the new file size and still render the old image.
+// A hash rather than a timestamp: an unchanged card keeps its URL and stays
+// cached; only a card that really changed forces every consumer to re-fetch.
+const ogImage = new URL(`/og.png?v=${OG_VERSION}`, `${site}/`).href;
 ---
 
 <!doctype html>
