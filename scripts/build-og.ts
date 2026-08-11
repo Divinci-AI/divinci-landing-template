@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { brand } from "../src/brand.config.ts";
-import { composeOgCard, prepareLogo, dwebpTranscode, DEFAULT_LOGO_ASPECT } from "./og-card.ts";
+import { composeOgCard, prepareLogo, dwebpTranscode, DEFAULT_LOGO_ASPECT, wordmarkProbeSvg, nameBesideAi } from "./og-card.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -85,6 +85,30 @@ const displayWeight = brand.fonts.displayWeight ?? "500";
 const fontFile = await fetchDisplayFont(displayStack, displayStyle, displayWeight);
 const displayFamily = fontFile ? (displayStack || "").split(",")[0].replace(/["']/g, "").trim() : undefined;
 
+// MEASURE the wordmark before laying out the row.
+//
+// The width was estimated at a fixed em-per-character, calibrated for a bold
+// grotesque. A narrow italic serif measures ~30% under that, so the row was
+// laid out around a phantom width and a visible gap opened between the wordmark
+// and "AI". Rasterizing a probe with the SAME font files gives the real width.
+const usesTextWordmark = logo.href === null || brand.media.logoIsMark === true;
+let measuredWordmarkWidth: number | undefined;
+if (usesTextWordmark) {
+  try {
+    const probe = new Resvg(
+      wordmarkProbeSvg(nameBesideAi(brand.identity.siteName), {
+        family: displayFamily, style: displayStyle, weight: displayWeight,
+        letterSpacing: brand.fonts.displayLetterSpacing,
+      }),
+      { font: { loadSystemFonts: true, fontFiles: fontFile ? [fontFile] : [] } },
+    );
+    const box = probe.getBBox();
+    if (box && box.width > 0) measuredWordmarkWidth = Math.ceil(box.width);
+  } catch {
+    // Fall back to the estimate — a slightly wide gap beats no card.
+  }
+}
+
 const { svg, note } = composeOgCard(
   {
     siteName: brand.identity.siteName,
@@ -94,6 +118,7 @@ const { svg, note } = composeOgCard(
     ogSubtitle: brand.media.ogSubtitle,
     logoIsLight: brand.media.logoIsLight,
     logoIsMark: brand.media.logoIsMark,
+    measuredWordmarkWidth,
     displayFont: displayFamily
       ? { family: displayFamily, style: displayStyle, weight: displayWeight, letterSpacing: brand.fonts.displayLetterSpacing }
       : undefined,
@@ -136,4 +161,4 @@ writeFileSync(
     `export const OG_VERSION = ${JSON.stringify(hash)};\n`,
 );
 
-console.log(`[og] wrote ${outPng} (${(png.length / 1024).toFixed(0)} KB, v=${hash}, wordmark font: ${displayFamily ?? "fallback"})${note ? ` — ${note}` : ""}`);
+console.log(`[og] wrote ${outPng} (${(png.length / 1024).toFixed(0)} KB, v=${hash}, wordmark font: ${displayFamily ?? "fallback"}${measuredWordmarkWidth ? `, measured ${measuredWordmarkWidth}px` : ""})${note ? ` — ${note}` : ""}`);

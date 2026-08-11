@@ -243,6 +243,16 @@ export interface OgBrand {
    * build-og.ts, which downloads it), or resvg silently substitutes.
    */
   displayFont?: { family: string; style?: string; weight?: string; letterSpacing?: string };
+  /**
+   * The wordmark's MEASURED width in px, when the caller has rasterized a probe.
+   *
+   * Without it the width is estimated at a fixed em-per-character, which is
+   * calibrated for a bold grotesque and overshoots badly for a narrow italic
+   * serif — the row is then laid out around a phantom width and the gap between
+   * the wordmark and "AI" opens up visibly. Fraunces italic measured ~30% under
+   * the estimate.
+   */
+  measuredWordmarkWidth?: number;
 }
 
 /**
@@ -261,6 +271,28 @@ export function nameBesideAi(siteName: string): string {
  * Compose the 1200x630 card. Pure: same inputs → same SVG, no I/O.
  * Returns the SVG plus a note describing any degradation.
  */
+/** The wordmark's font-size — exported so a measuring probe matches the card. */
+export const WORDMARK_FONT_SIZE = Math.round(86 * 0.82);
+
+/**
+ * A minimal SVG containing ONLY the wordmark, for measuring its real width.
+ *
+ * Rasterized by the caller with the same font files the card uses, so the
+ * measurement reflects the actual face rather than an em-per-character guess.
+ */
+export function wordmarkProbeSvg(
+  text: string,
+  font: { family?: string; style?: string; weight?: string; letterSpacing?: string } = {},
+): string {
+  const family = font.family ? `${font.family}, Helvetica, Arial, sans-serif` : "Helvetica, Arial, sans-serif";
+  const style = font.style === "italic" ? ` font-style="italic"` : "";
+  const tracking = font.letterSpacing && /^-?[\d.]+(px|em)?$/.test(font.letterSpacing) ? font.letterSpacing : "-1";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="200" viewBox="0 0 2000 200">` +
+    `<text x="10" y="140" font-family="${escapeXml(family)}"${style} font-size="${WORDMARK_FONT_SIZE}" ` +
+    `font-weight="${escapeXml(font.weight || "700")}" letter-spacing="${escapeXml(tracking)}" fill="#000">` +
+    `${escapeXml(text)}</text></svg>`;
+}
+
 export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; note: string } {
   const { primary: NAVY, dark: GREEN_DARK, mid: GREEN_MID, accent: GREEN_LEAF, cream: CREAM, text: TEXT } =
     brand.palette;
@@ -286,7 +318,7 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   const usingText = logo.href === null || brand.logoIsMark === true;
   const wordmarkText = nameBesideAi(brand.siteName);
   const logoW = usingText
-    ? Math.min(720, wordmarkText.length * LOGO_H * 0.52)
+    ? Math.min(720, brand.measuredWordmarkWidth ?? wordmarkText.length * LOGO_H * 0.52)
     : LOGO_H * logo.aspect;
 
   // A light/knocked-out logo gets a dark plate (below). The plate extends
