@@ -30,7 +30,14 @@ const navItems = [
   class="header-hidden fixed inset-x-0 top-0 z-30 bg-df-navy/95 px-6 py-3 text-white shadow-sm backdrop-blur-md transition-all duration-300 ease-out"
 >
   <div class="mx-auto flex max-w-6xl items-center justify-between">
-    <a href="#hero" class="flex items-end gap-1.5" aria-label={ui.header.logoAriaLabel}>
+    {/* items-BASELINE, not items-end. items-end aligns the boxes' bottom
+        edges, and a text box extends BELOW its baseline by the descender depth
+        while a tightly-cropped logo's bottom edge IS its baseline. Aligning
+        bottoms therefore pushes the logo down by exactly that gap — which is
+        why the customer's logo sat visibly lower than "AI" on every demo.
+        A flex item that is an image baselines on its bottom margin edge, so
+        items-baseline lands the logo's foot on the text's baseline. */}
+    <a href="#hero" class="flex items-baseline gap-1.5" aria-label={ui.header.logoAriaLabel}>
       <img
         src={brand.media.logo}
         alt={brand.identity.siteName}
@@ -38,7 +45,11 @@ const navItems = [
         width="200"
         height="42"
       />
-      <span class="relative inline-flex items-center">
+      {/* inline-BLOCK, not inline-flex: an inline-flex box reports a baseline
+          derived from its flex line, which items-center then shifts, so the
+          baseline this span hands its parent would not be the "AI" glyphs'.
+          That silently defeats the items-baseline above. */}
+      <span class="relative inline-block">
         <span
           class="bg-gradient-to-br from-df-green-leaf via-df-green-leaf to-df-green-mid bg-clip-text text-lg font-extrabold leading-none tracking-tight text-transparent"
         >

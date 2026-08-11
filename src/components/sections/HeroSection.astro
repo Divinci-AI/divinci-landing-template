@@ -455,21 +455,21 @@ const t = getUI(lang).hero;
       }
     </script>
     <div class="text-center">
-      {/* items-BASELINE when the lockup is two runs of text, items-end when it
-          pairs an image with text.
+      {/* items-BASELINE for both branches — text-beside-text and image-beside-
+          text alike.
 
-          items-end aligns the boxes' bottom edges, which is right for a logo
-          image beside text but wrong for two text spans: their boxes differ in
-          height (different sizes, weights and line-heights), so equal bottoms
-          put the baselines at different heights — "AuraPath" sat visibly below
-          "AI". Baseline alignment is what makes two runs of type read as one
-          line. */}
-      <div
-        class:list={[
-          "relative inline-flex justify-center gap-3",
-          brand.media.logoIsMark ? "items-baseline" : "items-end",
-        ]}
-      >
+          items-end aligns the boxes' BOTTOM EDGES, which is wrong for both. A
+          text box extends below its baseline by the descender depth, so two
+          text spans of different sizes get misaligned baselines; and a
+          tightly-cropped logo's bottom edge IS its baseline, so pairing it with
+          a text box pushes the logo down by that same descender gap. That is
+          why the customer's logo sat lower than "AI" on every wordmark demo,
+          and why "AuraPath" sat lower on the mark ones — one cause, two
+          symptoms, which is why fixing only the text case left the other.
+
+          A flex item that is an image baselines on its bottom margin edge, so
+          items-baseline lands the logo's foot on the text baseline. */}
+      <div class="relative inline-flex items-baseline justify-center gap-3">
         {/* The logo IMAGE is the lockup only when it is a wordmark — i.e. when
             it carries the brand's name. A square mark does not, so the name is
             set as text instead (below) and the mark is omitted here rather than
