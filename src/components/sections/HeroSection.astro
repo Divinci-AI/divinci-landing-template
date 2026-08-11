@@ -410,24 +410,30 @@ const t = getUI(lang).hero;
     </script>
     <div class="text-center">
       <div class="relative inline-flex items-end justify-center gap-3">
-        <span class="gleam-host">
-          {/* A light/white logo (built for a dark site header) washes out on the
-              hero's light bg — darken it here. The scrolled navy Header keeps it
-              white. */}
-          <img
-            src={brand.media.logo}
-            alt={brand.identity.siteName}
-            class:list={["block h-10 w-auto md:h-14", brand.media.logoIsLight && "brightness-0"]}
-            width="200"
-            height="42"
-          />
-          <span class="logo-gleam" aria-hidden="true"></span>
-        </span>
-        {/* A MARK does not carry the brand's name, so the lockup would read
-            "⟨glyph⟩ AI" with the brand nowhere on its own hero. Render the name
-            beside it, in the display face, exactly as these brands set it in
-            their own header. Wordmark logos already contain the name and are
-            untouched.
+        {/* The logo IMAGE is the lockup only when it is a wordmark — i.e. when
+            it carries the brand's name. A square mark does not, so the name is
+            set as text instead (below) and the mark is omitted here rather than
+            placed in front of it: "⟨glyph⟩ AuraPath AI" states the A twice, and
+            a hero is the one place the brand should read cleanly. The mark still
+            appears in the header and as the favicon, where it is doing the job
+            marks are for. */}
+        {!brand.media.logoIsMark && (
+          <span class="gleam-host">
+            {/* A light/white logo (built for a dark site header) washes out on
+                the hero's light bg — darken it here. The scrolled navy Header
+                keeps it white. */}
+            <img
+              src={brand.media.logo}
+              alt={brand.identity.siteName}
+              class:list={["block h-10 w-auto md:h-14", brand.media.logoIsLight && "brightness-0"]}
+              width="200"
+              height="42"
+            />
+            <span class="logo-gleam" aria-hidden="true"></span>
+          </span>
+        )}
+        {/* The name, in the display face, exactly as these brands set it in
+            their own header.
 
             The trailing "AI" is stripped because it is drawn separately below —
             without that, a brand already called "AuraPath AI" reads
