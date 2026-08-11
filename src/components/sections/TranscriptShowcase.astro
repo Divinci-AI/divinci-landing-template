@@ -253,9 +253,13 @@ function citeTitle(ex: Exchange, n: number): string {
             aria-hidden="true"
             class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-df-green-dark/90 text-white transition group-hover:bg-df-green-mid"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-              <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round"></path>
-              <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round"></path>
+            {/* SOLID, not a 2px outline. At 16px in a 32px circle the stroked
+                Lucide send reads as a thin sketch against the filled button —
+                the same shape the og-card draws filled, so the two surfaces
+                disagreed. A single filled path also removes the interior
+                hairline the two-path outline leaves behind. */}
+            <svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+              <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"></path>
             </svg>
           </span>
         </button>
