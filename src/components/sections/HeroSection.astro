@@ -217,6 +217,17 @@ const t = getUI(lang).hero;
         }
       }
 
+      /* The brand name beside a MARK. Same face and colour as the surrounding
+         lockup, but deliberately NOT the ai-shine gradient: the gradient exists
+         to make "AI" read as Divinci's addition to the customer's brand, and
+         extending it over their own name would recolour their wordmark. */
+      .brand-word {
+        font-family: var(--font-display, var(--font-sans));
+        font-weight: 500;
+        color: var(--color-df-text);
+        line-height: 1;
+      }
+
       .ai-shine {
         position: relative;
         /* The brand's DISPLAY face — this glyph pair sits beside the logo, so
@@ -412,6 +423,20 @@ const t = getUI(lang).hero;
           />
           <span class="logo-gleam" aria-hidden="true"></span>
         </span>
+        {/* A MARK does not carry the brand's name, so the lockup would read
+            "⟨glyph⟩ AI" with the brand nowhere on its own hero. Render the name
+            beside it, in the display face, exactly as these brands set it in
+            their own header. Wordmark logos already contain the name and are
+            untouched.
+
+            The trailing "AI" is stripped because it is drawn separately below —
+            without that, a brand already called "AuraPath AI" reads
+            "AuraPath AI AI". */}
+        {brand.media.logoIsMark && (
+          <span class="brand-word text-4xl tracking-tight md:text-5xl">
+            {brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
+          </span>
+        )}
         <span class="relative inline-flex items-center">
           <span
             class="ai-shine text-4xl font-extrabold tracking-tight md:text-5xl"

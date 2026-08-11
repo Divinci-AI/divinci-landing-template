@@ -51,6 +51,10 @@ export interface BrandConfig {
     /** True when the logo is light/white (built for a dark header) — the hero
      *  darkens it so it doesn't wash out on the light background. */
     logoIsLight?: boolean;
+    /** True when `logo` is a square MARK rather than a wordmark. The hero
+     *  lockup assumes the logo carries the brand NAME; for a mark it does not,
+     *  so the name is rendered as text beside it. */
+    logoIsMark?: boolean;
   };
   referral: { source: string };
   deploy: { workerName: string; demoHost: string };
