@@ -477,7 +477,7 @@ const t = getUI(lang).hero;
             a hero is the one place the brand should read cleanly. The mark still
             appears in the header and as the favicon, where it is doing the job
             marks are for. */}
-        {!brand.media.logoIsMark && (
+        {!(brand.media.logoIsMark || brand.media.logoIsTextWordmark) && (
           <span class="gleam-host">
             {/* A light/white logo (built for a dark site header) washes out on
                 the hero's light bg — darken it here. The scrolled navy Header
@@ -498,7 +498,7 @@ const t = getUI(lang).hero;
             The trailing "AI" is stripped because it is drawn separately below —
             without that, a brand already called "AuraPath AI" reads
             "AuraPath AI AI". */}
-        {brand.media.logoIsMark && (
+        {(brand.media.logoIsMark || brand.media.logoIsTextWordmark) && (
           <span
             class="brand-word text-4xl tracking-tight md:text-5xl"
             data-word={brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}

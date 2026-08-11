@@ -38,13 +38,23 @@ const navItems = [
         A flex item that is an image baselines on its bottom margin edge, so
         items-baseline lands the logo's foot on the text's baseline. */}
     <a href="#hero" class="flex items-baseline gap-1.5" aria-label={ui.header.logoAriaLabel}>
-      <img
-        src={brand.media.logo}
-        alt={brand.identity.siteName}
-        class="h-6 w-auto brightness-0 invert"
-        width="200"
-        height="42"
-      />
+      {/* A GENERATED text-wordmark is drawn as real text, not as an image.
+          Its SVG box carries empty space below the baseline, and an image
+          baselines on its bottom edge — so as an <img> the name floats above
+          the "AI". Same rule as the hero and the og-card. */}
+      {brand.media.logoIsTextWordmark || brand.media.logoIsMark ? (
+        <span class="text-lg font-extrabold tracking-tight text-white">
+          {brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
+        </span>
+      ) : (
+        <img
+          src={brand.media.logo}
+          alt={brand.identity.siteName}
+          class="h-6 w-auto brightness-0 invert"
+          width="200"
+          height="42"
+        />
+      )}
       {/* inline-BLOCK, not inline-flex: an inline-flex box reports a baseline
           derived from its flex line, which items-center then shifts, so the
           baseline this span hands its parent would not be the "AI" glyphs'.

@@ -63,6 +63,16 @@ export interface BrandConfig {
      *  lockup assumes the logo carries the brand NAME; for a mark it does not,
      *  so the name is rendered as text beside it. */
     logoIsMark?: boolean;
+    /**
+     * `logo` is not a real logo — it is the text-wordmark SVG the pipeline
+     * generates when extraction finds none. Drawn as an IMAGE it misaligns:
+     * its box carries ~11/42 of empty space below the text baseline, and a
+     * flex item that is an image baselines on its BOTTOM edge, so the name
+     * floats above the "AI" it should sit level with. Draw the name as text
+     * instead — which is what the og-card already does, having refused to
+     * embed a text-only SVG all along.
+     */
+    logoIsTextWordmark?: boolean;
   };
   referral: { source: string };
   deploy: { workerName: string; demoHost: string };
