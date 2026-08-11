@@ -463,7 +463,14 @@ const t = getUI(lang).hero;
             {brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
           </span>
         )}
-        <span class="relative inline-flex items-center">
+        {/* inline-BLOCK, not inline-flex. An inline-flex box exposes a baseline
+            derived from its flex line, and `items-center` shifts that line, so
+            the baseline this span reported was NOT the "AI" glyphs' baseline —
+            which silently defeated items-baseline on the parent and left the
+            name sitting a few pixels low. inline-block reports the text's own
+            baseline. It still establishes the containing block the sparkles are
+            absolutely positioned against, which is all the wrapper is for. */}
+        <span class="relative inline-block">
           <span
             class="ai-shine text-4xl font-extrabold tracking-tight md:text-5xl"
           >
