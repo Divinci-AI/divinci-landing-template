@@ -304,9 +304,22 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   // Lockup geometry — wordmark + gradient "AI", centered as a row.
   const LOGO_H = 86;
   const GAP = 30;
-  const AI_FONT = 96;
-  const AI_W = 122;
   const ROW_CENTER_Y = 196;
+
+  // Is the wordmark drawn as TEXT? Decided here because the "AI" is sized
+  // against it. (A mark carries no name, so it takes the text path too.)
+  const usingText = logo.href === null || brand.logoIsMark === true;
+  const wordmarkText = nameBesideAi(brand.siteName);
+
+  // "AI" matches the wordmark's size when both are TEXT — they read as one
+  // piece of type, and 96 against a 71px wordmark made the AI visibly bigger
+  // than the brand's own name. Against a LOGO IMAGE the 96/86 pairing is
+  // deliberate and unchanged: an image's cap-height is not its box height, so
+  // matching the numbers there would make the AI look small.
+  const AI_FONT = usingText ? WORDMARK_FONT_SIZE : 96;
+  // 122 was measured for "AI" at 96px; scale with the font so the row's width
+  // stays right and the sparkles stay on the glyphs.
+  const AI_W = Math.round(122 * (AI_FONT / 96));
 
   // The wordmark: the real logo when we could embed it, else the site name as
   // text. Text is measured at roughly 0.62em per character for Helvetica-ish
@@ -315,8 +328,6 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   // Text when the logo cannot be embedded, AND when it is a MARK: a mark does
   // not contain the brand's name, so drawing it alone leaves the card without
   // the brand on it. Same rule as the hero lockup.
-  const usingText = logo.href === null || brand.logoIsMark === true;
-  const wordmarkText = nameBesideAi(brand.siteName);
   const logoW = usingText
     ? Math.min(720, brand.measuredWordmarkWidth ?? wordmarkText.length * LOGO_H * 0.52)
     : LOGO_H * logo.aspect;

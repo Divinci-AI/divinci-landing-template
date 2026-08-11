@@ -243,3 +243,34 @@ describe("mark logos and the AI suffix on the card", () => {
     expect(svg).toContain("Xenon AI Labs");
   });
 });
+
+describe("AI sizing against the wordmark", () => {
+  const brand = {
+    siteName: "AuraPath AI",
+    productName: "AuraPath AI",
+    palette: { primary: "#1a1610", dark: "#262017", mid: "#403627", accent: "#0f0d08", cream: "#f7fafc", text: "#0f0d08" },
+    ogTagline: "answered 24/7.",
+    ogSubtitle: "AI-powered answers.",
+  };
+  const embeddable = { href: "data:image/png;base64,AAAA", aspect: 4, note: "" };
+
+  function fontSizes(svg: string) {
+    return [...svg.matchAll(/font-size="(\d+)"/g)].map((m) => Number(m[1]));
+  }
+
+  it("sets AI to the SAME size as a TEXT wordmark", () => {
+    // 96 against a 71px wordmark made the AI visibly larger than the brand's
+    // own name; as two runs of type they should read as one piece.
+    const { svg } = composeOgCard({ ...brand, logoIsMark: true }, embeddable);
+    const wm = svg.match(/font-size="(\d+)"[^>]*font-weight="[^"]*"[^>]*>AuraPath</);
+    const ai = svg.match(/font-size="(\d+)"[^>]*fill="url\(#aiGrad\)">AI</);
+    expect(ai?.[1]).toBe(wm?.[1]);
+  });
+
+  it("keeps the larger AI beside a LOGO IMAGE", () => {
+    // An image's cap-height is not its box height, so matching the numbers
+    // there would make the AI look small. That pairing is deliberate.
+    const { svg } = composeOgCard({ ...brand, logoIsMark: false }, embeddable);
+    expect(fontSizes(svg)).toContain(96);
+  });
+});
