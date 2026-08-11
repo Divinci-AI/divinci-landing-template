@@ -42,6 +42,7 @@ const { svg, note } = composeOgCard(
     ogTagline: brand.media.ogTagline,
     ogSubtitle: brand.media.ogSubtitle,
     logoIsLight: brand.media.logoIsLight,
+    logoIsMark: brand.media.logoIsMark,
   },
   logo,
 );

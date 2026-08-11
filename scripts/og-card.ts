@@ -224,6 +224,25 @@ export interface OgBrand {
    * simply ignored it.
    */
   logoIsLight?: boolean;
+  /**
+   * The logo is a square MARK, not a wordmark — it does not carry the brand's
+   * name. The card's lockup assumes it does, exactly as the hero did, so a mark
+   * produced a shared card reading "<glyph> AI" with the brand nowhere on the
+   * image people actually see in Slack and iMessage.
+   */
+  logoIsMark?: boolean;
+}
+
+/**
+ * The name to draw beside a separately-rendered "AI".
+ *
+ * The card draws "AI" as its own gradient element, so a brand already called
+ * "AuraPath AI" reads "AuraPath AI AI" on the card. Mirrors the same rule in
+ * the hero lockup; matches only a TRAILING occurrence, so "Xenon AI Labs" is
+ * untouched, and never strips a name to nothing.
+ */
+export function nameBesideAi(siteName: string): string {
+  return siteName.trim().replace(/\s*\bai\s*$/i, "").trim() || siteName.trim();
 }
 
 /**
@@ -249,9 +268,13 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   // text. Text is measured at roughly 0.62em per character for Helvetica-ish
   // bold — approximate, but it only has to keep the row centered, and being a
   // little off is vastly better than an empty space where the brand should be.
-  const usingText = logo.href === null;
+  // Text when the logo cannot be embedded, AND when it is a MARK: a mark does
+  // not contain the brand's name, so drawing it alone leaves the card without
+  // the brand on it. Same rule as the hero lockup.
+  const usingText = logo.href === null || brand.logoIsMark === true;
+  const wordmarkText = nameBesideAi(brand.siteName);
   const logoW = usingText
-    ? Math.min(720, brand.siteName.length * LOGO_H * 0.52)
+    ? Math.min(720, wordmarkText.length * LOGO_H * 0.52)
     : LOGO_H * logo.aspect;
 
   // A light/knocked-out logo gets a dark plate (below). The plate extends
@@ -279,7 +302,7 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   const wordmark = usingText
     ? `<text x="${startX}" y="${aiBaseline}" font-family="Helvetica, Arial, sans-serif" font-size="${Math.round(
         LOGO_H * 0.82,
-      )}" font-weight="700" letter-spacing="-1" fill="${TEXT}">${escapeXml(brand.siteName)}</text>`
+      )}" font-weight="700" letter-spacing="-1" fill="${TEXT}">${escapeXml(wordmarkText)}</text>`
     : `${plate}<image x="${startX}" y="${logoY}" width="${logoW}" height="${LOGO_H}" preserveAspectRatio="xMidYMid meet" xlink:href="${logo.href}"/>`;
 
   const star = (cx: number, cy: number, s: number, fill: string) => {

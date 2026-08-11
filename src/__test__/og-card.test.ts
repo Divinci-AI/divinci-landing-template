@@ -194,3 +194,52 @@ describe("logoIsLight", () => {
     expect(aiX - plateRight).toBeGreaterThanOrEqual(24);
   });
 });
+
+/**
+ * The card is what people see in Slack, iMessage and LinkedIn — often before
+ * they see the page. Two defects rendered there and nowhere else obvious.
+ */
+describe("mark logos and the AI suffix on the card", () => {
+  const brand = {
+    siteName: "AuraPath AI",
+    productName: "AuraPath AI",
+    palette: { primary: "#1a1610", dark: "#262017", mid: "#403627", accent: "#0f0d08", cream: "#f7fafc", text: "#0f0d08" },
+    ogTagline: "answered 24/7.",
+    ogSubtitle: "AI-powered answers.",
+  };
+  const embeddable = { href: "data:image/png;base64,AAAA", aspect: 1, note: "" };
+
+  it("draws the NAME as text when the logo is a mark, not the glyph alone", () => {
+    // A mark carries no name, so the shared card read "<glyph> AI" with the
+    // brand absent from the image people actually see.
+    const { svg } = composeOgCard({ ...brand, logoIsMark: true }, embeddable);
+    expect(svg).toContain("AuraPath");
+    expect(svg).not.toContain("<image");
+  });
+
+  it("still embeds a WORDMARK logo as an image", () => {
+    const { svg } = composeOgCard({ ...brand, logoIsMark: false }, embeddable);
+    expect(svg).toContain("<image");
+  });
+
+  it("does not print the AI suffix twice in the WORDMARK", () => {
+    // "AI" is drawn separately as a gradient, so rendering the full site name
+    // beside it produced "AuraPath AI AI" in the lockup.
+    //
+    // Scoped to the wordmark <text>, not the whole SVG: the input placeholder
+    // legitimately reads "Ask the AuraPath AI…" — that is the product name and
+    // it is correct. An over-broad assertion here fails on working output,
+    // which is how a test starts costing more than the bug.
+    const { svg } = composeOgCard({ ...brand, logoIsMark: true }, embeddable);
+    const wordmark = svg.match(/<text[^>]*font-weight="700"[^>]*>([^<]*)<\/text>/);
+    expect(wordmark?.[1]).toBe("AuraPath");
+  });
+
+  it("leaves a name whose AI is not a trailing word alone", () => {
+    const { svg } = composeOgCard(
+      { ...brand, siteName: "Xenon AI Labs", logoIsMark: true },
+      embeddable,
+    );
+    expect(svg).toContain("Xenon AI Labs");
+  });
+});
