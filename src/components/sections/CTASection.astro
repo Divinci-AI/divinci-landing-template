@@ -1,12 +1,23 @@
 ---
 import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
+import { brand } from "~/brand.config";
+import { buttonColors } from "~/lib/contrast";
 
 interface Props {
   lang?: string;
 }
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const t = getUI(lang).cta;
+
+// The page's primary call to action cannot be styled on the ASSUMPTION that the
+// brand's accent is bright. AuraPath's accent (#0f0d08) against this section
+// (#1a1610) measured 1.08:1 — the button was invisible until hover, which only
+// worked because the hover state hardcodes white.
+//
+// Measured at build time from the actual palette. A brand whose accent already
+// clears AA keeps it, so this changes nothing for the demos that look right.
+const cta = buttonColors(brand.palette.primary, brand.palette.accent, brand.palette.primary, brand.palette.cream);
 ---
 
 <section class="bg-df-navy py-16">
@@ -20,10 +31,27 @@ const t = getUI(lang).cta;
     <a
       href="#hero"
       data-focus-chat
-      class="mt-8 inline-flex items-center gap-2 rounded-full bg-df-green-leaf px-8 py-3 text-base font-semibold text-df-navy transition hover:bg-white hover:text-df-green-dark"
+      class="cta-button mt-8 inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold transition"
+      style={`--cta-bg:${cta.bg};--cta-fg:${cta.text}`}
     >
       {t.buttonText}
       <span aria-hidden="true">→</span>
     </a>
   </div>
 </section>
+
+<style>
+  /* Colours travel as custom properties, not as an inline `background-color`.
+     An inline style beats Tailwind's `hover:` utilities on specificity, so
+     setting the resolved colours directly would have fixed the resting state
+     and silently removed the hover state — trading one invisible-button bug for
+     a dead affordance. */
+  .cta-button {
+    background-color: var(--cta-bg);
+    color: var(--cta-fg);
+  }
+  .cta-button:hover {
+    background-color: #fff;
+    color: var(--color-df-green-dark);
+  }
+</style>
