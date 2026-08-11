@@ -55,6 +55,12 @@ const brandVars = `:root{` +
   // headings are Fraunces, so rendering "AI" in the body font put a heavy
   // grotesque next to a serif wordmark.
   `--font-display:${brand.fonts.display ?? brand.fonts.family};` +
+  // The wordmark's full treatment. Each defaults to the CSS initial value, so a
+  // brand that specified nothing renders exactly as before.
+  `--font-display-style:${brand.fonts.displayStyle ?? "normal"};` +
+  `--font-display-weight:${brand.fonts.displayWeight ?? "500"};` +
+  `--font-display-tracking:${brand.fonts.displayLetterSpacing ?? "normal"};` +
+  `--font-display-variation:${brand.fonts.displayVariationSettings ?? "normal"};` +
   `--logo-url:url("${brand.media.logo}");}`;
 
 function urlFor(code: string): string {

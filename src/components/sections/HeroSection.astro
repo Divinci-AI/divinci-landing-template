@@ -223,7 +223,13 @@ const t = getUI(lang).hero;
          extending it over their own name would recolour their wordmark. */
       .brand-word {
         font-family: var(--font-display, var(--font-sans));
-        font-weight: 500;
+        /* The brand's own treatment, not a guess at one. A wordmark is a
+           specific cut — style, weight, tracking and (for a variable face) its
+           optical size all carry it. */
+        font-style: var(--font-display-style, normal);
+        font-weight: var(--font-display-weight, 500);
+        letter-spacing: var(--font-display-tracking, normal);
+        font-variation-settings: var(--font-display-variation, normal);
         color: var(--color-df-text);
         line-height: 1;
       }
@@ -409,7 +415,21 @@ const t = getUI(lang).hero;
       }
     </script>
     <div class="text-center">
-      <div class="relative inline-flex items-end justify-center gap-3">
+      {/* items-BASELINE when the lockup is two runs of text, items-end when it
+          pairs an image with text.
+
+          items-end aligns the boxes' bottom edges, which is right for a logo
+          image beside text but wrong for two text spans: their boxes differ in
+          height (different sizes, weights and line-heights), so equal bottoms
+          put the baselines at different heights — "AuraPath" sat visibly below
+          "AI". Baseline alignment is what makes two runs of type read as one
+          line. */}
+      <div
+        class:list={[
+          "relative inline-flex justify-center gap-3",
+          brand.media.logoIsMark ? "items-baseline" : "items-end",
+        ]}
+      >
         {/* The logo IMAGE is the lockup only when it is a wordmark — i.e. when
             it carries the brand's name. A square mark does not, so the name is
             set as text instead (below) and the mark is omitted here rather than

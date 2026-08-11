@@ -29,6 +29,14 @@ export interface BrandConfig {
      *  for the "AI" wordmark so it sits with the logo rather than the body
      *  copy. Optional: most brands set one face for both. */
     display?: string;
+    /** The rest of the wordmark's treatment, captured from the brand's own
+     *  header. A wordmark is a specific CUT, not just a family — Fraunces
+     *  italic 500 at `opsz 24` reads nothing like Fraunces upright 400 at its
+     *  default `opsz 144`. Each is omitted when it equals the CSS default. */
+    displayStyle?: string;
+    displayWeight?: string;
+    displayLetterSpacing?: string;
+    displayVariationSettings?: string;
     headingWeight: number;
     bodyWeight: number;
     links?: string[];
