@@ -167,8 +167,20 @@ function UserBubble({ content }: { content: string }) {
   );
 }
 
-/** How many source chips to keep visible (scrollable) before offering "Show all". */
-const SOURCE_TOGGLE_THRESHOLD = 3;
+/**
+ * The "Show all N sources" toggle is offered only when the collapsed strip
+ * ACTUALLY OVERFLOWS — measured, not guessed from a count.
+ *
+ * It used to appear whenever `sources.length > 3`. With five chips that fit on
+ * one row (the common case on a desktop reply), collapsed and expanded render
+ * identically, so the button toggled nothing a visitor could see. Reported on
+ * the Ansir demo as "a false positive — clicking that only toggles the
+ * collapsed text itself".
+ *
+ * A count cannot answer this: whether chips overflow depends on the container
+ * width, the chip labels, and the font — none of which are known here. The
+ * element knows, so ask it.
+ */
 /** How long a citation-clicked source chip stays highlighted (ms). */
 const SOURCE_HIGHLIGHT_MS = 2600;
 
@@ -518,9 +530,29 @@ function SourceChips({
   highlight: number | null;
   chipRefs: MutableRefObject<Array<HTMLSpanElement | null>>;
 }) {
+  const stripRef = useRef<HTMLDivElement | null>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  // Measure only while COLLAPSED: expanding wraps the chips, so scrollWidth
+  // collapses to clientWidth and a measurement taken then would read "no
+  // overflow" and hide the button — trapping the reader in the expanded state
+  // with no way back.
+  useEffect(() => {
+    if (expanded) return;
+    const el = stripRef.current;
+    if (!el) return;
+    const measure = () => setOverflowing(el.scrollWidth > el.clientWidth + 1);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [expanded, sources.length, sourceDetails]);
+
   return (
     <div className="pl-9">
       <div
+        ref={stripRef}
         className={
           expanded
             ? "flex flex-wrap items-center gap-1.5"
@@ -538,7 +570,7 @@ function SourceChips({
           />
         ))}
       </div>
-      {sources.length > SOURCE_TOGGLE_THRESHOLD && (
+      {(overflowing || expanded) && (
         <button
           type="button"
           onClick={(e) => {

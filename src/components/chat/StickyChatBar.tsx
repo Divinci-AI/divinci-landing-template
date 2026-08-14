@@ -161,12 +161,12 @@ export function StickyChatBar({
                 placeholder={t.questionPlaceholderSticky}
                 className="min-w-0 flex-1 rounded-full border border-gray-300 bg-white/80 px-4 py-2.5 text-sm focus:border-df-green-dark focus:outline-none focus:ring-2 focus:ring-df-green-dark/30"
               />
-              <span className={`send-glow-wrap ${sendActive ? "is-active" : ""}`}>
+              <span className={`send-glow-wrap shrink-0 ${sendActive ? "is-active" : ""}`}>
                 <button
                   type="submit"
                   disabled={pending || !draft.trim()}
                   aria-label={t.sendAriaLabel}
-                  className="rounded-full bg-df-green-dark/90 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-df-green-mid disabled:cursor-not-allowed disabled:opacity-80"
+                  className="shrink-0 whitespace-nowrap rounded-full bg-df-green-dark/90 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-df-green-mid disabled:cursor-not-allowed disabled:opacity-80"
                 >
                   {pending ? "…" : t.askButton}
                 </button>

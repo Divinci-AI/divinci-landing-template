@@ -71,6 +71,27 @@ body {
 .send-glow-wrap > button,
 .email-glow-wrap > input {
   border-radius: 0.45rem;
+}
+/* Fill the wrapper — but ONLY for controls that do not size themselves.
+ *
+ * `display:block; width:100%` used to apply to EVERY button in a glow wrapper.
+ * That is right for the text "Ask" button and wrong for the round icon send
+ * button, which sets its own `flex h-10 w-10`: width:100% resolves against an
+ * inline-block wrapper sized to its own content, so the button collapsed to the
+ * SVG's intrinsic 16px and rendered as a 16x40 sliver — the "squished paper
+ * airplane". `display:block` also killed the flex centring that puts the icon
+ * in the middle.
+ *
+ * Tailwind v4 could not win this on specificity: utilities live in a cascade
+ * LAYER, and unlayered rules beat layered ones however specific. So `w-10` and
+ * `flex` were being silently discarded, which is why adding shrink-0 or
+ * changing the markup had no effect on previous attempts.
+ *
+ * Opt OUT with data-self-sized rather than opting every text button in, so an
+ * existing button keeps today's behaviour and only the icon button changes.
+ */
+.send-glow-wrap > button:not([data-self-sized]),
+.email-glow-wrap > input:not([data-self-sized]) {
   display: block;
   width: 100%;
 }
