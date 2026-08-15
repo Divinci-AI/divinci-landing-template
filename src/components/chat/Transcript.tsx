@@ -1,4 +1,5 @@
 import { cleanContextTitle } from "../../lib/clean-context-title";
+import { FloatingLayer } from "./FloatingLayer";
 import { brand } from "../../brand.config";
 import { brandInitials } from "../../lib/initials";
 import {
@@ -421,11 +422,13 @@ function SourceChip({
   const [open, setOpen] = useState(false);
   const title = cleanContextTitle(label);
   const hasDetail = Boolean(detail?.excerpt || detail?.url || detail?.image);
+  const anchorRef = useRef<HTMLSpanElement | null>(null);
 
   return (
     <span
       ref={(el) => {
         chipRefs.current[index] = el;
+        anchorRef.current = el;
       }}
       className="relative inline-flex shrink-0"
       onMouseEnter={() => hasDetail && setOpen(true)}
@@ -458,11 +461,15 @@ function SourceChip({
         <span className="max-w-[10rem] truncate">{title}</span>
       </button>
 
-      {open && hasDetail && (
-        <span
-          role="tooltip"
-          className="absolute bottom-full left-0 z-30 mb-2 w-[min(22rem,80vw)] rounded-lg border border-df-green-dark/15 bg-white p-3 text-left shadow-lg"
-        >
+      {/* Portalled, not `absolute`: the transcript scrolls, and a scrolling
+          ancestor clips its descendants on both axes — so the old bubble was
+          trimmed by the container's top edge, not covered by anything. */}
+      <FloatingLayer
+        anchorRef={anchorRef}
+        open={open && hasDetail}
+        className="w-[min(22rem,80vw)] rounded-lg border border-df-green-dark/15 bg-white p-3 text-left shadow-lg"
+      >
+        <span>
           <span className="block text-xs font-semibold text-df-green-dark">{title}</span>
           {detail?.image && (
             // The rendered page itself. For a scanned insert this IS the
@@ -503,7 +510,7 @@ function SourceChip({
             </a>
           )}
         </span>
-      )}
+      </FloatingLayer>
     </span>
   );
 }
@@ -614,10 +621,17 @@ interface InlineOpts {
 function Citation({ n, sources, onCite }: { n: number } & InlineOpts) {
   const title = citeTitle(sources, n);
   const activate = () => onCite?.(n);
+  const anchorRef = useRef<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
   return (
     <sup
+      ref={anchorRef}
       role="button"
       tabIndex={0}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
       aria-label={`Source ${n}: ${title}`}
       onClick={(e) => {
         e.stopPropagation();
@@ -630,15 +644,26 @@ function Citation({ n, sources, onCite }: { n: number } & InlineOpts) {
           activate();
         }
       }}
-      className="df-cite group relative ml-0.5 cursor-pointer rounded bg-df-green-leaf/30 px-1 py-0.5 text-[0.65em] font-semibold text-df-green-dark transition hover:bg-df-green-leaf/60 focus:outline-none focus-visible:ring-1 focus-visible:ring-df-green-dark"
+      /* The numeral is 0.65em, so it needs MORE contrast than body text, not
+         less. `text-df-green-dark` on `bg-df-green-leaf/30` measured 2.06:1
+         against BioRenew's gold palette — the badge read as a coloured smudge.
+         `df-text` is the brand's own body-text colour, so it is readable on the
+         brand's light surfaces by construction, for any palette rather than
+         just the ones we have looked at. */
+      className="df-cite group relative ml-0.5 cursor-pointer rounded bg-df-green-leaf/45 px-1 py-0.5 text-[0.65em] font-semibold text-df-text ring-1 ring-df-green-dark/25 transition hover:bg-df-green-leaf/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-df-green-dark"
     >
       {n}
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 hidden w-max max-w-[15rem] -translate-x-1/2 whitespace-normal rounded-md bg-df-text px-2.5 py-1.5 text-left text-xs font-normal not-italic leading-snug text-white shadow-lg group-hover:block group-focus-within:block"
+      {/* Portalled for the same reason as the source bubble: `absolute` inside
+          the scrolling transcript gets clipped at the container edge. */}
+      <FloatingLayer
+        anchorRef={anchorRef}
+        open={open}
+        gap={6}
+        maxWidth="15rem"
+        className="pointer-events-none w-max rounded-md bg-df-text px-2.5 py-1.5 text-left text-xs font-normal not-italic leading-snug text-white shadow-lg"
       >
         {title}
-      </span>
+      </FloatingLayer>
     </sup>
   );
 }
