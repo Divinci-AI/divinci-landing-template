@@ -3,12 +3,14 @@ import { ChatIsland } from "~/components/chat/ChatIsland";
 import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
+import { lockupWord as resolveLockupWord } from "~/lib/lockup-word";
 
 interface Props {
   lang?: string;
 }
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const t = getUI(lang).hero;
+const lockupWord = resolveLockupWord();
 ---
 
 <section
@@ -501,9 +503,9 @@ const t = getUI(lang).hero;
         {(brand.media.logoIsMark || brand.media.logoIsTextWordmark) && (
           <span
             class="brand-word text-4xl tracking-tight md:text-5xl"
-            data-word={brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
+            data-word={lockupWord}
           >
-            {brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
+            {lockupWord}
           </span>
         )}
         {/* inline-BLOCK, not inline-flex. An inline-flex box exposes a baseline

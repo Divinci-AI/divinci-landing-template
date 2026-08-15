@@ -13,6 +13,9 @@
 export interface BrandConfig {
   identity: {
     siteName: string;        // "Acme Expert" — OG, copyright, og:site_name
+    /** Short name for the `[name] AI` lockup, when the full siteName is too
+     *  long to sit on one line beside the "AI" glyphs. Defaults to siteName. */
+    lockupName?: string;
     domain: string;          // canonical, e.g. "https://demo.acme.com"
     productName: string;     // AI product name shown in chat, "Acme Expert AI"
     legalName: string;       // copyright holder; year is always dynamic
@@ -89,6 +92,7 @@ export interface BrandConfig {
 export const brand: BrandConfig = {
   identity: {
     siteName: "Acme Expert",
+    lockupName: "Acme Expert",
     domain: "https://demo.acme.example",
     productName: "Acme Expert AI",
     legalName: "Acme Expert",

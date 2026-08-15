@@ -3,12 +3,14 @@ import { withRef } from "~/lib/links";
 import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
+import { lockupWord as resolveLockupWord } from "~/lib/lockup-word";
 
 interface Props {
   lang?: string;
 }
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const ui = getUI(lang);
+const lockupWord = resolveLockupWord();
 
 const mainSiteLabel = brand.links.mainSite.replace(/^https?:\/\//, "").replace(/\/$/, "");
 const navItems = [
@@ -43,8 +45,8 @@ const navItems = [
           baselines on its bottom edge — so as an <img> the name floats above
           the "AI". Same rule as the hero and the og-card. */}
       {brand.media.logoIsTextWordmark || brand.media.logoIsMark ? (
-        <span class="text-lg font-extrabold tracking-tight text-white">
-          {brand.identity.siteName.replace(/\s*\bai\s*$/i, "") || brand.identity.siteName}
+        <span class="whitespace-nowrap text-lg font-extrabold tracking-tight text-white">
+          {lockupWord}
         </span>
       ) : (
         <img
