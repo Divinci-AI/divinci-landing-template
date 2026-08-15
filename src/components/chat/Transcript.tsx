@@ -467,7 +467,9 @@ function SourceChip({
       <FloatingLayer
         anchorRef={anchorRef}
         open={open && hasDetail}
-        className="w-[min(22rem,80vw)] rounded-lg border border-df-green-dark/15 bg-white p-3 text-left shadow-lg"
+        /* overflow-hidden so nothing inside can paint outside the card, and
+           the rounded corners actually clip. */
+        className="w-[min(22rem,80vw)] overflow-hidden rounded-lg border border-df-green-dark/15 bg-white p-3 text-left shadow-lg"
       >
         <span>
           <span className="block text-xs font-semibold text-df-green-dark">{title}</span>
@@ -493,7 +495,14 @@ function SourceChip({
             />
           )}
           {detail?.excerpt && (
-            <span className="mt-2 block whitespace-pre-wrap text-[0.72rem] leading-relaxed text-gray-600">
+            /* `break-words` + `[overflow-wrap:anywhere]`: a chunk excerpt is
+               raw page text and routinely contains a bare CDN URL with no
+               spaces in it. `whitespace-pre-wrap` alone will not break an
+               unbroken token, so the URL ran straight out past the card's
+               right edge and over the message behind it. `anywhere` also lets
+               the box shrink to its container, which `break-word` alone does
+               not guarantee. */
+            <span className="mt-2 block overflow-hidden whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-[0.72rem] leading-relaxed text-gray-600">
               {detail.excerpt}
               {detail.excerpt.length >= 320 ? "…" : ""}
             </span>
