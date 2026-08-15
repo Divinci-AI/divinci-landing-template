@@ -15,7 +15,17 @@ import { fileURLToPath } from "node:url";
  * screenshot, so a future tint change that quietly drops contrast fails here.
  */
 
-const TRANSCRIPT = fileURLToPath(new URL("../components/chat/Transcript.tsx", import.meta.url));
+/**
+ * ⚠️ The citation badge markup is DUPLICATED — the live React chat and the
+ * static Astro showcase each carry their own copy of the classes. The first
+ * version of this test checked only Transcript.tsx and went green while the
+ * showcase still rendered the unreadable pairing, which is what a screenshot
+ * of the deployed page then showed. Both files are asserted.
+ */
+const CITE_SOURCES = [
+  fileURLToPath(new URL("../components/chat/Transcript.tsx", import.meta.url)),
+  fileURLToPath(new URL("../components/sections/TranscriptShowcase.astro", import.meta.url)),
+];
 
 type RGB = { r: number; g: number; b: number };
 
@@ -70,13 +80,19 @@ describe("citation badge contrast", () => {
     });
   }
 
-  it("the component still uses the pairing this test measures", () => {
-    // Without this the numbers above drift away from the markup and the test
-    // keeps passing while the badge goes dark again.
-    const src = readFileSync(TRANSCRIPT, "utf8");
-    const cite = src.slice(src.indexOf("df-cite"), src.indexOf("df-cite") + 400);
-    expect(cite).toContain("bg-df-green-leaf/45");
-    expect(cite).toContain("text-df-text");
-    expect(cite).not.toContain("text-df-green-dark");
-  });
+  for (const file of CITE_SOURCES) {
+    const name = file.split("/").pop();
+    it(`${name} still uses the pairing this test measures`, () => {
+      // Without this the numbers above drift away from the markup and the test
+      // keeps passing while the badge goes dark again.
+      const src = readFileSync(file, "utf8");
+      const i = src.indexOf("df-cite");
+      expect(i, "df-cite class not found — did the badge move?").toBeGreaterThan(-1);
+      const cite = src.slice(i, i + 400);
+      expect(cite).toContain("bg-df-green-leaf/45");
+      expect(cite).toContain("text-df-text");
+      // The old, unreadable foreground must not come back on the badge itself.
+      expect(cite).not.toMatch(/text-df-green-dark[\s"]/);
+    });
+  }
 });

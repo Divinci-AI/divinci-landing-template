@@ -201,7 +201,7 @@ function citeTitle(ex: Exchange, n: number): string {
                           ) : seg.t === "cite" ? (
                             <sup
                               tabindex="0"
-                              class="df-cite group relative ml-0.5 cursor-help rounded bg-df-green-leaf/30 px-1 py-0.5 text-[0.65em] font-semibold text-df-green-dark focus:outline-none focus-visible:ring-1 focus-visible:ring-df-green-dark"
+                              class="df-cite group relative ml-0.5 cursor-help rounded bg-df-green-leaf/45 px-1 py-0.5 text-[0.65em] font-semibold text-df-text ring-1 ring-df-green-dark/25 focus:outline-none focus-visible:ring-1 focus-visible:ring-df-green-dark"
                             >
                               {seg.n}
                               <span
@@ -288,6 +288,50 @@ function citeTitle(ex: Exchange, n: number): string {
       e.preventDefault();
       cite.focus();
     });
+  });
+
+  /**
+   * Lift each tooltip out of the scroll container's clip.
+   *
+   * The transcript window scrolls, and an overflow other than `visible` clips
+   * descendants on BOTH axes — so an `absolute bottom-full` tooltip on a line
+   * near the top of the window is trimmed at its edge. It reads as "covered
+   * up" and sends you hunting for a z-index; z-index cannot help, because
+   * clipping ignores stacking order. The React chat solves this with a portal;
+   * here the tooltip is moved to <body> once and positioned from the
+   * citation's viewport rect each time it is shown.
+   */
+  document.querySelectorAll<HTMLElement>(".df-cite").forEach((cite) => {
+    const tip = cite.querySelector<HTMLElement>("[role='tooltip']");
+    if (!tip) return;
+    document.body.appendChild(tip);
+    tip.classList.remove("absolute", "bottom-full", "left-1/2", "-translate-x-1/2", "mb-1.5", "group-hover:block", "group-focus-within:block");
+    tip.style.position = "fixed";
+    tip.style.display = "none";
+    tip.style.zIndex = "60";
+
+    const place = () => {
+      const a = cite.getBoundingClientRect();
+      const t = tip.getBoundingClientRect();
+      const above = a.top >= t.height + 8;
+      tip.style.top = `${above ? a.top - 8 - t.height : a.bottom + 8}px`;
+      tip.style.left = `${Math.min(Math.max(8, a.left + a.width / 2 - t.width / 2), Math.max(8, window.innerWidth - t.width - 8))}px`;
+    };
+    const show = () => {
+      tip.style.display = "block";
+      place();
+    };
+    const hide = () => {
+      tip.style.display = "none";
+    };
+    cite.addEventListener("mouseenter", show);
+    cite.addEventListener("mouseleave", hide);
+    cite.addEventListener("focus", show);
+    cite.addEventListener("blur", hide);
+    // Capture phase: the scroller is the transcript, not the window, and a
+    // bubbling listener never sees a nested scroll.
+    window.addEventListener("scroll", () => tip.style.display === "block" && place(), true);
+    window.addEventListener("resize", () => tip.style.display === "block" && place());
   });
 </script>
 
