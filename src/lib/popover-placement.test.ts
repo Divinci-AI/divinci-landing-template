@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import { placeBelow } from "../lib/popover-placement";
 
 // A citation chip near the TOP of the transcript, bubble 160px tall, 8px gap.
@@ -49,5 +50,25 @@ describe("there is only ONE placement rule", () => {
       expect(src, `${f} re-implements the rule`).not.toMatch(/const above = a\.top >= t\.height/);
       expect(src, `${f} re-implements the rule`).not.toMatch(/!\(roomAbove >= h \+ gap\)/);
     }
+  });
+});
+
+describe("lockupMarkSplit", () => {
+  it("is null unless the brand opts in", async () => {
+    // Never inferred from a square aspect ratio — that would silently eat the
+    // first letter of every brand whose mark is not its initial.
+    const src = readFileSync("src/lib/lockup-word.ts", "utf8");
+    expect(src).toContain("logoDepictsPrefix");
+    expect(src).toMatch(/if \(!prefix\) return null;/);
+  });
+
+  it("refuses a prefix the name does not start with", () => {
+    const src = readFileSync("src/lib/lockup-word.ts", "utf8");
+    expect(src).toMatch(/startsWith\(prefix\.toLowerCase\(\)\)\) return null/);
+  });
+
+  it("refuses when nothing would be left to set beside the mark", () => {
+    const src = readFileSync("src/lib/lockup-word.ts", "utf8");
+    expect(src).toMatch(/if \(!rest\.trim\(\)\) return null;/);
   });
 });

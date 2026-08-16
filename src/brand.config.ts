@@ -76,6 +76,15 @@ export interface BrandConfig {
      * header's 24px alike. Absent means the logo needed no correction.
      */
     logoBaselineDrop?: number;
+    /**
+     * The opening letters the logo MARK already draws, e.g. "P" for Probed's
+     * ringed P. The hero then renders the mark plus only the REMAINDER of the
+     * name ("robed"), so the lockup spells the name once instead of "P Probed".
+     *
+     * Opt-in per brand and never inferred: guessing from a square aspect ratio
+     * would silently swallow the first letter of every other brand.
+     */
+    logoDepictsPrefix?: string;
     /** True when `logo` is a square MARK rather than a wordmark. The hero
      *  lockup assumes the logo carries the brand NAME; for a mark it does not,
      *  so the name is rendered as text beside it. */

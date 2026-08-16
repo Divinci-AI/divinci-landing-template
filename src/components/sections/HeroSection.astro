@@ -3,7 +3,7 @@ import { ChatIsland } from "~/components/chat/ChatIsland";
 import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
-import { lockupWord as resolveLockupWord } from "~/lib/lockup-word";
+import { lockupWord as resolveLockupWord, lockupMarkSplit } from "~/lib/lockup-word";
 import { isDarkPalette } from "~/lib/contrast";
 
 interface Props {
@@ -14,6 +14,9 @@ const t = getUI(lang).hero;
 const lockupWord = resolveLockupWord();
 // The hero sits on the page background, so the logo-inversion rule follows it.
 const isDarkBrand = isDarkPalette(brand.palette.cream);
+// A mark that already draws the name's opening letters: render the mark and
+// only the REMAINDER, so "P" + "robed" still spells Probed exactly once.
+const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
 ---
 
 <section
@@ -516,7 +519,7 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
             a hero is the one place the brand should read cleanly. The mark still
             appears in the header and as the favicon, where it is doing the job
             marks are for. */}
-        {!(brand.media.logoIsMark || brand.media.logoIsTextWordmark) && (
+        {(markSplit || !(brand.media.logoIsMark || brand.media.logoIsTextWordmark)) && (
           <span class="gleam-host">
             {/* A light/white logo (built for a dark site header) washes out on
                 the hero's light bg — darken it here. The scrolled navy Header
@@ -551,7 +554,18 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
             The trailing "AI" is stripped because it is drawn separately below —
             without that, a brand already called "AuraPath AI" reads
             "AuraPath AI AI". */}
-        {(brand.media.logoIsMark || brand.media.logoIsTextWordmark) && (
+        {markSplit ? (
+          /* `-ml-3` cancels the flex gap so the remainder sits SNUG against
+             the mark and the two read as one word. With the gap left in,
+             "P robed" is just a differently-broken version of the same
+             problem. */
+          <span
+            class="brand-word -ml-3 text-4xl tracking-tight md:text-5xl"
+            data-word={markSplit.rest}
+          >
+            {markSplit.rest}
+          </span>
+        ) : (brand.media.logoIsMark || brand.media.logoIsTextWordmark) && (
           <span
             class="brand-word text-4xl tracking-tight md:text-5xl"
             data-word={lockupWord}

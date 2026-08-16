@@ -3,7 +3,7 @@ import { withRef } from "~/lib/links";
 import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
-import { lockupWord as resolveLockupWord } from "~/lib/lockup-word";
+import { lockupWord as resolveLockupWord, lockupMarkSplit } from "~/lib/lockup-word";
 import { contrastRatio, AA_LARGE } from "~/lib/contrast";
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const ui = getUI(lang);
 const lockupWord = resolveLockupWord();
+// Same mark-plus-remainder rule as the hero, so the two lockups agree.
+const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
 
 // The header's AI mark, painted so it is actually VISIBLE on the header.
 //
@@ -64,7 +66,20 @@ const navItems = [
           Its SVG box carries empty space below the baseline, and an image
           baselines on its bottom edge — so as an <img> the name floats above
           the "AI". Same rule as the hero and the og-card. */}
-      {brand.media.logoIsTextWordmark || brand.media.logoIsMark ? (
+      {markSplit ? (
+        <>
+          <img
+            src={brand.media.logo}
+            alt={brand.identity.siteName}
+            class="h-6 w-auto brightness-0 invert"
+            width="200"
+            height="42"
+          />
+          <span class="-ml-1.5 whitespace-nowrap text-lg font-extrabold tracking-tight text-white">
+            {markSplit.rest}
+          </span>
+        </>
+      ) : brand.media.logoIsTextWordmark || brand.media.logoIsMark ? (
         <span class="whitespace-nowrap text-lg font-extrabold tracking-tight text-white">
           {lockupWord}
         </span>
