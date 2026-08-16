@@ -75,6 +75,18 @@ const darkSurfaceVars = isDarkBrand
     `--color-df-faint:color-mix(in srgb, ${p.text} 45%, ${p.cream});` +
     `--color-df-line:color-mix(in srgb, ${p.text} 16%, ${p.cream});` +
     `--color-df-line-strong:color-mix(in srgb, ${p.text} 28%, ${p.cream});` +
+    // `green-dark` is an INK token at several call sites (the corpus stat
+    // numbers, the language-list label, the showcase byline) as well as a
+    // chrome base. On a light brand `dark` is a deep colour and reads fine; on
+    // a dark brand it can BE the page's near-black, so those numbers render
+    // invisible on the card they sit on. Point the ink at the accent, which is
+    // what a dark site does with its own counts.
+    //
+    // Only bites a hand-authored palette: the extractor's dark branch already
+    // derives `dark` from the accent. Probed carried this as a local
+    // Landing.astro override, which then froze it out of every later template
+    // fix — the override is deleted with this commit.
+    `--color-df-green-dark:${p.accent};` +
     `--color-df-on-chrome:${onChrome};` +
     // The frosted chat card. A white tint at 18% is a sheen on a light page
     // and a haze on a near-black one — it lightened dodcyber's card until
