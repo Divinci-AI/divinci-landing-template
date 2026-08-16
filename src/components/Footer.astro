@@ -20,9 +20,9 @@ const divinciHomeUrl = withRef("https://divinci.ai", "footer-credit");
 
 <!-- pb clears the fixed StickyChatBar (bottom-0) so the copyright row is never
      hidden behind it on the last screen. -->
-<footer class="border-t border-gray-200 bg-df-cream pt-8 pb-28">
+<footer class="border-t border-df-line bg-df-cream pt-8 pb-28">
   <div
-    class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 text-sm text-gray-600 md:flex-row md:justify-between"
+    class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 text-sm text-df-muted md:flex-row md:justify-between"
   >
     <p>
       © {year} {brand.identity.legalName} · {t.poweredBy}{" "}
@@ -44,7 +44,7 @@ const divinciHomeUrl = withRef("https://divinci.ai", "footer-credit");
       >
         {t.aiSafety}
       </a>
-      <span class="text-gray-400">·</span>
+      <span class="text-df-faint">·</span>
       <a
         href={termsUrl}
         class="hover:text-df-green-dark"
@@ -53,7 +53,7 @@ const divinciHomeUrl = withRef("https://divinci.ai", "footer-credit");
       >
         {t.terms}
       </a>
-      <span class="text-gray-400">·</span>
+      <span class="text-df-faint">·</span>
       <a
         href={privacyUrl}
         class="hover:text-df-green-dark"

@@ -29,7 +29,7 @@ const navItems = [
 
 <header
   id="site-header"
-  class="header-hidden fixed inset-x-0 top-0 z-30 bg-df-navy/95 px-6 py-3 text-white shadow-sm backdrop-blur-md transition-all duration-300 ease-out"
+  class="header-hidden fixed inset-x-0 top-0 z-30 bg-df-navy/95 px-6 py-3 text-df-on-chrome shadow-sm backdrop-blur-md transition-all duration-300 ease-out"
 >
   <div class="mx-auto flex max-w-6xl items-center justify-between">
     {/* items-BASELINE, not items-end. items-end aligns the boxes' bottom
@@ -108,7 +108,7 @@ const navItems = [
       <button
         id="nav-toggle"
         type="button"
-        class="-mr-1 inline-flex items-center justify-center rounded-lg p-2 text-white transition-colors hover:bg-white/10 md:hidden"
+        class="-mr-1 inline-flex items-center justify-center rounded-lg p-2 text-white transition-colors hover:bg-df-surface/10 md:hidden"
         aria-controls="mobile-nav"
         aria-expanded="false"
         {/* Fallback, NOT a key in the neutral en.ts — deliberately.
@@ -137,7 +137,7 @@ const navItems = [
       navItems.map((item) => (
         <a
           href={item.href}
-          class="rounded-lg px-2 py-2.5 text-base transition-colors hover:bg-white/10 hover:text-df-green-leaf"
+          class="rounded-lg px-2 py-2.5 text-base transition-colors hover:bg-df-surface/10 hover:text-df-green-leaf"
           target={item.external ? "_blank" : undefined}
           rel={item.external ? "noopener" : undefined}
         >

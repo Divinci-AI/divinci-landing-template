@@ -118,13 +118,13 @@ function citeTitle(ex: Exchange, n: number): string {
 }
 ---
 
-<section id="transcripts" class="bg-white py-20">
+<section id="transcripts" class="bg-df-surface py-20">
   <div class="mx-auto max-w-3xl px-6">
     <div class="text-center">
       <h2 class="text-3xl font-bold text-df-text md:text-4xl">
         {t.heading}
       </h2>
-      <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-700">
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-df-muted-strong">
         {t.subheading}
       </p>
     </div>
@@ -135,7 +135,7 @@ function citeTitle(ex: Exchange, n: number): string {
     >
       {/* Header */}
       <div
-        class="flex items-center gap-2 border-b border-df-green-dark/10 bg-white/70 px-5 py-3 backdrop-blur-sm"
+        class="flex items-center gap-2 border-b border-df-green-dark/10 bg-df-surface/70 px-5 py-3 backdrop-blur-sm"
       >
         <span
           class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15"
@@ -143,7 +143,7 @@ function citeTitle(ex: Exchange, n: number): string {
           <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
         </span>
         <span class="font-semibold text-df-green-dark">{brand.identity.productName}</span>
-        <span class="ml-auto inline-flex items-center gap-1.5 text-xs text-gray-500">
+        <span class="ml-auto inline-flex items-center gap-1.5 text-xs text-df-muted">
           <span class="relative flex h-2 w-2">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-df-green-mid"></span>
@@ -159,7 +159,7 @@ function citeTitle(ex: Exchange, n: number): string {
           <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
             <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
           </span>
-          <p class="max-w-[88%] rounded-2xl rounded-tl-sm bg-white px-4 py-2.5 text-sm leading-relaxed text-df-text shadow-sm md:text-base">
+          <p class="max-w-[88%] rounded-2xl rounded-tl-sm bg-df-surface px-4 py-2.5 text-sm leading-relaxed text-df-text shadow-sm md:text-base">
             {welcomeMessage}
           </p>
         </div>
@@ -169,7 +169,7 @@ function citeTitle(ex: Exchange, n: number): string {
             <>
               {/* User question */}
               <div class="flex justify-end">
-                <p class="max-w-[88%] rounded-2xl rounded-br-sm bg-df-green-dark px-4 py-2.5 text-left text-sm font-medium text-white md:text-base">
+                <p class="max-w-[88%] rounded-2xl rounded-br-sm bg-df-green-dark px-4 py-2.5 text-left text-sm font-medium text-df-on-chrome md:text-base">
                   {ex.question}
                 </p>
               </div>
@@ -177,7 +177,7 @@ function citeTitle(ex: Exchange, n: number): string {
               {/* Retrieved sources — the context bubbles */}
               <div class="flex flex-wrap gap-1.5">
                 {ex.sources.map((s) => (
-                  <span class="inline-flex max-w-full items-center gap-1 rounded-md border border-df-green-dark/15 bg-white/80 px-2 py-1 text-xs text-gray-600">
+                  <span class="inline-flex max-w-full items-center gap-1 rounded-md border border-df-green-dark/15 bg-df-surface/80 px-2 py-1 text-xs text-df-muted">
                     <span aria-hidden="true">{sourceIcon(s)}</span>
                     <span class="truncate">{cleanContextTitle(s)}</span>
                   </span>
@@ -218,13 +218,13 @@ function citeTitle(ex: Exchange, n: number): string {
                       </p>
                     ))}
                   </div>
-                  <p class="mt-1 text-[0.7rem] text-gray-500">
+                  <p class="mt-1 text-[0.7rem] text-df-muted">
                     <span class="font-semibold text-df-green-dark">{t.assistantLabel}</span>
                     {" · "}
                     {ASSISTANT_MODEL}
                   </p>
                   {ex.recommendation && (
-                    <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-df-green-dark/20 bg-white px-3 py-1 text-xs text-df-green-dark">
+                    <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-df-green-dark/20 bg-df-surface px-3 py-1 text-xs text-df-green-dark">
                       <span aria-hidden="true">💡</span>
                       {t.recommendationPrefix}
                       <span class="font-semibold">{ex.recommendation}</span>
@@ -239,19 +239,19 @@ function citeTitle(ex: Exchange, n: number): string {
       </div>
 
       {/* Decoy composer — clicking jumps to the real hero chat */}
-      <div class="border-t border-df-green-dark/10 bg-white/70 p-3 backdrop-blur-sm">
+      <div class="border-t border-df-green-dark/10 bg-df-surface/70 p-3 backdrop-blur-sm">
         <button
           type="button"
           id="df-transcript-cta"
           aria-label={t.composerAria}
-          class="group flex w-full items-center gap-2 rounded-full border border-df-green-dark/20 bg-white px-4 py-2.5 text-left transition hover:border-df-green-dark hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-df-green-dark/40"
+          class="group flex w-full items-center gap-2 rounded-full border border-df-green-dark/20 bg-df-surface px-4 py-2.5 text-left transition hover:border-df-green-dark hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-df-green-dark/40"
         >
-          <span class="flex-1 truncate text-sm text-gray-400 group-hover:text-gray-500">
+          <span class="flex-1 truncate text-sm text-df-faint group-hover:text-df-muted">
             {t.composerPlaceholder}
           </span>
           <span
             aria-hidden="true"
-            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-df-green-dark/90 text-white transition group-hover:bg-df-green-mid"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-df-green-dark/90 text-df-on-chrome transition group-hover:bg-df-green-mid"
           >
             {/* SOLID, not a 2px outline. At 16px in a 32px circle the stroked
                 Lucide send reads as a thin sketch against the filled button —
@@ -266,7 +266,7 @@ function citeTitle(ex: Exchange, n: number): string {
       </div>
     </div>
 
-    <p class="mt-6 text-center text-xs text-gray-400">
+    <p class="mt-6 text-center text-xs text-df-faint">
       Real responses from the live {ASSISTANT_MODEL}
     </p>
   </div>

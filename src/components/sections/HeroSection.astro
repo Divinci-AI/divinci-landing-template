@@ -4,6 +4,7 @@ import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
 import { lockupWord as resolveLockupWord } from "~/lib/lockup-word";
+import { isDarkPalette } from "~/lib/contrast";
 
 interface Props {
   lang?: string;
@@ -11,6 +12,8 @@ interface Props {
 const { lang = DEFAULT_LOCALE } = Astro.props;
 const t = getUI(lang).hero;
 const lockupWord = resolveLockupWord();
+// The hero sits on the page background, so the logo-inversion rule follows it.
+const isDarkBrand = isDarkPalette(brand.palette.cream);
 ---
 
 <section
@@ -483,11 +486,22 @@ const lockupWord = resolveLockupWord();
           <span class="gleam-host">
             {/* A light/white logo (built for a dark site header) washes out on
                 the hero's light bg — darken it here. The scrolled navy Header
-                keeps it white. */}
+                keeps it white.
+
+                On a DARK brand the hero background is the near-black page, so
+                the rule inverts with it: a dark-ink logo is the one that
+                disappears and must be whited out, exactly as the Header always
+                does. Without this the hero rendered a black wordmark on a
+                #04090e page — present, correctly sized, and unreadable. */}
             <img
               src={brand.media.logo}
               alt={brand.identity.siteName}
-              class:list={["block h-10 w-auto md:h-14", brand.media.logoIsLight && "brightness-0"]}
+              class:list={[
+                "block h-10 w-auto md:h-14",
+                isDarkBrand
+                  ? !brand.media.logoIsLight && "brightness-0 invert"
+                  : brand.media.logoIsLight && "brightness-0",
+              ]}
               width="200"
               height="42"
             />

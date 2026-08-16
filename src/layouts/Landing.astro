@@ -12,6 +12,7 @@
  *   - passes `lang` into every section so they pull from the dictionary
  */
 import "~/styles/global.css";
+import { isDarkPalette, readableOn } from "~/lib/contrast";
 import LanguageSwitcher from "~/components/LanguageSwitcher.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
@@ -44,6 +45,39 @@ const site = brand.identity.domain;
 // them with the customer's palette so every `bg-df-*`/`text-df-*` utility
 // re-skins with zero component changes.
 const p = brand.palette;
+
+// DARK BRANDS.
+//
+// The semantic surface tokens in global.css default to the light values the
+// components used to hardcode, so a light palette is untouched by everything
+// below. A dark palette needs every one of them inverted at once: a white card
+// with gray-500 text on dodcyberconsulting.com's #04090e body is not a styling
+// blemish, it is a different website.
+//
+// Keyed on the PAGE colour, which is what `cream` means on both paths — the
+// extractor sets it to the site's own background whatever its lightness.
+const isDarkBrand = isDarkPalette(p.cream);
+// Ink on the primary/accent chrome. `text-white` cannot ask this question, and
+// on a cyan or pale-gold chrome white is the wrong answer.
+// Candidates are white and the PAGE colour — never `text`, which on a dark
+// brand is another light ink and so cannot rescue a pale chrome. On a light
+// brand `cream` is near-white, so white keeps winning and nothing moves.
+const onChrome = readableOn(p.dark, "#ffffff", p.cream);
+const darkSurfaceVars = isDarkBrand
+  ? `:root{` +
+    // Panels sit ABOVE the page on a dark design: `soft` is already one step
+    // up from `cream`, so the card surface is that, not white.
+    `--color-df-surface:${p.soft};--color-df-surface-2:${p.cream};` +
+    // Secondary text as the brand's own ink, dimmed — not a grey ramp, which
+    // goes muddy against a saturated near-black.
+    `--color-df-muted:color-mix(in srgb, ${p.text} 62%, ${p.cream});` +
+    `--color-df-muted-strong:color-mix(in srgb, ${p.text} 82%, ${p.cream});` +
+    `--color-df-faint:color-mix(in srgb, ${p.text} 45%, ${p.cream});` +
+    `--color-df-line:color-mix(in srgb, ${p.text} 16%, ${p.cream});` +
+    `--color-df-line-strong:color-mix(in srgb, ${p.text} 28%, ${p.cream});` +
+    `--color-df-on-chrome:${onChrome};}`
+  : `:root{--color-df-on-chrome:${onChrome};}`;
+
 const brandVars = `:root{` +
   `--color-df-navy:${p.primary};--color-df-green-dark:${p.dark};` +
   `--color-df-green-mid:${p.mid};--color-df-green-leaf:${p.accent};` +
@@ -62,7 +96,8 @@ const brandVars = `:root{` +
   `--font-display-weight:${brand.fonts.displayWeight ?? "500"};` +
   `--font-display-tracking:${brand.fonts.displayLetterSpacing ?? "normal"};` +
   `--font-display-variation:${brand.fonts.displayVariationSettings ?? "normal"};` +
-  `--logo-url:url("${brand.media.logo}");}`;
+  `--logo-url:url("${brand.media.logo}");}` +
+  darkSurfaceVars;
 
 function urlFor(code: string): string {
   return code === DEFAULT_LOCALE ? `${site}/` : `${site}/${code}/`;
@@ -141,7 +176,7 @@ const ogImage = new URL(`/og.png?v=${OG_VERSION}`, `${site}/`).href;
       )
     }
   </head>
-  <body class="min-h-screen bg-white text-df-text antialiased">
+  <body class="min-h-screen bg-df-surface text-df-text antialiased">
     <LanguageSwitcher lang={lang} />
     <Header lang={lang} />
     <main>

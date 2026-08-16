@@ -11,7 +11,7 @@ export function WelcomeMessage({ text, avatarUrl }: WelcomeMessageProps) {
   if (!text) return null;
   return (
     <div className="flex items-start gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-dark text-sm font-bold text-white">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-dark text-sm font-bold text-df-on-chrome">
         {avatarUrl ? (
           <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
         ) : (

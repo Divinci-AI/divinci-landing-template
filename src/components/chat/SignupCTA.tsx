@@ -13,11 +13,11 @@ export function SignupCTA({ lang = DEFAULT_LOCALE }: SignupCTAProps) {
   return (
     <div className="rounded-2xl border border-df-green-dark/40 bg-df-green-leaf/15 p-5 text-center backdrop-blur-sm">
       <p className="text-base font-semibold text-df-text">{t.signupHeadline}</p>
-      <p className="mt-2 text-sm leading-relaxed text-gray-700">{t.signupBody}</p>
+      <p className="mt-2 text-sm leading-relaxed text-df-muted-strong">{t.signupBody}</p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
         <a
           href={SIGNUP_URL}
-          className="inline-flex items-center gap-2 rounded-full bg-df-green-dark px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-df-green-mid"
+          className="inline-flex items-center gap-2 rounded-full bg-df-green-dark px-6 py-2.5 text-sm font-semibold text-df-on-chrome transition hover:bg-df-green-mid"
         >
           {t.signupButton}
           <span aria-hidden="true">→</span>

@@ -76,3 +76,31 @@ export function buttonColors(
     text: contrastRatio(sectionBg, cream) >= AA_TEXT ? sectionBg : "#000000",
   };
 }
+
+/**
+ * Below this luminance the PAGE needs LIGHT ink, which is what "dark brand"
+ * has to mean if the classification is to decide anything.
+ *
+ * Derived, not chosen: white text clears AA (4.5:1) on a background of
+ * luminance L while (1.0 + 0.05) / (L + 0.05) >= 4.5, i.e. L <= 0.1833. Above
+ * that white starts failing and the light mapping is the right one.
+ *
+ * A first attempt used 0.22, which is the OTHER end of the same calculation —
+ * the point below which near-black ink stops clearing AA. Between the two
+ * values neither ink works, so picking the upper bound classifies as "dark"
+ * several pages that light ink cannot serve either.
+ *
+ * Mirrors DARK_PAGE_MAX_LUM in the extractor that produces these palettes.
+ * The two must agree: the extractor decides which mapping to emit and the
+ * template decides which surfaces to paint, so a palette classified dark by
+ * one and light by the other renders light text on a light page.
+ */
+export const DARK_BRAND_MAX_LUM = 0.1833;
+
+/**
+ * Is this a dark-page brand? Keyed on `cream`, which means "the page colour"
+ * on both extractor paths — its name is a light-theme relic, not a claim.
+ */
+export function isDarkPalette(cream: string): boolean {
+  return luminance(cream) < DARK_BRAND_MAX_LUM;
+}

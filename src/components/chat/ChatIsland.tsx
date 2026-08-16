@@ -601,7 +601,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         // Active chat — "grows out" of the orb into a wide card that mirrors
         // the static TranscriptShowcase (header · messages · single composer).
         <div className="df-active-card overflow-hidden rounded-3xl border border-df-green-dark/15 bg-gradient-to-b from-df-green-leaf/10 to-white shadow-lg ring-1 ring-black/5">
-          <div className="flex items-center gap-2 border-b border-df-green-dark/10 bg-white/70 px-5 py-3 backdrop-blur-sm">
+          <div className="flex items-center gap-2 border-b border-df-green-dark/10 bg-df-surface/70 px-5 py-3 backdrop-blur-sm">
             <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
@@ -610,7 +610,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
               )}
             </span>
             <span className="font-semibold text-df-green-dark">{brand.identity.productName}</span>
-            <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-gray-500">
+            <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-df-muted">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-df-green-mid" />
@@ -629,14 +629,14 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
               <div
                 role="alert"
                 data-testid="safety-advisory"
-                className="ml-9 flex max-w-[88%] items-start gap-2 rounded-lg border-l-4 border-amber-400 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-gray-700 md:text-sm"
+                className="ml-9 flex max-w-[88%] items-start gap-2 rounded-lg border-l-4 border-amber-400 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-df-muted-strong md:text-sm"
               >
                 <span aria-hidden="true" className="mt-0.5">⚕️</span>
                 <span>{latestAdvisory.text}</span>
               </div>
             </div>
           )}
-          <div className="border-t border-df-green-dark/10 bg-white/70 p-3 backdrop-blur-sm">
+          <div className="border-t border-df-green-dark/10 bg-df-surface/70 p-3 backdrop-blur-sm">
             {quotaExhausted ? (
               <SignupCTA lang={lang} />
             ) : (
@@ -673,7 +673,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       {/* Disclaimer with intentional line breaks so it wraps gracefully on
           narrow screens instead of orphaning a single word. text-balance
           evens out any line that still wraps. */}
-      <p className="text-balance text-center text-xs leading-relaxed text-gray-500">
+      <p className="text-balance text-center text-xs leading-relaxed text-df-muted">
         {t.disclaimer[0]} {t.disclaimer[1]}
         <br />
         {t.disclaimer[2]}
@@ -738,20 +738,20 @@ function TermsModal({
       aria-modal="true"
       aria-label={title}
     >
-      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-df-green-dark/15 bg-white shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-df-green-dark/15 bg-df-surface shadow-2xl">
         <div className="border-b border-df-green-dark/10 bg-df-green-leaf/10 px-5 py-3">
           <h2 className="text-base font-semibold text-df-green-dark">{title}</h2>
         </div>
         <div className="df-chat-scroll flex-1 space-y-2 overflow-y-auto px-5 py-4 text-sm leading-relaxed text-df-text">
           {renderTosContent(content)}
         </div>
-        <div className="border-t border-df-green-dark/10 bg-white/90 px-5 py-3">
+        <div className="border-t border-df-green-dark/10 bg-df-surface/90 px-5 py-3">
           {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700"
+              className="rounded-lg px-3 py-1.5 text-sm text-df-muted hover:text-df-muted-strong"
             >
               Not now
             </button>
@@ -759,7 +759,7 @@ function TermsModal({
               type="button"
               onClick={onAgree}
               disabled={busy}
-              className="rounded-lg bg-df-green-dark px-4 py-1.5 text-sm font-medium text-white transition hover:bg-df-green-mid disabled:opacity-60"
+              className="rounded-lg bg-df-green-dark px-4 py-1.5 text-sm font-medium text-df-on-chrome transition hover:bg-df-green-mid disabled:opacity-60"
             >
               {busy ? "Saving…" : "I Agree"}
             </button>

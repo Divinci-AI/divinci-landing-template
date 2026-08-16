@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { luminance, contrastRatio, readableOn, buttonColors, AA_TEXT } from "./contrast";
+import { luminance, contrastRatio, readableOn, buttonColors, AA_TEXT, isDarkPalette } from "./contrast";
 
 /**
  * AuraPath's real extracted palette — the one that produced an invisible CTA.
@@ -81,5 +81,50 @@ describe("buttonColors", () => {
     // checking only the section background would pass this.
     const c = buttonColors("#0f2c3f", "#f7fafc", "#ffffff", "#f7fafc");
     expect(contrastRatio(c.text, c.bg)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+});
+
+// Real palettes, both produced by the extractor from the customers' own sites.
+const DODCYBER = { primary: "#04090e", dark: "#00a1c2", mid: "#00d4ff", accent: "#00d4ff",
+  cream: "#04090e", soft: "#0a1622", bubble: "#004a59", text: "#ddeeff" };
+const LONGEVITYRX = { primary: "#1a2e20", dark: "#16271b", mid: "#30553b", accent: "#e9cc8f",
+  cream: "#f5f0e8", soft: "#f0e9dd", bubble: "#f7ecd4", text: "#2c2c2c" };
+
+describe("isDarkPalette", () => {
+  it("calls dodcyberconsulting.com's palette dark", () => {
+    expect(isDarkPalette(DODCYBER.cream)).toBe(true);
+  });
+
+  it("does NOT call a cream clinic dark", () => {
+    // The whole light-brand estate depends on this staying false: every
+    // semantic surface token flips at once, so a false positive turns a
+    // working page inside out.
+    expect(isDarkPalette(LONGEVITYRX.cream)).toBe(false);
+  });
+
+  it("classifies by whether the page needs LIGHT ink", () => {
+    // Not by "is it nearly black". A forest-green or slate PAGE cannot carry
+    // dark ink either, so it belongs on the dark path — the threshold is the
+    // luminance at which white text stops clearing AA, and these sit under it.
+    expect(isDarkPalette("#3b6b3f")).toBe(true);
+    expect(isDarkPalette("#4a5568")).toBe(true);
+    // Every page colour the light estate actually uses stays light.
+    for (const light of ["#ffffff", "#f7fafc", "#f5f0e8", "#f4efda", "#edf2f7"])
+      expect(isDarkPalette(light)).toBe(false);
+  });
+});
+
+describe("ink on the brand chrome", () => {
+  // `text-white` cannot ask whether white is legible. On dodcyber's #00a1c2
+  // buttons it is not, and the answer has to be the near-black page colour.
+  const onChrome = (p: typeof DODCYBER) => readableOn(p.dark, "#ffffff", p.cream);
+
+  it("puts dark ink on a bright cyan button", () => {
+    expect(onChrome(DODCYBER)).toBe(DODCYBER.cream);
+    expect(contrastRatio(onChrome(DODCYBER), DODCYBER.dark)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  it("keeps white on a dark green button — light brands do not move", () => {
+    expect(onChrome(LONGEVITYRX)).toBe("#ffffff");
   });
 });

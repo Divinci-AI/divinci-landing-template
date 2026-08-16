@@ -161,7 +161,7 @@ function DfAvatar({ avatarUrl }: { avatarUrl?: string | null }) {
 function UserBubble({ content }: { content: string }) {
   return (
     <div className="flex justify-end">
-      <p className="max-w-[88%] rounded-2xl rounded-br-sm bg-df-green-dark px-4 py-2.5 text-left text-sm font-medium text-white md:text-base">
+      <p className="max-w-[88%] rounded-2xl rounded-br-sm bg-df-green-dark px-4 py-2.5 text-left text-sm font-medium text-df-on-chrome md:text-base">
         {content}
       </p>
     </div>
@@ -309,14 +309,14 @@ function MessageRating({
   const [done, setDone] = useState(false);
 
   if (done) {
-    return <p className="pl-9 text-xs text-gray-500">Thanks for your feedback 🙏</p>;
+    return <p className="pl-9 text-xs text-df-muted">Thanks for your feedback 🙏</p>;
   }
 
   const thumb = (on: boolean) =>
     `rounded-md border px-1.5 py-0.5 text-sm transition ${
       on
-        ? "border-df-green-dark bg-df-green-dark text-white"
-        : "border-df-green-dark/20 bg-white/70 text-gray-600 hover:border-df-green-dark/40"
+        ? "border-df-green-dark bg-df-green-dark text-df-on-chrome"
+        : "border-df-green-dark/20 bg-df-surface/70 text-df-muted hover:border-df-green-dark/40"
     }`;
 
   return (
@@ -369,19 +369,19 @@ function MessageRating({
             maxLength={2000}
             rows={2}
             placeholder="What was wrong? (optional)"
-            className="w-full rounded-lg border border-df-green-dark/15 bg-white px-3 py-2 text-sm text-df-text focus:border-df-green-dark/40 focus:outline-none"
+            className="w-full rounded-lg border border-df-green-dark/15 bg-df-surface px-3 py-2 text-sm text-df-text focus:border-df-green-dark/40 focus:outline-none"
           />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-df-green-dark px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+              className="rounded-lg bg-df-green-dark px-3 py-1.5 text-sm font-medium text-df-on-chrome disabled:opacity-60"
             >
               {submitting ? "Sending…" : "Send feedback"}
             </button>
             <button
               type="button"
-              className="rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700"
+              className="rounded-lg px-3 py-1.5 text-sm text-df-muted hover:text-df-muted-strong"
               onClick={() => setShowBox(false)}
             >
               Cancel
@@ -451,7 +451,7 @@ function SourceChip({
         className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-left text-xs transition ${
           highlighted
             ? "border-df-green-dark bg-df-green-leaf/40 text-df-green-dark ring-2 ring-df-green-dark/50"
-            : "border-df-green-dark/15 bg-white/80 text-gray-600"
+            : "border-df-green-dark/15 bg-df-surface/80 text-df-muted"
         } ${hasDetail ? "cursor-help hover:border-df-green-dark/40" : ""}`}
       >
         <span className="text-[0.7rem] font-semibold text-df-green-dark/70" aria-hidden="true">
@@ -469,7 +469,7 @@ function SourceChip({
         open={open && hasDetail}
         /* overflow-hidden so nothing inside can paint outside the card, and
            the rounded corners actually clip. */
-        className="w-[min(22rem,80vw)] overflow-hidden rounded-lg border border-df-green-dark/15 bg-white p-3 text-left shadow-lg"
+        className="w-[min(22rem,80vw)] overflow-hidden rounded-lg border border-df-green-dark/15 bg-df-surface p-3 text-left shadow-lg"
       >
         <span>
           <span className="block text-xs font-semibold text-df-green-dark">{title}</span>
@@ -502,7 +502,7 @@ function SourceChip({
                right edge and over the message behind it. `anywhere` also lets
                the box shrink to its container, which `break-word` alone does
                not guarantee. */
-            <span className="mt-2 block overflow-hidden whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-[0.72rem] leading-relaxed text-gray-600">
+            <span className="mt-2 block overflow-hidden whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-[0.72rem] leading-relaxed text-df-muted">
               {detail.excerpt}
               {detail.excerpt.length >= 320 ? "…" : ""}
             </span>

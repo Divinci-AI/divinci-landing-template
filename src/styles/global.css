@@ -10,6 +10,28 @@
   --color-df-bubble-user: #dceadc;
   --color-df-text: #1a1a1a;
 
+  /* SEMANTIC SURFACE TOKENS — the theme-aware replacements for the hardcoded
+     `bg-white` / `text-gray-N` / `border-gray-N` utilities that were scattered
+     through the components.
+
+     Those utilities are correct on every light palette and catastrophic on a
+     dark one: dodcyberconsulting.com is body #04090e, and a white card with
+     gray-500 text on that page is not a styling blemish, it is a different
+     website. The defaults below are exactly the values they replace, so a
+     light brand renders byte-identically; Landing.astro overrides them only
+     when the palette is dark. */
+  --color-df-surface: #ffffff;      /* cards, panels, inputs — was bg-white   */
+  --color-df-surface-2: #f3f4f6;    /* one step off the surface — was gray-100 */
+  --color-df-muted: #6b7280;        /* secondary text        — was gray-500   */
+  --color-df-muted-strong: #374151; /* body-weight secondary — was gray-700   */
+  --color-df-faint: #9ca3af;        /* placeholders          — was gray-400   */
+  --color-df-line: #e5e7eb;         /* hairlines             — was gray-200   */
+  --color-df-line-strong: #d1d5db;  /* input borders         — was gray-300   */
+  /* Ink that is legible ON the primary/accent chrome. White on a dark brand
+     header, and still white on most light brands' saturated primary — but a
+     pale-gold or cyan primary needs dark ink, and `text-white` cannot say so. */
+  --color-df-on-chrome: #ffffff;
+
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
@@ -17,7 +39,9 @@
 
 html,
 body {
-  background-color: #f4efda;
+  /* The token, not the template's own cream. Hardcoded, a dark brand's page
+     stayed light behind every transparent section. */
+  background-color: var(--color-df-cream);
   color: var(--color-df-text);
   min-height: 100%;
 }

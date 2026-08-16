@@ -41,7 +41,7 @@ function hrefFor(code: string): string {
   class="df-lang-switcher fixed right-4 top-4 z-50 [&::-webkit-details-marker]:hidden"
 >
   <summary
-    class="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-df-green-dark text-white shadow-lg ring-1 ring-black/10 transition-colors hover:bg-df-green-mid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-df-green-leaf"
+    class="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-df-green-dark text-df-on-chrome shadow-lg ring-1 ring-black/10 transition-colors hover:bg-df-green-mid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-df-green-leaf"
     aria-label={switcherLabel}
     title={switcherLabel}
   >
@@ -61,7 +61,7 @@ function hrefFor(code: string): string {
 
   <ul
     aria-label={switcherLabel}
-    class="absolute right-0 mt-2 max-h-[70vh] w-56 overflow-y-auto rounded-2xl bg-white p-1.5 text-df-text shadow-xl ring-1 ring-black/10"
+    class="absolute right-0 mt-2 max-h-[70vh] w-56 overflow-y-auto rounded-2xl bg-df-surface p-1.5 text-df-text shadow-xl ring-1 ring-black/10"
   >
     {
       LOCALES.map((l) => (

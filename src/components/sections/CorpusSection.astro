@@ -50,7 +50,7 @@ const headlineSegments = tokenize(t.headline);
         <h2 class="text-3xl font-bold leading-tight text-df-text md:text-4xl">
           {headlineSegments.map((seg) => (seg.kind === "br" ? <br /> : seg.kind === "text" ? seg.value : seg.value))}
         </h2>
-        <p class="mt-4 text-lg text-gray-700">
+        <p class="mt-4 text-lg text-df-muted-strong">
           {t.subheading}
         </p>
       </div>
@@ -59,11 +59,11 @@ const headlineSegments = tokenize(t.headline);
     <div class={`mt-14 grid gap-6 sm:grid-cols-2 ${stats.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
       {
         stats.map((stat) => (
-          <article class="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+          <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-black/5">
             <p class="text-4xl font-bold leading-none text-df-green-dark">
               {stat.value}
             </p>
-            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-gray-500">
+            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-df-muted">
               {stat.label}
             </p>
           </article>
@@ -77,10 +77,10 @@ const headlineSegments = tokenize(t.headline);
       </p>
       {/* One clean line instead of a noisy 35-chip cloud: a few native names +
           a count. Keeps the multilingual flex without the visual weight. */}
-      <p class="mx-auto mt-3 max-w-2xl text-base text-gray-600">
+      <p class="mx-auto mt-3 max-w-2xl text-base text-df-muted">
         {languages.slice(0, 6).join("  ·  ")}
         {languages.length > 6 && (
-          <span class="text-gray-400">{`  ·  +${languages.length - 6} more`}</span>
+          <span class="text-df-faint">{`  ·  +${languages.length - 6} more`}</span>
         )}
       </p>
     </div>

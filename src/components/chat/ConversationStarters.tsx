@@ -25,7 +25,7 @@ export function ConversationStarters({
             type="button"
             onClick={() => onSelect(starter)}
             disabled={disabled}
-            className="starter-pill rounded-full bg-df-green-dark px-4 py-2 text-left text-sm font-medium text-white transition hover:bg-df-green-mid/85 disabled:cursor-not-allowed disabled:opacity-80"
+            className="starter-pill rounded-full bg-df-green-dark px-4 py-2 text-left text-sm font-medium text-df-on-chrome transition hover:bg-df-green-mid/85 disabled:cursor-not-allowed disabled:opacity-80"
           >
             {starter}
           </button>
