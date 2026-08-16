@@ -102,11 +102,14 @@ const exchangeMeta: Array<{ sources: string[]; recommendation?: string }> = [
   },
 ];
 
+// Brand-supplied sources win over the placeholders. Per-index so a brand can
+// override one exchange and leave the rest — and a brand that supplies none
+// renders exactly as before.
 const exchanges: Exchange[] = exchangeMeta.map((meta, i) => ({
   question: t.questions[i],
   answer: t.answers[i],
-  sources: meta.sources,
-  recommendation: meta.recommendation,
+  sources: brand.showcase?.sources?.[i] ?? meta.sources,
+  recommendation: brand.showcase?.recommendations?.[i] ?? meta.recommendation,
 }));
 
 const ASSISTANT_MODEL = brand.identity.productName;

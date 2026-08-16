@@ -44,6 +44,23 @@ export interface BrandConfig {
     bodyWeight: number;
     links?: string[];
   };
+  /**
+   * The showcase transcript's RETRIEVED SOURCES, one list per exchange.
+   *
+   * Deliberately here and not in the i18n dictionary: these are document
+   * names, and a translated filename names nothing. Deliberately per-brand
+   * and not hardcoded in the component: the placeholders
+   * ("getting-started-guide.pdf") shipped on every demo whose pipeline did
+   * not splice its own showcase HTML, so a UFO-archive assistant cited an
+   * "Intro Talk Episode 1" it has never held.
+   *
+   * Omit to keep the placeholders.
+   */
+  showcase?: {
+    sources?: string[][];
+    recommendations?: (string | undefined)[];
+  };
+
   links: {
     mainSite: string; signupUrl: string; loginUrl: string; bioCreditUrl: string;
     /** True only when the client's site actually offers a member/patient login —
