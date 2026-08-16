@@ -263,6 +263,33 @@ export interface OgBrand {
  * the hero lockup; matches only a TRAILING occurrence, so "Xenon AI Labs" is
  * untouched, and never strips a name to nothing.
  */
+/**
+ * Shrink a font size until the text fits `maxWidth`.
+ *
+ * Both defects this fixes are the same mistake: text that does not fit was
+ * drawn anyway.
+ *
+ *  * The wordmark width was `Math.min(720, measured)`. The CLAMP changed the
+ *    number used for layout but not the text being drawn, so for a name wider
+ *    than 720px the "AI" mark — positioned at `startX + logoW + gap` — landed
+ *    INSIDE the still-drawing name. "BioRenew Integrative Medicine" rendered as
+ *    "BioRenew Integrative M[AI]dicine".
+ *  * The tagline is centred at x=600 with no width constraint at all, so a long
+ *    one overflows BOTH card edges and is clipped at each end.
+ *
+ * Scaling the type is the honest fix: the text then genuinely occupies the
+ * width the layout reserves for it.
+ *
+ * `ratio` is the average glyph advance as a fraction of font size. Helvetica
+ * Bold runs ~0.54em; the caller passes what matches the weight it draws.
+ */
+export function fitFontSize(text: string, maxWidth: number, baseSize: number, ratio = 0.54, minSize = 10): number {
+  const width = (size: number) => text.length * size * ratio;
+  if (width(baseSize) <= maxWidth) return baseSize;
+  const scaled = Math.floor((maxWidth / (text.length * ratio)) * 10) / 10;
+  return Math.max(minSize, Math.min(baseSize, scaled));
+}
+
 export function nameBesideAi(siteName: string): string {
   return siteName.trim().replace(/\s*\bai\s*$/i, "").trim() || siteName.trim();
 }
@@ -328,9 +355,14 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   // Text when the logo cannot be embedded, AND when it is a MARK: a mark does
   // not contain the brand's name, so drawing it alone leaves the card without
   // the brand on it. Same rule as the hero lockup.
-  const logoW = usingText
-    ? Math.min(720, brand.measuredWordmarkWidth ?? wordmarkText.length * LOGO_H * 0.52)
-    : LOGO_H * logo.aspect;
+  // ⚠️ NOT `Math.min(720, measured)`. Clamping shrank the number the layout
+  // used without shrinking the TEXT, so "AI" was placed inside a name that was
+  // still drawing. If the wordmark is too wide the type is scaled down (see
+  // wordmarkScale below) so the reserved width is the real width.
+  const measuredW = brand.measuredWordmarkWidth ?? wordmarkText.length * LOGO_H * 0.52;
+  const MAX_WORDMARK_W = 720;
+  const wordmarkScale = measuredW > MAX_WORDMARK_W ? MAX_WORDMARK_W / measuredW : 1;
+  const logoW = usingText ? Math.min(MAX_WORDMARK_W, measuredW) : LOGO_H * logo.aspect;
 
   // A light/knocked-out logo gets a dark plate (below). The plate extends
   // PLATE_PAD_X past the logo on each side, so the gap has to grow by the same
@@ -373,8 +405,11 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   const wmTracking = df?.letterSpacing && /^-?[\d.]+(px|em)?$/.test(df.letterSpacing) ? df.letterSpacing : "-1";
 
   const wordmark = usingText
+    // wordmarkScale shrinks the TYPE when the name is too wide, so the width
+    // the layout reserved is the width actually drawn and "AI" cannot land on
+    // top of the name.
     ? `<text x="${startX}" y="${aiBaseline}" font-family="${escapeXml(wmFamily)}"${wmStyle} font-size="${Math.round(
-        LOGO_H * 0.82,
+        LOGO_H * 0.82 * wordmarkScale,
       )}" font-weight="${escapeXml(wmWeight)}" letter-spacing="${escapeXml(wmTracking)}" fill="${TEXT}">${escapeXml(wordmarkText)}</text>`
     : `${plate}<image x="${startX}" y="${logoY}" width="${logoW}" height="${LOGO_H}" preserveAspectRatio="xMidYMid meet" xlink:href="${logo.href}"/>`;
 
@@ -412,9 +447,9 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   ${star(aiX + AI_W - 6, ROW_CENTER_Y - AI_FONT * 0.34, 26, GREEN_LEAF)}
   ${star(aiX - 4, ROW_CENTER_Y + AI_FONT * 0.36, 18, GREEN_MID)}
 
-  <text x="600" y="360" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="58" font-weight="700" letter-spacing="-1" fill="${TEXT}">${TAGLINE}</text>
+  <text x="600" y="360" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${fitFontSize(brand.ogTagline, 1080, 58, 0.54)}" font-weight="700" letter-spacing="-1" fill="${TEXT}">${TAGLINE}</text>
 
-  <text x="600" y="418" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="${NAVY}">${SUBTITLE}</text>
+  <text x="600" y="418" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="${fitFontSize(brand.ogSubtitle ?? "", 1080, 30, 0.5)}" font-weight="400" fill="${NAVY}">${SUBTITLE}</text>
 
   <g>
     <rect x="320" y="476" width="560" height="72" rx="36" fill="#ffffff" fill-opacity="0.94" stroke="${GREEN_DARK}" stroke-opacity="0.28" stroke-width="1.5"/>

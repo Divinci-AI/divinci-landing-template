@@ -274,3 +274,56 @@ describe("AI sizing against the wordmark", () => {
     expect(fontSizes(svg)).toContain(96);
   });
 });
+
+/**
+ * The unfurl thumbnail had TWO defects, both the same mistake: text that does
+ * not fit was drawn anyway.
+ *
+ *  * the wordmark width was `Math.min(720, measured)`, which shrank the number
+ *    used for LAYOUT without shrinking the TEXT — so "AI", placed at
+ *    `startX + logoW + gap`, landed inside a name that was still drawing.
+ *    "BioRenew Integrative Medicine" rendered as "BioRenew Integrative M[AI]dicine".
+ *  * the tagline is centred at x=600 with no width constraint, so a long one
+ *    overflows BOTH card edges and is clipped at each end.
+ *
+ * These pin the arithmetic. A rendered-pixel check would be better still, but
+ * it needs the same fonts the card is drawn with, and a wrong-font measurement
+ * is what caused the original overlap.
+ */
+describe("og card — text must fit the card it is drawn on", () => {
+  it("scales an over-wide wordmark instead of clamping its reported width", async () => {
+    const { fitFontSize } = await import("../../scripts/og-card");
+    // Long real name at the card's wordmark size.
+    const long = "BioRenew Integrative Medicine";
+    const fitted = fitFontSize(long, 720, 96, 0.54);
+    expect(fitted).toBeLessThan(96);
+    // And it genuinely fits now.
+    expect(long.length * fitted * 0.54).toBeLessThanOrEqual(720);
+  });
+
+  it("leaves a name that already fits at full size", async () => {
+    const { fitFontSize } = await import("../../scripts/og-card");
+    // The short lockup name the card now uses.
+    expect(fitFontSize("BioRenewIM", 720, 96, 0.54)).toBe(96);
+  });
+
+  it("shrinks the tagline that overflowed both card edges", async () => {
+    const { fitFontSize } = await import("../../scripts/og-card");
+    // Verbatim from the deployed card.
+    const tagline = "BioRenew Integrative Medicine — answered 24/7";
+    const fitted = fitFontSize(tagline, 1080, 58, 0.54);
+    expect(fitted).toBeLessThan(58);
+    expect(tagline.length * fitted * 0.54).toBeLessThanOrEqual(1080);
+  });
+
+  it("never returns a size so small the text is unreadable", async () => {
+    const { fitFontSize } = await import("../../scripts/og-card");
+    const absurd = "x".repeat(500);
+    expect(fitFontSize(absurd, 1080, 58)).toBeGreaterThanOrEqual(10);
+  });
+
+  it("handles an empty string without dividing by zero", async () => {
+    const { fitFontSize } = await import("../../scripts/og-card");
+    expect(fitFontSize("", 1080, 30, 0.5)).toBe(30);
+  });
+});

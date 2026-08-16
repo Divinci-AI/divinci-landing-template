@@ -93,6 +93,11 @@ const displayFamily = fontFile ? (displayStack || "").split(",")[0].replace(/["'
 // and "AI". Rasterizing a probe with the SAME font files gives the real width.
 const usesTextWordmark = logo.href === null || brand.media.logoIsMark === true;
 
+// The OG lockup uses the SAME short name as the header and hero. Drawing the
+// full legal name here is what pushed "BioRenew Integrative Medicine" past the
+// card's width budget in the first place.
+const ogLockupName = brand.identity.lockupName || brand.identity.siteName;
+
 // ONE description of the wordmark's type, used by both the probe and the card.
 //
 // They were built separately and disagreed: the probe measured at weight 500
@@ -111,7 +116,7 @@ let measuredWordmarkWidth: number | undefined;
 if (usesTextWordmark) {
   try {
     const probe = new Resvg(
-      wordmarkProbeSvg(nameBesideAi(brand.identity.siteName), displayFont ?? {}),
+      wordmarkProbeSvg(nameBesideAi(ogLockupName), displayFont ?? {}),
       { font: { loadSystemFonts: true, fontFiles: fontFile ? [fontFile] : [] } },
     );
     const box = probe.getBBox();
@@ -123,7 +128,7 @@ if (usesTextWordmark) {
 
 const { svg, note } = composeOgCard(
   {
-    siteName: brand.identity.siteName,
+    siteName: ogLockupName,
     productName: brand.identity.productName,
     palette: brand.palette,
     ogTagline: brand.media.ogTagline,
