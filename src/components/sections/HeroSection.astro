@@ -395,7 +395,18 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
            assistant intro is easy to read while the orb of transparency
            is open. */
         .chat-panel-wrapper:hover .welcome-bubble {
-          background-color: rgba(220, 234, 220, 0.85) !important;
+          /* The BRAND's bubble, a touch more solid than its resting 75%.
+
+             This was hardcoded rgba(220, 234, 220, 0.85) — the template's
+             original DrFuhrman sage — with !important, so hovering the panel
+             turned every customer's welcome bubble green regardless of their
+             palette, and on a dark brand it painted a near-white slab under
+             near-white text. */
+          background-color: color-mix(
+            in srgb,
+            var(--color-df-bubble-user) 88%,
+            transparent
+          ) !important;
         }
         .chat-panel-wrapper:hover .chat-glass {
           -webkit-mask-image: radial-gradient(

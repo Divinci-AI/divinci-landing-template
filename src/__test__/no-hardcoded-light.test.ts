@@ -61,3 +61,42 @@ describe("no hardcoded light colours on themed surfaces", () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe("the assistant has ONE face", () => {
+  it("no component re-implements the avatar fallback chain", () => {
+    // Three near-identical copies had drifted: the hero and the live
+    // transcript fell straight to INITIALS while the showcase directly below
+    // used the brand logo, so one page showed "DC" and the customer's icon
+    // for the same assistant.
+    const users = ["src/components/chat/WelcomeMessage.tsx",
+                   "src/components/chat/Transcript.tsx",
+                   "src/components/chat/ChatIsland.tsx"];
+    for (const f of users) {
+      const src = readFileSync(f, "utf8");
+      expect(src, `${f} must use the shared avatar`).toContain("BrandAvatar");
+      expect(src, `${f} re-implements the fallback`).not.toContain("brandInitials(");
+    }
+  });
+
+  it("prefers the brand mark over initials", () => {
+    const src = readFileSync("src/components/chat/BrandAvatar.tsx", "utf8");
+    expect(src.indexOf("brand.media.logo")).toBeLessThan(src.indexOf("brandInitials("));
+    // A wordmark cropped to fill a small circle is unreadable.
+    expect(src).toContain("object-contain");
+  });
+});
+
+describe("hover states follow the brand, not the template", () => {
+  it("the welcome bubble's hover colour is the brand's bubble token", () => {
+    // Was `rgba(220, 234, 220, 0.85) !important` — the template's original
+    // sage — so hovering turned EVERY customer's bubble green, and on a dark
+    // brand painted a near-white slab under near-white text.
+    // Comments are stripped first: this file explains the old value in prose,
+    // and a guard that reads its own documentation is checking nothing.
+    const hero = readFileSync("src/components/sections/HeroSection.astro", "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = hero.slice(hero.indexOf(":hover .welcome-bubble")).slice(0, 400);
+    expect(rule).toContain("--color-df-bubble-user");
+    expect(rule).not.toMatch(/rgba\(220,\s*234,\s*220/);
+  });
+});

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { brand } from "../../brand.config";
-import { brandInitials } from "../../lib/initials";
+import { BrandAvatar } from "./BrandAvatar";
 import { FREE_MESSAGE_QUOTA, FREE_MESSAGES_BEFORE_EMAIL, getDivinci } from "../../lib/divinci";
 import { loadEscrow, saveEscrow } from "../../lib/escrow";
 import { WelcomeMessage } from "./WelcomeMessage";
@@ -602,13 +602,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         // the static TranscriptShowcase (header · messages · single composer).
         <div className="df-active-card overflow-hidden rounded-3xl border border-df-green-dark/15 bg-gradient-to-b from-df-green-leaf/10 to-df-surface shadow-lg ring-1 ring-df-text/5">
           <div className="flex items-center gap-2 border-b border-df-green-dark/10 bg-df-surface/70 px-5 py-3 backdrop-blur-sm">
-            <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-[11px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
-              )}
-            </span>
+            <BrandAvatar avatarUrl={avatarUrl} size="h-7 w-7" className="bg-df-green-leaf/20 ring-1 ring-df-green-dark/15" />
             <span className="font-semibold text-df-green-dark">{brand.identity.productName}</span>
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-df-muted">
               <span className="relative flex h-2 w-2">

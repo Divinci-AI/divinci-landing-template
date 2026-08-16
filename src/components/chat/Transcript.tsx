@@ -1,7 +1,7 @@
 import { cleanContextTitle } from "../../lib/clean-context-title";
 import { FloatingLayer } from "./FloatingLayer";
 import { brand } from "../../brand.config";
-import { brandInitials } from "../../lib/initials";
+import { BrandAvatar } from "./BrandAvatar";
 import {
   useCallback,
   useEffect,
@@ -148,13 +148,7 @@ export function Transcript({ messages, onFeedback, avatarUrl }: TranscriptProps)
 
 function DfAvatar({ avatarUrl }: { avatarUrl?: string | null }) {
   return (
-    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
-      {avatarUrl ? (
-        <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
-      ) : (
-        <span className="text-[11px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
-      )}
-    </span>
+    <BrandAvatar avatarUrl={avatarUrl} size="h-7 w-7" className="mt-0.5 bg-df-green-leaf/20 ring-1 ring-df-green-dark/15" />
   );
 }
 
