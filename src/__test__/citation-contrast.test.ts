@@ -63,6 +63,10 @@ const PALETTES = {
   biorenew: { leaf: "#d6ad62", dark: "#af812e", text: "#000000", bubble: "#ccccff" },
   // The template's own defaults.
   divinci: { leaf: "#9ec947", dark: "#3b6b3f", text: "#1a1a1a", bubble: "#eef4e4" },
+  // runs/drlongevityrx — a DARK-primary brand whose accent is a pale gold, so
+  // the badge sits on a very light wash. The previous palettes both had a
+  // mid-tone accent; this one checks the light end of the range.
+  longevityrx: { leaf: "#e9cc8f", dark: "#16271b", text: "#2c2c2c", bubble: "#f7ecd4" },
 };
 
 describe("citation badge contrast", () => {
