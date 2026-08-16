@@ -62,6 +62,20 @@ export interface BrandConfig {
     /** True when the logo is light/white (built for a dark header) — the hero
      *  darkens it so it doesn't wash out on the light background. */
     logoIsLight?: boolean;
+    /**
+     * How far the logo image must drop so its LETTERFORMS sit on the "AI"
+     * baseline, as a fraction of the rendered logo height (0.0909 = 9.09%).
+     *
+     * `items-baseline` puts an <img>'s BOTTOM EDGE on the text baseline, which
+     * is right for a tightly-cropped wordmark and wrong when a mark overshoots
+     * below the letters — Aquillius's flame descends 13px past "AQUILLIUS" in
+     * a 143px image, so the name floated ~5px above the "AI" beside it.
+     *
+     * A FRACTION, because a CSS translate percentage resolves against the
+     * element's own box: one value is correct at the hero's 56px and the
+     * header's 24px alike. Absent means the logo needed no correction.
+     */
+    logoBaselineDrop?: number;
     /** True when `logo` is a square MARK rather than a wordmark. The hero
      *  lockup assumes the logo carries the brand NAME; for a mark it does not,
      *  so the name is rendered as text beside it. */

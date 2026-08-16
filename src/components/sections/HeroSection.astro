@@ -502,6 +502,9 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
                   ? !brand.media.logoIsLight && "brightness-0 invert"
                   : brand.media.logoIsLight && "brightness-0",
               ]}
+              style={brand.media.logoBaselineDrop
+                  ? `translate: 0 ${(brand.media.logoBaselineDrop * 100).toFixed(2)}%`
+                  : undefined}
               width="200"
               height="42"
             />

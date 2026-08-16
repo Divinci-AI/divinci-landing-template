@@ -20,6 +20,35 @@ import { createPortal } from "react-dom";
  * Deliberately measures on every open rather than caching: the anchor is inside
  * a scroll container, so its viewport position changes as the reader scrolls.
  */
+/**
+ * Which side of the anchor the bubble opens on.
+ *
+ * The first rule preferred ABOVE whenever above happened to fit, and only
+ * flipped when it did not AND below was roomier. For a citation chip near the
+ * top of the transcript that means the bubble opens upward across the
+ * conversation the reader is looking at — and when above fits by a margin
+ * thinner than the bubble, it lands clamped against the viewport edge, on top
+ * of the message it belongs to. That is what "the popup isn't showing up like
+ * it should" looks like on the Aquillius demo.
+ *
+ * The rule now: take a side that FITS, and among two that fit take the roomier.
+ * A chip near the top opens downward, one near the bottom opens upward, and
+ * neither ever has to be clamped when there is anywhere it could have gone.
+ *
+ * Exported and pure so the decision is testable without a DOM — the bug lived
+ * in one boolean, and one boolean is exactly what a test can pin.
+ */
+export function placeBelow(roomAbove: number, roomBelow: number, height: number, gap: number): boolean {
+  const need = height + gap;
+  const fitsAbove = roomAbove >= need;
+  const fitsBelow = roomBelow >= need;
+  if (fitsBelow && !fitsAbove) return true;
+  if (fitsAbove && !fitsBelow) return false;
+  // Both fit, or neither does: the roomier side. Ties go ABOVE, preserving the
+  // original placement for the symmetric case.
+  return roomBelow > roomAbove;
+}
+
 export function FloatingLayer({
   anchorRef,
   open,
@@ -57,7 +86,7 @@ export function FloatingLayer({
       const w = box?.width ?? 0;
       const roomAbove = a.top;
       const roomBelow = window.innerHeight - a.bottom;
-      const below = !(roomAbove >= h + gap) && roomBelow > roomAbove;
+      const below = placeBelow(roomAbove, roomBelow, h, gap);
       setPos({
         top: below ? a.bottom + gap : Math.max(8, a.top - gap - h),
         left: Math.min(Math.max(8, a.left), Math.max(8, window.innerWidth - w - 8)),
