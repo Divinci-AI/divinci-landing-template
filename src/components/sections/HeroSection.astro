@@ -534,7 +534,14 @@ const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
               src={brand.media.logo}
               alt={brand.identity.siteName}
               class:list={[
-                "block h-10 w-auto md:h-14",
+                /* max-H plus max-W, not a fixed height.
+                   Applied BioCode's wordmark is 1248x138 — a 9:1 ratio. At a
+                   fixed h-10 that is 362px wide, so on a 390px viewport the
+                   "AI" wrapped to a second line and the lockup stopped being
+                   one. Constraining BOTH axes with object-contain lets a wide
+                   mark shrink to fit; a logo that already fits is unchanged,
+                   because max-h-10 resolves to the same 40px h-10 gave it. */
+                "block h-auto max-h-10 w-auto max-w-[62vw] object-contain md:max-h-14 md:max-w-[26rem]",
                 isDarkBrand
                   ? !brand.media.logoIsLight && "brightness-0 invert"
                   : brand.media.logoIsLight && "brightness-0",
