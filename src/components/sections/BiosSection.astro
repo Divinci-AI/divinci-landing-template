@@ -67,7 +67,7 @@ const gridCols = bios.length === 1 ? "md:grid-cols-1 max-w-md mx-auto" : "md:gri
     <div class={`mt-12 grid gap-8 ${gridCols}`}>
       {
         bios.map((bio) => (
-          <article class="rounded-2xl bg-df-cream p-8 shadow-sm ring-1 ring-black/5">
+          <article class="rounded-2xl bg-df-cream p-8 shadow-sm ring-1 ring-df-text/5">
             <div class="flex items-center gap-4">
               {/* Real headshot when the brand kit provides one (auto-sourced
                   from the prospect site); otherwise a clean initials avatar. */}
@@ -75,7 +75,7 @@ const gridCols = bios.length === 1 ? "md:grid-cols-1 max-w-md mx-auto" : "md:gri
                 <img
                   src={bio.image}
                   alt={bio.name}
-                  class="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-black/10"
+                  class="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-df-text/10"
                   width={56}
                   height={56}
                   loading="lazy"

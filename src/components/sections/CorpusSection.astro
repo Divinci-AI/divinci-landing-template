@@ -31,7 +31,7 @@ const headlineSegments = tokenize(t.headline);
           NOTE: braces, not an HTML comment — Astro ships <!-- --> to the visitor. */}
       {brand.media.corpusVideo && (
       <div
-        class="overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/5 md:order-2"
+        class="overflow-hidden rounded-3xl shadow-xl ring-1 ring-df-text/5 md:order-2"
       >
         <video
           src={brand.media.corpusVideo}
@@ -59,7 +59,7 @@ const headlineSegments = tokenize(t.headline);
     <div class={`mt-14 grid gap-6 sm:grid-cols-2 ${stats.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
       {
         stats.map((stat) => (
-          <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-black/5">
+          <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5">
             <p class="text-4xl font-bold leading-none text-df-green-dark">
               {stat.value}
             </p>

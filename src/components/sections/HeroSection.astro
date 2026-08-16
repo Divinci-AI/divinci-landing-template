@@ -61,7 +61,26 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
       .chat-panel-wrapper {
         --orb-x: 50%;
         --orb-y: 50%;
-        --chat-glass-gradient: linear-gradient(135deg, #ffffff2e, #ffffff26);
+        /* The frosted card's tint.
+
+           These were hardcoded WHITE (#ffffff2e / #ffffff26). On a light page
+           that is a subtle sheen; on dodcyberconsulting.com's #04090e page it
+           is an 18% white wash over the entire card, which lightened the
+           background until near-white body text stopped being readable — and
+           its hairline border was the "white fringy edges" around the panel.
+
+           Now derived from the page colour, so the glass lifts a dark card and
+           brightens a light one by the same *relative* amount. Overridden per
+           theme in Landing.astro; these values are the light-page originals so
+           nothing moves for an existing demo. */
+        --chat-glass-tint-a: #ffffff2e;
+        --chat-glass-tint-b: #ffffff26;
+        --chat-glass-border: rgba(255, 255, 255, 0.14);
+        --chat-glass-gradient: linear-gradient(
+          135deg,
+          var(--chat-glass-tint-a),
+          var(--chat-glass-tint-b)
+        );
         --chat-glass-shadow: 0 8px 32px #00000006;
       }
 
@@ -107,7 +126,7 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
            drfuhrman's half-circle hero art; a rounded card generalizes to any
            customer's full-bleed ambient background and never gets covered.) */
         .chat-glass {
-          border: 1px solid rgba(255, 255, 255, 0.14);
+          border: 1px solid var(--chat-glass-border);
           border-radius: 1.5rem;
           background-image: var(--chat-glass-gradient);
           box-shadow: var(--chat-glass-shadow);

@@ -600,7 +600,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       {messages.length > 0 ? (
         // Active chat — "grows out" of the orb into a wide card that mirrors
         // the static TranscriptShowcase (header · messages · single composer).
-        <div className="df-active-card overflow-hidden rounded-3xl border border-df-green-dark/15 bg-gradient-to-b from-df-green-leaf/10 to-white shadow-lg ring-1 ring-black/5">
+        <div className="df-active-card overflow-hidden rounded-3xl border border-df-green-dark/15 bg-gradient-to-b from-df-green-leaf/10 to-df-surface shadow-lg ring-1 ring-df-text/5">
           <div className="flex items-center gap-2 border-b border-df-green-dark/10 bg-df-surface/70 px-5 py-3 backdrop-blur-sm">
             <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
               {avatarUrl ? (
