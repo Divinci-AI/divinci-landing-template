@@ -81,12 +81,12 @@ const darkSurfaceVars = isDarkBrand
     // near-white body text stopped being readable, and its border drew a
     // white fringe around the panel. On a dark page the lift has to be a
     // fraction of that, and the hairline drawn in the brand's own ink.
-    `--chat-glass-tint-a:color-mix(in srgb, ${p.text} 7%, transparent);` +
-    `--chat-glass-tint-b:color-mix(in srgb, ${p.text} 4%, transparent);` +
-    `--chat-glass-border:color-mix(in srgb, ${p.text} 12%, transparent);` +
+    `--glass-tint-a:color-mix(in srgb, ${p.text} 7%, transparent);` +
+    `--glass-tint-b:color-mix(in srgb, ${p.text} 4%, transparent);` +
+    `--glass-border:color-mix(in srgb, ${p.text} 12%, transparent);` +
     // A black drop shadow is invisible on black; lift the card with a ring
     // of its own ink instead.
-    `--chat-glass-shadow:0 8px 32px color-mix(in srgb, ${p.cream} 60%, transparent);}`
+    `--glass-shadow:0 8px 32px color-mix(in srgb, ${p.cream} 60%, transparent);}`
   : `:root{--color-df-on-chrome:${onChrome};}`;
 
 const brandVars = `:root{` +

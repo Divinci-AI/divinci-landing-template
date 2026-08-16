@@ -69,19 +69,23 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
            background until near-white body text stopped being readable — and
            its hairline border was the "white fringy edges" around the panel.
 
-           Now derived from the page colour, so the glass lifts a dark card and
-           brightens a light one by the same *relative* amount. Overridden per
-           theme in Landing.astro; these values are the light-page originals so
-           nothing moves for an existing demo. */
-        --chat-glass-tint-a: #ffffff2e;
-        --chat-glass-tint-b: #ffffff26;
-        --chat-glass-border: rgba(255, 255, 255, 0.14);
+           ⚠️ The light values live in the FALLBACK, not in a variable declared
+           here. Declaring `--chat-glass-tint-a: #ffffff2e` on this class and
+           overriding it at `:root` does not work: a custom property set on the
+           element itself shadows the inherited one for that element and its
+           whole subtree, whatever the cascade order. That is exactly how the
+           first attempt at this shipped — the override was present in the
+           document and the card was still 18% white.
+
+           With `var(--glass-tint-a, <light default>)` nothing is declared
+           locally, so a `:root` value from Landing.astro is simply inherited,
+           and a brand that sets nothing keeps the original look. */
         --chat-glass-gradient: linear-gradient(
           135deg,
-          var(--chat-glass-tint-a),
-          var(--chat-glass-tint-b)
+          var(--glass-tint-a, #ffffff2e),
+          var(--glass-tint-b, #ffffff26)
         );
-        --chat-glass-shadow: 0 8px 32px #00000006;
+        --chat-glass-shadow: var(--glass-shadow, 0 8px 32px #00000006);
       }
 
       /* Chat panel shape. Mobile: a plain full-width rounded card so the
@@ -126,7 +130,7 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
            drfuhrman's half-circle hero art; a rounded card generalizes to any
            customer's full-bleed ambient background and never gets covered.) */
         .chat-glass {
-          border: 1px solid var(--chat-glass-border);
+          border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
           border-radius: 1.5rem;
           background-image: var(--chat-glass-gradient);
           box-shadow: var(--chat-glass-shadow);

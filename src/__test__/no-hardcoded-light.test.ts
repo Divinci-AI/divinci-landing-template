@@ -36,16 +36,21 @@ describe("no hardcoded light colours on themed surfaces", () => {
     // The literals may exist as the LIGHT default, but only on the tint vars —
     // never inline in the gradient or the border, where nothing can reach them.
     const hero = readFileSync("src/components/sections/HeroSection.astro", "utf8");
-    expect(hero).toContain("--chat-glass-tint-a");
-    expect(hero).toContain("--chat-glass-border");
-    expect(hero).toMatch(/border:\s*1px solid var\(--chat-glass-border\)/);
-    expect(hero).not.toMatch(/--chat-glass-gradient:\s*linear-gradient\(135deg,\s*#fff/);
+    // The light values must be FALLBACKS, never declarations on the wrapper.
+    // A custom property declared on the element shadows the inherited one for
+    // its whole subtree regardless of cascade order — the first attempt at
+    // this fix was present in the document and changed nothing.
+    expect(hero).toMatch(/var\(--glass-tint-a,\s*#ffffff2e\)/);
+    expect(hero).toMatch(/var\(--glass-tint-b,\s*#ffffff26\)/);
+    expect(hero).toMatch(/border:\s*1px solid var\(--glass-border,/);
+    expect(hero).toMatch(/var\(--glass-shadow,/);
+    expect(hero).not.toMatch(/^\s*--glass-(tint-a|tint-b|border|shadow)\s*:/m);
   });
 
   it("has a dark override for every glass variable it defines", () => {
     // A default with no override is a light value that ships to a dark page.
     const layout = readFileSync("src/layouts/Landing.astro", "utf8");
-    for (const v of ["--chat-glass-tint-a", "--chat-glass-tint-b", "--chat-glass-border", "--chat-glass-shadow"])
+    for (const v of ["--glass-tint-a", "--glass-tint-b", "--glass-border", "--glass-shadow"])
       expect(layout, `${v} needs a dark-brand override`).toContain(v);
   });
 
