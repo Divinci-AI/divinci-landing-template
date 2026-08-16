@@ -31,9 +31,15 @@ export function BrandAvatar({
     >
       {avatarUrl ? (
         <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
-      ) : brand.media.logo ? (
-        // `contain` and inset, not `cover`: the logo may be a WORDMARK, and a
-        // wordmark cropped to fill a 28px circle is an unreadable smear.
+      ) : brand.media.logo && brand.media.logoIsMark ? (
+        // ONLY a mark. `object-contain` keeps a wordmark undistorted but does
+        // not make it legible: Applied BioCode's logo is 1248x138, so at 70%
+        // of a 36px circle it renders ~25px wide and under 3px tall — a smear,
+        // and the showcase's 16px version read as barcode stripes.
+        //
+        // A wordmark is a horizontal lockup; there is no crop or scale of one
+        // that works in a small circle. Initials do, which is why they are the
+        // fallback rather than a last-ditch one.
         <img
           src={brand.media.logo}
           alt=""

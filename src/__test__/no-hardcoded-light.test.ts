@@ -100,3 +100,23 @@ describe("hover states follow the brand, not the template", () => {
     expect(rule).not.toMatch(/rgba\(220,\s*234,\s*220/);
   });
 });
+
+describe("a wordmark is never used as a circular avatar", () => {
+  it("BrandAvatar requires logoIsMark before using the logo", () => {
+    // Applied BioCode's logo is 1248x138. At 70% of a 36px circle that is
+    // ~25px wide and under 3px tall — a smear — and the showcase's 16px
+    // version read as barcode stripes. object-contain keeps it undistorted
+    // without making it legible; there is no scale of a horizontal lockup
+    // that works in a small circle.
+    const src = readFileSync("src/components/chat/BrandAvatar.tsx", "utf8");
+    expect(src).toMatch(/brand\.media\.logo && brand\.media\.logoIsMark/);
+  });
+
+  it("the showcase avatars are gated the same way", () => {
+    const src = readFileSync("src/components/sections/TranscriptShowcase.astro", "utf8");
+    // Every logo <img> in an avatar position must sit behind the mark check.
+    const avatarImgs = src.match(/<img src=\{brand\.media\.logo\}[^>]*class="h-4 w-4"/g) || [];
+    for (const _ of avatarImgs) expect(src).toContain("brand.media.logoIsMark ? (");
+    expect(src).toContain("brandInitials(");
+  });
+});

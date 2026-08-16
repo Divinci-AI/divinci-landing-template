@@ -20,6 +20,7 @@
  */
 import { getUI } from "~/i18n";
 import { cleanContextTitle } from "~/lib/clean-context-title";
+import { brandInitials } from "~/lib/initials";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
 
@@ -143,7 +144,11 @@ function citeTitle(ex: Exchange, n: number): string {
         <span
           class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15"
         >
-          <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+          {brand.media.logoIsMark ? (
+            <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+          ) : (
+            <span class="text-[10px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
+          )}
         </span>
         <span class="font-semibold text-df-green-dark">{brand.identity.productName}</span>
         <span class="ml-auto inline-flex items-center gap-1.5 text-xs text-df-muted">
@@ -160,7 +165,11 @@ function citeTitle(ex: Exchange, n: number): string {
         {/* Opening greeting */}
         <div class="flex items-start gap-2">
           <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
+            {brand.media.logoIsMark ? (
             <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+          ) : (
+            <span class="text-[10px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
+          )}
           </span>
           <p class="max-w-[88%] rounded-2xl rounded-tl-sm bg-df-surface px-4 py-2.5 text-sm leading-relaxed text-df-text shadow-sm md:text-base">
             {welcomeMessage}
@@ -190,7 +199,11 @@ function citeTitle(ex: Exchange, n: number): string {
               {/* Assistant answer */}
               <div class="flex items-start gap-2">
                 <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
-                  <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+                  {brand.media.logoIsMark ? (
+            <img src={brand.media.logo} alt="" aria-hidden="true" class="h-4 w-4" width="16" height="16" />
+          ) : (
+            <span class="text-[10px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
+          )}
                 </span>
                 <div class="max-w-[88%]">
                   <div class="space-y-2 rounded-2xl rounded-tl-sm bg-df-green-leaf/15 px-4 py-3 text-sm leading-relaxed text-df-text md:text-base">
