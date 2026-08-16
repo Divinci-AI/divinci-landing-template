@@ -290,6 +290,8 @@ function citeTitle(ex: Exchange, n: number): string {
     });
   });
 
+  import { placeBelow } from "~/lib/popover-placement";
+
   /**
    * Lift each tooltip out of the scroll container's clip.
    *
@@ -313,8 +315,10 @@ function citeTitle(ex: Exchange, n: number): string {
     const place = () => {
       const a = cite.getBoundingClientRect();
       const t = tip.getBoundingClientRect();
-      const above = a.top >= t.height + 8;
-      tip.style.top = `${above ? a.top - 8 - t.height : a.bottom + 8}px`;
+      // Shared with the React chat's FloatingLayer — two copies of this rule
+      // is how one of them stayed wrong after the other was fixed.
+      const below = placeBelow(a.top, window.innerHeight - a.bottom, t.height, 8);
+      tip.style.top = `${below ? a.bottom + 8 : a.top - 8 - t.height}px`;
       tip.style.left = `${Math.min(Math.max(8, a.left + a.width / 2 - t.width / 2), Math.max(8, window.innerWidth - t.width - 8))}px`;
     };
     const show = () => {

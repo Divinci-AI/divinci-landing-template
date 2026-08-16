@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { placeBelow } from "./FloatingLayer";
+import { placeBelow } from "../lib/popover-placement";
 
 // A citation chip near the TOP of the transcript, bubble 160px tall, 8px gap.
 // The old rule was `!(roomAbove >= h + gap) && roomBelow > roomAbove`.
@@ -29,5 +29,25 @@ describe("placeBelow", () => {
   it("keeps the original placement when the two sides are symmetric", () => {
     // A tie must not silently move every existing bubble.
     expect(placeBelow(300, 300, 160, 8)).toBe(false);
+  });
+});
+
+// Both popovers must go through this module. Two copies of the rule is exactly
+// how the showcase stayed broken after the React chat was fixed — the demo
+// still opened its citation bubble upward across the message.
+describe("there is only ONE placement rule", () => {
+  it("neither popover re-implements the above/below decision", async () => {
+    const { readFileSync } = await import("node:fs");
+    for (const f of [
+      "src/components/chat/FloatingLayer.tsx",
+      "src/components/sections/TranscriptShowcase.astro",
+    ]) {
+      const src = readFileSync(f, "utf8");
+      expect(src, `${f} must call the shared rule`).toContain("placeBelow(");
+      // The two original forms, either of which prefers ABOVE whenever above
+      // merely fits.
+      expect(src, `${f} re-implements the rule`).not.toMatch(/const above = a\.top >= t\.height/);
+      expect(src, `${f} re-implements the rule`).not.toMatch(/!\(roomAbove >= h \+ gap\)/);
+    }
   });
 });
