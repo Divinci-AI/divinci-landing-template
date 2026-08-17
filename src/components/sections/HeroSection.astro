@@ -259,12 +259,21 @@ const logoMaxHMd = Math.round(56 * logoScale);
          extending it over their own name would recolour their wordmark. */
       /* Logo box height. Defaults reproduce max-h-10 / md:max-h-14 exactly, so
          a brand that sets no scale renders unchanged. */
+      /* EXPLICIT height, not max-height.
+         An SVG with a viewBox and no width/height has an intrinsic RATIO but
+         no intrinsic SIZE, so `height:auto` collapses it to 0x0 and
+         `max-height` has nothing to cap — Greystone's logo.svg
+         (viewBox="0 0 304 56.1") vanished entirely when this was max-height.
+         A definite height plus width:auto lets the ratio do the rest, and
+         works for rasters and SVGs alike.
+         max-width still guards the over-wide case; object-contain means an
+         over-wide mark letterboxes inside the box rather than distorting. */
       .hero-logo {
-        max-height: var(--logo-max-h, 40px);
+        height: var(--logo-max-h, 40px);
       }
       @media (min-width: 768px) {
         .hero-logo {
-          max-height: var(--logo-max-h-md, 56px);
+          height: var(--logo-max-h-md, 56px);
         }
       }
 
@@ -557,7 +566,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
                    one. Constraining BOTH axes with object-contain lets a wide
                    mark shrink to fit; a logo that already fits is unchanged,
                    because max-h-10 resolves to the same 40px h-10 gave it. */
-                "hero-logo block h-auto w-auto max-w-[62vw] object-contain md:max-w-[26rem]",
+                "hero-logo block w-auto max-w-[62vw] object-contain md:max-w-[26rem]",
                 isDarkBrand
                   ? !brand.media.logoIsLight && "brightness-0 invert"
                   : brand.media.logoIsLight && "brightness-0",

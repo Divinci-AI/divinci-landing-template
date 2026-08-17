@@ -120,3 +120,20 @@ describe("a wordmark is never used as a circular avatar", () => {
     expect(src).toContain("brandInitials(");
   });
 });
+
+describe("the lockup logo is sized by an explicit height", () => {
+  it("never relies on max-height alone", () => {
+    // An SVG with a viewBox and no width/height has a ratio but NO intrinsic
+    // size: height:auto collapses it to 0x0 and max-height has nothing to cap.
+    // Greystone's logo.svg disappeared entirely when this was max-height, and
+    // measuring the deployed page was the only way that surfaced —
+    // forcing max-height:56px still gave 0x0, forcing height:35px gave 190x35.
+    const hero = readFileSync("src/components/sections/HeroSection.astro", "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = hero.slice(hero.indexOf(".hero-logo {"), hero.indexOf(".hero-logo {") + 200);
+    expect(rule).toMatch(/height:\s*var\(--logo-max-h/);
+    expect(rule).not.toMatch(/max-height:\s*var\(--logo-max-h/);
+    // and the class must not re-introduce an auto height
+    expect(hero).not.toMatch(/"hero-logo[^"]*\bh-auto\b/);
+  });
+});
