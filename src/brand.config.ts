@@ -102,6 +102,30 @@ export interface BrandConfig {
      * would silently swallow the first letter of every other brand.
      */
     logoDepictsPrefix?: string;
+    /**
+     * A SQUARE mark for avatar circles, when `logo` is a wordmark.
+     *
+     * The lockup wants the wordmark and an avatar wants a square; most brands
+     * publish both, but only the wordmark is discoverable from a page's
+     * <img> tags. Greystone's is a "G" monogram that appears on their LinkedIn
+     * and as a 48px favicon, and nowhere the extractor looks.
+     *
+     * Preferred over `logo` in every avatar position, and over initials. The
+     * lockup never uses it.
+     */
+    markLogo?: string;
+    /**
+     * Scale the hero/header logo so its letters match the "AI" cap height.
+     *
+     * The lockup sizes the logo by BOX height (40px / 56px), but a
+     * tightly-cropped all-caps wordmark fills its box, so its letters render
+     * 56px against the "AI" cap height of ~35px and visibly dwarf it —
+     * Greystone measured exactly that. A brand whose logo carries padding, or
+     * has ascenders and descenders, already looks right and should omit this.
+     *
+     * 1 (or absent) leaves the current sizing untouched.
+     */
+    logoHeightScale?: number;
     /** True when `logo` is a square MARK rather than a wordmark. The hero
      *  lockup assumes the logo carries the brand NAME; for a mark it does not,
      *  so the name is rendered as text beside it. */

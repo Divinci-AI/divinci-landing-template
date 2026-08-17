@@ -17,6 +17,11 @@ const isDarkBrand = isDarkPalette(brand.palette.cream);
 // A mark that already draws the name's opening letters: render the mark and
 // only the REMAINDER, so "P" + "robed" still spells Probed exactly once.
 const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
+// Optional cap-height match. The defaults below are exactly the 40px/56px the
+// max-h-10 / md:max-h-14 utilities were giving, so an unset scale is a no-op.
+const logoScale = brand.media.logoHeightScale ?? 1;
+const logoMaxH = Math.round(40 * logoScale);
+const logoMaxHMd = Math.round(56 * logoScale);
 ---
 
 <section
@@ -252,6 +257,17 @@ const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
          lockup, but deliberately NOT the ai-shine gradient: the gradient exists
          to make "AI" read as Divinci's addition to the customer's brand, and
          extending it over their own name would recolour their wordmark. */
+      /* Logo box height. Defaults reproduce max-h-10 / md:max-h-14 exactly, so
+         a brand that sets no scale renders unchanged. */
+      .hero-logo {
+        max-height: var(--logo-max-h, 40px);
+      }
+      @media (min-width: 768px) {
+        .hero-logo {
+          max-height: var(--logo-max-h-md, 56px);
+        }
+      }
+
       .brand-word {
         font-family: var(--font-display, var(--font-sans));
         /* The brand's own treatment, not a guess at one. A wordmark is a
@@ -541,14 +557,18 @@ const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
                    one. Constraining BOTH axes with object-contain lets a wide
                    mark shrink to fit; a logo that already fits is unchanged,
                    because max-h-10 resolves to the same 40px h-10 gave it. */
-                "block h-auto max-h-10 w-auto max-w-[62vw] object-contain md:max-h-14 md:max-w-[26rem]",
+                "hero-logo block h-auto w-auto max-w-[62vw] object-contain md:max-w-[26rem]",
                 isDarkBrand
                   ? !brand.media.logoIsLight && "brightness-0 invert"
                   : brand.media.logoIsLight && "brightness-0",
               ]}
-              style={brand.media.logoBaselineDrop
+              style={[
+                brand.media.logoBaselineDrop
                   ? `translate: 0 ${(brand.media.logoBaselineDrop * 100).toFixed(2)}%`
-                  : undefined}
+                  : "",
+                `--logo-max-h:${logoMaxH}px`,
+                `--logo-max-h-md:${logoMaxHMd}px`,
+              ].filter(Boolean).join(";")}
               width="200"
               height="42"
             />
