@@ -15,7 +15,7 @@ export function ConversationStarters({
   if (starters.length === 0) return null;
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-medium uppercase tracking-wider text-df-green-dark">
+      <p className="text-xs font-medium uppercase tracking-wider text-df-brand-ink">
         {label}
       </p>
       <div className="flex flex-col gap-2">

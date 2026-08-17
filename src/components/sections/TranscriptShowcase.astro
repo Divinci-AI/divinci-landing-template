@@ -147,10 +147,10 @@ function citeTitle(ex: Exchange, n: number): string {
           {(brand.media.markLogo || brand.media.logoIsMark) ? (
             <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class={brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4"} width="16" height="16" />
           ) : (
-            <span class="text-[10px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
+            <span class="text-[10px] font-bold text-df-brand-ink" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
           )}
         </span>
-        <span class="font-semibold text-df-green-dark">{brand.identity.productName}</span>
+        <span class="font-semibold text-df-brand-ink">{brand.identity.productName}</span>
         <span class="ml-auto inline-flex items-center gap-1.5 text-xs text-df-muted">
           <span class="relative flex h-2 w-2">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75"></span>
@@ -168,7 +168,7 @@ function citeTitle(ex: Exchange, n: number): string {
             {(brand.media.markLogo || brand.media.logoIsMark) ? (
             <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class={brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4"} width="16" height="16" />
           ) : (
-            <span class="text-[10px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
+            <span class="text-[10px] font-bold text-df-brand-ink" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
           )}
           </span>
           <p class="max-w-[88%] rounded-2xl rounded-tl-sm bg-df-surface px-4 py-2.5 text-sm leading-relaxed text-df-text shadow-sm md:text-base">
@@ -202,7 +202,7 @@ function citeTitle(ex: Exchange, n: number): string {
                   {(brand.media.markLogo || brand.media.logoIsMark) ? (
             <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class={brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4"} width="16" height="16" />
           ) : (
-            <span class="text-[10px] font-bold text-df-green-dark" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
+            <span class="text-[10px] font-bold text-df-brand-ink" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
           )}
                 </span>
                 <div class="max-w-[88%]">
@@ -235,12 +235,12 @@ function citeTitle(ex: Exchange, n: number): string {
                     ))}
                   </div>
                   <p class="mt-1 text-[0.7rem] text-df-muted">
-                    <span class="font-semibold text-df-green-dark">{t.assistantLabel}</span>
+                    <span class="font-semibold text-df-brand-ink">{t.assistantLabel}</span>
                     {" · "}
                     {ASSISTANT_MODEL}
                   </p>
                   {ex.recommendation && (
-                    <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-df-green-dark/20 bg-df-surface px-3 py-1 text-xs text-df-green-dark">
+                    <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-df-green-dark/20 bg-df-surface px-3 py-1 text-xs text-df-brand-ink">
                       <span aria-hidden="true">💡</span>
                       {t.recommendationPrefix}
                       <span class="font-semibold">{ex.recommendation}</span>

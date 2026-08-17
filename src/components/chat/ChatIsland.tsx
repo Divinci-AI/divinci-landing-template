@@ -603,7 +603,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         <div className="df-active-card overflow-hidden rounded-3xl border border-df-green-dark/15 bg-gradient-to-b from-df-green-leaf/10 to-df-surface shadow-lg ring-1 ring-df-text/5">
           <div className="flex items-center gap-2 border-b border-df-green-dark/10 bg-df-surface/70 px-5 py-3 backdrop-blur-sm">
             <BrandAvatar avatarUrl={avatarUrl} size="h-7 w-7" className="bg-df-green-leaf/20 ring-1 ring-df-green-dark/15" />
-            <span className="font-semibold text-df-green-dark">{brand.identity.productName}</span>
+            <span className="font-semibold text-df-brand-ink">{brand.identity.productName}</span>
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-df-muted">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-df-green-leaf opacity-75" />
@@ -734,7 +734,7 @@ function TermsModal({
     >
       <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-df-green-dark/15 bg-df-surface shadow-2xl">
         <div className="border-b border-df-green-dark/10 bg-df-green-leaf/10 px-5 py-3">
-          <h2 className="text-base font-semibold text-df-green-dark">{title}</h2>
+          <h2 className="text-base font-semibold text-df-brand-ink">{title}</h2>
         </div>
         <div className="df-chat-scroll flex-1 space-y-2 overflow-y-auto px-5 py-4 text-sm leading-relaxed text-df-text">
           {renderTosContent(content)}
@@ -785,7 +785,7 @@ function renderTosContent(text: string) {
       );
     if (heading) {
       return (
-        <p key={i} className="pt-1 font-semibold text-df-green-dark">
+        <p key={i} className="pt-1 font-semibold text-df-brand-ink">
           {renderBold(heading[2])}
         </p>
       );

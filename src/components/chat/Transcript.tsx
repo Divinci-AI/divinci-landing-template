@@ -444,11 +444,11 @@ function SourceChip({
         }}
         className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-left text-xs transition ${
           highlighted
-            ? "border-df-green-dark bg-df-green-leaf/40 text-df-green-dark ring-2 ring-df-green-dark/50"
+            ? "border-df-green-dark bg-df-green-leaf/40 text-df-brand-ink ring-2 ring-df-green-dark/50"
             : "border-df-green-dark/15 bg-df-surface/80 text-df-muted"
         } ${hasDetail ? "cursor-help hover:border-df-green-dark/40" : ""}`}
       >
-        <span className="text-[0.7rem] font-semibold text-df-green-dark/70" aria-hidden="true">
+        <span className="text-[0.7rem] font-semibold text-df-brand-ink/70" aria-hidden="true">
           {index + 1}
         </span>
         <span aria-hidden="true">{sourceIcon(label)}</span>
@@ -466,7 +466,7 @@ function SourceChip({
         className="w-[min(22rem,80vw)] overflow-hidden rounded-lg border border-df-green-dark/15 bg-df-surface p-3 text-left shadow-lg"
       >
         <span>
-          <span className="block text-xs font-semibold text-df-green-dark">{title}</span>
+          <span className="block text-xs font-semibold text-df-brand-ink">{title}</span>
           {detail?.image && (
             // The rendered page itself. For a scanned insert this IS the
             // evidence — an excerpt of a scan would be empty.
@@ -507,7 +507,7 @@ function SourceChip({
               target="_blank"
               rel="noopener noreferrer"
               onMouseDown={(e) => e.stopPropagation()}
-              className="mt-2 inline-block text-[0.72rem] font-medium text-df-green-dark underline"
+              className="mt-2 inline-block text-[0.72rem] font-medium text-df-brand-ink underline"
             >
               View source →
             </a>
@@ -592,7 +592,7 @@ function SourceChips({
           // BEFORE mouseup — the target moves and the click never fires (the
           // "first click just scrolls the page" bug).
           onMouseDown={(e) => e.preventDefault()}
-          className="mt-1 text-xs font-medium text-df-green-dark/80 transition hover:text-df-green-dark"
+          className="mt-1 text-xs font-medium text-df-brand-ink/80 transition hover:text-df-brand-ink"
         >
           {expanded ? "Collapse sources" : `Show all ${sources.length} sources`}
         </button>
@@ -648,7 +648,7 @@ function Citation({ n, sources, onCite }: { n: number } & InlineOpts) {
         }
       }}
       /* The numeral is 0.65em, so it needs MORE contrast than body text, not
-         less. `text-df-green-dark` on `bg-df-green-leaf/30` measured 2.06:1
+         less. `text-df-brand-ink` on `bg-df-green-leaf/30` measured 2.06:1
          against BioRenew's gold palette — the badge read as a coloured smudge.
          `df-text` is the brand's own body-text colour, so it is readable on the
          brand's light surfaces by construction, for any palette rather than

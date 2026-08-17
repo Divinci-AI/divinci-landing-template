@@ -47,7 +47,12 @@ export function BrandAvatar({
           className={brand.media.markLogo ? "h-full w-full object-cover" : "h-[70%] w-[70%] object-contain"}
         />
       ) : (
-        <span className="text-[11px] font-bold text-df-green-dark" aria-hidden="true">
+        // Ink is `on-chrome`, NOT a brand value token. This component's background
+        // is set by its CALLER via className — WelcomeMessage and the chat header
+        // both pass `bg-df-green-dark` — so brand-toned ink is painted onto its
+        // own background and vanishes. The Greystone demo shipped a blank navy
+        // circle this way, on a LIGHT brand: it was never about brand lightness.
+        <span className="text-[11px] font-bold text-df-on-chrome" aria-hidden="true">
           {brandInitials(brand.identity.siteName)}
         </span>
       )}

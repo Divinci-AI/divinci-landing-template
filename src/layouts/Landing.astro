@@ -75,18 +75,20 @@ const darkSurfaceVars = isDarkBrand
     `--color-df-faint:color-mix(in srgb, ${p.text} 45%, ${p.cream});` +
     `--color-df-line:color-mix(in srgb, ${p.text} 16%, ${p.cream});` +
     `--color-df-line-strong:color-mix(in srgb, ${p.text} 28%, ${p.cream});` +
-    // `green-dark` is an INK token at several call sites (the corpus stat
-    // numbers, the language-list label, the showcase byline) as well as a
-    // chrome base. On a light brand `dark` is a deep colour and reads fine; on
-    // a dark brand it can BE the page's near-black, so those numbers render
-    // invisible on the card they sit on. Point the ink at the accent, which is
-    // what a dark site does with its own counts.
+    // `green-dark` names a VALUE ("the brand's deep tone"), and the design uses
+    // it in two ROLES: ink at some call sites (corpus stat numbers, the
+    // language-list label, the showcase byline) and SURFACE at others (starter
+    // pills, the chat avatar, user message bubbles, the language-switcher pill,
+    // the signup button). Roles have a compatibility relation — ink must
+    // contrast with surface — and values do not, so nothing objects and the
+    // failure appears only where the two meet.
     //
-    // Only bites a hand-authored palette: the extractor's dark branch already
-    // derives `dark` from the accent. Probed carried this as a local
-    // Landing.astro override, which then froze it out of every later template
-    // fix — the override is deleted with this commit.
-    `--color-df-green-dark:${p.accent};` +
+    // ⚠️ THIS USED TO REMAP green-dark ITSELF TO THE ACCENT. That fixed the ink
+    // and turned every SURFACE bright cyan: on a dark brand the starter pills,
+    // the chat avatar and the switcher pill all went accent-coloured. A token
+    // that is both ink and surface cannot be remapped wholesale — it needs
+    // splitting, which is what `--color-df-brand-ink` below does.
+    `--color-df-brand-ink:${p.accent};` +
     `--color-df-on-chrome:${onChrome};` +
     // The frosted chat card. A white tint at 18% is a sheen on a light page
     // and a haze on a near-black one — it lightened dodcyber's card until
@@ -99,7 +101,7 @@ const darkSurfaceVars = isDarkBrand
     // A black drop shadow is invisible on black; lift the card with a ring
     // of its own ink instead.
     `--glass-shadow:0 8px 32px color-mix(in srgb, ${p.cream} 60%, transparent);}`
-  : `:root{--color-df-on-chrome:${onChrome};}`;
+  : `:root{--color-df-on-chrome:${onChrome};--color-df-brand-ink:${p.dark};}`;
 
 const brandVars = `:root{` +
   `--color-df-navy:${p.primary};--color-df-green-dark:${p.dark};` +

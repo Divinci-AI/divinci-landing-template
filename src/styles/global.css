@@ -3,6 +3,11 @@
 @theme {
   --color-df-navy: #3d4256;
   --color-df-green-dark: #3b6b3f;
+  /* Brand-coloured INK. Defaults to the same deep colour, so light brands are
+     unchanged; Landing.astro points it at the accent on dark brands, where
+     green-dark IS the page. Kept separate because green-dark is also a
+     SURFACE token and cannot be remapped wholesale. */
+  --color-df-brand-ink: #3b6b3f;
   --color-df-green-mid: #5a8f5f;
   --color-df-green-leaf: #9ec947;
   --color-df-cream: #f4efda;

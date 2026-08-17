@@ -26,7 +26,7 @@ export function SignupCTA({ lang = DEFAULT_LOCALE }: SignupCTAProps) {
         {brand.links.hasLogin && (
           <a
             href={LOGIN_URL}
-            className="inline-flex items-center rounded-full border border-df-green-dark/40 px-6 py-2.5 text-sm font-semibold text-df-green-dark transition hover:bg-df-green-dark/5"
+            className="inline-flex items-center rounded-full border border-df-green-dark/40 px-6 py-2.5 text-sm font-semibold text-df-brand-ink transition hover:bg-df-green-dark/5"
           >
             {ui.hero.memberLoginCta}
           </a>

@@ -60,7 +60,7 @@ const headlineSegments = tokenize(t.headline);
       {
         stats.map((stat) => (
           <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5">
-            <p class="text-4xl font-bold leading-none text-df-green-dark">
+            <p class="text-4xl font-bold leading-none text-df-brand-ink">
               {stat.value}
             </p>
             <p class="mt-1 text-sm font-medium uppercase tracking-wider text-df-muted">
@@ -72,7 +72,7 @@ const headlineSegments = tokenize(t.headline);
     </div>
 
     <div class="mt-16 text-center">
-      <p class="text-sm font-medium uppercase tracking-wider text-df-green-dark">
+      <p class="text-sm font-medium uppercase tracking-wider text-df-brand-ink">
         {t.languagePrefix}
       </p>
       {/* One clean line instead of a noisy 35-chip cloud: a few native names +
