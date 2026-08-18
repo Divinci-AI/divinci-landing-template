@@ -136,6 +136,28 @@ export const en = {
       "Please use a permanent email address — disposable inboxes aren't supported.",
     errorNetwork:
       "Network error — that message wasn't delivered. Please try again.",
+    /**
+     * A 5xx from the API is OUR fault, not the visitor's connection. Blaming
+     * their network sends them to reload the page and reproduce it — this was
+     * the string shown during the 2026-08-17 outage, when the API was
+     * returning 500s from an exhausted Mongo pool.
+     */
+    errorServer:
+      "Something went wrong on our end — that message wasn't delivered. Please try again in a moment.",
+    /** Upstream 429: the release's shared rate-limit bucket, not a failure. */
+    errorBusy:
+      "The assistant is handling a lot of questions right now. Please try again in a moment.",
+    /**
+     * The Divinci-side anonymous cap (release.maxAnonymousChatMessages) — a
+     * DIFFERENT ceiling from this landing page's own free-message quota, and
+     * the only refusal with a real next step: sign in and keep the thread.
+     * Kept separate from signupHeadline/-Body, which send the visitor to the
+     * CUSTOMER's site; this one goes to Divinci.
+     */
+    anonLimitHeadline: "You've reached the anonymous chat limit",
+    anonLimitBody:
+      "Sign in to Divinci to keep this conversation going — no limit once you're signed in.",
+    anonLimitButton: "Sign in to continue",
     /** Sticky bar nudge once the free message is spent. */
     quotaExhaustedNudge:
       "You've used your free message — keep talking to the Acme Expert AI.",
@@ -240,4 +262,18 @@ export const en = {
  * NOT `as const` — string fields stay typed as `string` so translated
  * locale files satisfy the same shape.
  */
-export type UIStrings = typeof en;
+/**
+ * Keys added AFTER the first wave of machine-translated locale files shipped.
+ * Every generated `src/i18n/ui/<code>.ts` is annotated `: UIStrings`, so making
+ * a new key REQUIRED breaks the typecheck of ~30 already-generated dictionaries
+ * in every live demo site the moment it rebuilds. They stay optional here and
+ * fall back to English at the use site (see `chatString()` in ChatIsland).
+ *
+ * Promote a key out of this list only when every locale file actually carries
+ * it — i.e. after a re-translation pass, not before.
+ */
+type LateChatKeys = "errorServer" | "errorBusy" | "anonLimitHeadline" | "anonLimitBody" | "anonLimitButton";
+
+export type UIStrings = Omit<typeof en, "chat"> & {
+  chat: Omit<typeof en.chat, LateChatKeys> & Partial<Pick<typeof en.chat, LateChatKeys>>,
+};

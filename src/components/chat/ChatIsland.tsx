@@ -9,10 +9,12 @@ import { Transcript, type TranscriptMessage } from "./Transcript";
 import { MessageInput } from "./MessageInput";
 import { StickyChatBar } from "./StickyChatBar";
 import { SignupCTA } from "./SignupCTA";
+import { AnonLimitCTA } from "./AnonLimitCTA";
 
 import { isDisposableEmail } from "../../lib/disposable-emails";
 import { getLocaleMeta, DEFAULT_LOCALE } from "../../i18n/locales";
 import { getUI } from "../../i18n";
+import { en } from "../../i18n/ui/en";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // A disposable email is NOT valid for the gate — keeps the email gate
@@ -73,6 +75,14 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   const signitureRef = useRef<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * The DIVINCI-side anonymous cap (release.maxAnonymousChatMessages), which
+   * is a different ceiling from this page's own free-message quota and needs a
+   * different exit: sign in at Divinci, not sign up with the customer.
+   * Server-driven — this tab cannot count it, because the cap is enforced over
+   * the signed transcript the server holds.
+   */
+  const [anonLimit, setAnonLimit] = useState(false);
   /**
    * Set when the WORKER says the anonymous grace window is spent, which can
    * happen before this tab's own count reaches the limit — the server keys the
@@ -335,7 +345,51 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
           throw new Error(`chat-send failed: ${resp.status}`);
         }
 
+        // The Divinci anonymous-message cap. Until 2026-08-17 this arrived as
+        // the same flat 502 as an outage and rendered as "Network error",
+        // which is both wrong and a dead end — the visitor has somewhere to go.
+        if (resp.status === 409) {
+          const b = (await resp.json().catch(() => null)) as { error?: string } | null;
+          if (b?.error === "anon_limit_reached") {
+            setMessages((prev) =>
+              prev.filter(
+                (m) => m.id !== assistantPlaceholder.id && m.id !== userMsg.id,
+              ),
+            );
+            setDraft(content);
+            setError(null);
+            setAnonLimit(true);
+            return;
+          }
+        }
+
+        // Rate limited upstream — transient, and NOT the visitor's doing:
+        // within one release every Worker-fronted visitor shares a bucket.
+        if (resp.status === 429) {
+          setMessages((prev) =>
+            prev.filter(
+              (m) => m.id !== assistantPlaceholder.id && m.id !== userMsg.id,
+            ),
+          );
+          setDraft(content);
+          setError(t.errorBusy ?? en.chat.errorBusy);
+          return;
+        }
+
         if (!resp.ok) {
+          // A 5xx is ours. Say so — "Network error" sends the visitor to check
+          // their wifi and reload, which reproduces it. Keep their text in the
+          // composer so a retry is one click, not a retype.
+          if (resp.status >= 500) {
+            setMessages((prev) =>
+              prev.filter(
+                (m) => m.id !== assistantPlaceholder.id && m.id !== userMsg.id,
+              ),
+            );
+            setDraft(content);
+            setError(t.errorServer ?? en.chat.errorServer);
+            return;
+          }
           throw new Error(`chat-send failed: ${resp.status}`);
         }
 
@@ -631,7 +685,9 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
             </div>
           )}
           <div className="border-t border-df-green-dark/10 bg-df-surface/70 p-3 backdrop-blur-sm">
-            {quotaExhausted ? (
+            {anonLimit ? (
+              <AnonLimitCTA lang={lang} />
+            ) : quotaExhausted ? (
               <SignupCTA lang={lang} />
             ) : (
               <MessageInput
@@ -649,6 +705,8 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
             )}
           </div>
         </div>
+      ) : anonLimit ? (
+        <AnonLimitCTA lang={lang} />
       ) : quotaExhausted ? (
         <SignupCTA lang={lang} />
       ) : (
@@ -678,6 +736,8 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         send handler, so a question typed at the bottom of the page flows
         through the same gated /api/chat-send path as the hero panel. It
         reveals itself once the hero scrolls out of view. */}
+    {/* The sticky bar has no anon-limit state of its own: hiding its composer
+        is the right behaviour for EITHER ceiling, so both feed one prop. */}
     <StickyChatBar
       lang={lang}
       emailRequired={emailRequired}
@@ -685,7 +745,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
       onDraftChange={setDraft}
       onSend={handleSend}
       pending={pending}
-      quotaExhausted={quotaExhausted}
+      quotaExhausted={quotaExhausted || anonLimit}
     />
     {tosGate && (
       <TermsModal

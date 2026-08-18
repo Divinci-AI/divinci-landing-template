@@ -17,6 +17,18 @@ export { FREE_MESSAGE_QUOTA, FREE_MESSAGES_BEFORE_EMAIL };
 export const SIGNUP_URL = withRef(brand.links.signupUrl, "free-message-quota-cta");
 export const LOGIN_URL = withRef(brand.links.loginUrl, "free-message-quota-cta");
 
+/**
+ * Where a visitor goes when the DIVINCI-side anonymous cap is reached
+ * (release.maxAnonymousChatMessages), as opposed to this page's own free-
+ * message quota. Deliberately NOT brand.links.* — that points at the
+ * customer's site, and this ceiling is Divinci's, not theirs.
+ *
+ * withRef() is intentionally NOT applied: it tags with the CUSTOMER's
+ * utm_source, which would misattribute a Divinci signup to them.
+ */
+export const DIVINCI_CHAT_URL =
+  "https://chat.divinci.app/?utm_source=divinci-demo&utm_medium=referral&utm_campaign=anon-limit-cta";
+
 let cached: DivinciClient | null = null;
 
 export function getDivinci(): DivinciClient {

@@ -469,6 +469,96 @@ describe("worker: /api/chat-send quota gate", () => {
     }
   });
 
+  /**
+   * Regression: 2026-08-17. EVERY non-ok upstream status except the ToS 403
+   * was flattened to `502 upstream_error`, which the chat island renders as
+   * "Network error — that message wasn't delivered." A colleague hit it on
+   * their FIRST visit and read it as the anonymous limit; it was actually a
+   * 500 from an exhausted Mongo pool. Three different upstream conditions had
+   * one indistinguishable presentation, and the only one with a real next
+   * step (sign in) looked like a broken connection.
+   */
+  describe("upstream refusals are classified, not flattened to 502", () => {
+    const send = (env: MockEnv, email = "cls@gmail.com") =>
+      fetchHandler(
+        new Request("https://x.workers.dev/api/chat-send", {
+          method: "POST",
+          headers: {
+            Authorization: authHeader("preview", "secret-pw"),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, newPrompt: "hi" }),
+        }),
+        env,
+      );
+
+    it("anonymous cap (400 + phrase) -> 409 anon_limit_reached, claim rolled back", async () => {
+      const env = makeEnv();
+      // The API puts the phrase in `context`, not `message` — BAD_FORM's own
+      // message is the generic "bad form data". Matching the whole body is
+      // what makes this robust to which field carries it.
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            status: "error",
+            message: "bad form data",
+            context: "Max number of messages reached.",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+      try {
+        const resp = await send(env);
+        expect(resp.status).toBe(409);
+        expect(((await resp.json()) as { error: string }).error).toBe("anon_limit_reached");
+        // No answer was delivered, so the free message must not be burned.
+        expect(env.QUOTA_DO.claims.size).toBe(0);
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    });
+
+    it("rate limit (429) -> 429 rate_limited with Retry-After carried through", async () => {
+      const env = makeEnv();
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ status: "error", message: "too many requests" }), {
+          status: 429,
+          headers: { "Content-Type": "application/json", "Retry-After": "740" },
+        }),
+      );
+      try {
+        const resp = await send(env, "rl@gmail.com");
+        expect(resp.status).toBe(429);
+        const body = (await resp.json()) as { error: string, retryAfterSeconds?: number };
+        expect(body.error).toBe("rate_limited");
+        expect(body.retryAfterSeconds).toBe(740);
+        expect(env.QUOTA_DO.claims.size).toBe(0);
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    });
+
+    it("a 400 that is NOT the cap still reads as a generic upstream error", async () => {
+      // The classifier must key on the cap specifically. Treating every 400 as
+      // "you are out of messages" would send a visitor to sign in over a
+      // validation bug — the same wrong-answer failure in the other direction.
+      const env = makeEnv();
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ status: "error", message: "bad form data" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+      try {
+        const resp = await send(env, "other@gmail.com");
+        expect(resp.status).toBe(502);
+        expect(((await resp.json()) as { error: string }).error).toBe("upstream_error");
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    });
+  });
+
   it("claim rolled back on failure lets the visitor retry successfully", async () => {
     const env = makeEnv();
     const okPayload = {
