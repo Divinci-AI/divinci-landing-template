@@ -14,7 +14,7 @@ import { AnonLimitCTA } from "./AnonLimitCTA";
 import { isDisposableEmail } from "../../lib/disposable-emails";
 import { getLocaleMeta, DEFAULT_LOCALE } from "../../i18n/locales";
 import { getUI } from "../../i18n";
-import { en } from "../../i18n/ui/en";
+import { CHAT_SYSTEM_STRINGS as SYS } from "../../i18n/chat-system-strings";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // A disposable email is NOT valid for the gate — keeps the email gate
@@ -372,7 +372,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
             ),
           );
           setDraft(content);
-          setError(t.errorBusy ?? en.chat.errorBusy);
+          setError(SYS.errorBusy);
           return;
         }
 
@@ -387,7 +387,7 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
               ),
             );
             setDraft(content);
-            setError(t.errorServer ?? en.chat.errorServer);
+            setError(SYS.errorServer);
             return;
           }
           throw new Error(`chat-send failed: ${resp.status}`);

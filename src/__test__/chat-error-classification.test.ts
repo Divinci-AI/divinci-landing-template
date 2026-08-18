@@ -86,15 +86,49 @@ describe("the chat island tells the visitor which thing happened", () => {
     expect((src.match(/setDraft\(content\)/g) ?? []).length).toBeGreaterThanOrEqual(4);
   });
 
-  it("reads late-added strings with an English fallback", () => {
-    // Those keys are OPTIONAL on UIStrings so the ~30 already-generated locale
-    // dictionaries in live demo sites still typecheck. Without the fallback a
-    // non-English visitor gets the literal word "undefined" in the error.
+  it("takes its system strings from outside the customer copy dictionary", () => {
+    // See the guard below for why. Reading these off `t` (getUI) is what broke.
+    expect(code).toMatch(/CHAT_SYSTEM_STRINGS/);
     for (const key of ["errorServer", "errorBusy"]) {
-      expect(code, `${key} must fall back to English`).toMatch(
-        new RegExp(`t\\.${key} \\?\\? en\\.chat\\.${key}`),
+      expect(code, `${key} must come from CHAT_SYSTEM_STRINGS`).toMatch(
+        new RegExp(`SYS\\.${key}`),
       );
     }
+  });
+});
+
+/**
+ * The fleet-wide trap, caught by the pipeline on 2026-08-17 before it shipped.
+ *
+ * The demo pipeline generates a BRANDED `en.ts` per run and shape-checks it
+ * against this neutral template with exact key-set parity. So a key added here
+ * is missing from every previously generated run, and the pipeline's response
+ * is to reject the branded copy WHOLESALE — every demo would then rebuild with
+ * neutral "Acme Expert" text in its title, og: tags, chat welcome and CTA.
+ *
+ * An error string is not customer copy. It does not belong in that file.
+ */
+describe("chat system strings stay OUT of the per-customer copy dictionary", () => {
+  const en = read("i18n/ui/en.ts");
+
+  it("en.ts carries none of them", () => {
+    for (const key of [
+      "errorServer",
+      "errorBusy",
+      "anonLimitHeadline",
+      "anonLimitBody",
+      "anonLimitButton",
+    ]) {
+      expect(en, `${key} is in en.ts — it will de-brand every demo on rebuild`)
+        .not.toMatch(new RegExp(`\\b${key}\\b`));
+    }
+  });
+
+  it("UIStrings stays a plain derived type", () => {
+    // An earlier attempt kept the keys in en.ts and made them optional on
+    // UIStrings. That fixed the ~30 generated LOCALE files and did nothing for
+    // the generated en.ts shape check — the failure that actually mattered.
+    expect(en).toMatch(/export type UIStrings = typeof en;/);
   });
 });
 
