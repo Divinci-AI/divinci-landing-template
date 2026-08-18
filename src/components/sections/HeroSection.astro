@@ -4,7 +4,7 @@ import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
 import { lockupWord as resolveLockupWord, lockupMarkSplit } from "~/lib/lockup-word";
-import { isDarkPalette } from "~/lib/contrast";
+import { isDarkPalette, logoInkClass } from "~/lib/contrast";
 
 interface Props {
   lang?: string;
@@ -578,9 +578,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
                    mark shrink to fit; a logo that already fits is unchanged,
                    because max-h-10 resolves to the same 40px h-10 gave it. */
                 "hero-logo block w-auto max-w-[62vw] object-contain md:max-w-[26rem]",
-                isDarkBrand
-                  ? !brand.media.logoIsLight && "brightness-0 invert"
-                  : brand.media.logoIsLight && "brightness-0",
+                logoInkClass(isDarkBrand, brand.media.logoIsLight),
               ]}
               style={[
                 brand.media.logoBaselineDrop

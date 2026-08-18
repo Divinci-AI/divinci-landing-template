@@ -1,5 +1,6 @@
 import { brand } from "~/brand.config";
 import { brandInitials } from "~/lib/initials";
+import { isDarkPalette, logoInkClass } from "~/lib/contrast";
 
 /**
  * The assistant's face, in one place.
@@ -40,11 +41,23 @@ export function BrandAvatar({
         // A wordmark is a horizontal lockup; there is no crop or scale of one
         // that works in a small circle. Initials do, which is why they are the
         // fallback rather than a last-ditch one.
+        // The mark also has to be VISIBLE on the circle, which is the brand's
+        // own chrome: Freedom with AI's mark is drawn in #000000 and the
+        // avatar sits on a near-black panel, so it rendered as a black glyph
+        // on a black disc — present, correctly sized, and unseeable. Same rule
+        // the hero and the header already apply to the wordmark, and only for
+        // `logo`, whose lightness `logoIsLight` describes; a separate
+        // `markLogo` may be full-colour and a silhouette would destroy it.
         <img
           src={brand.media.markLogo || brand.media.logo}
           alt=""
           aria-hidden="true"
-          className={brand.media.markLogo ? "h-full w-full object-cover" : "h-[70%] w-[70%] object-contain"}
+          className={[
+            brand.media.markLogo ? "h-full w-full object-cover" : "h-[70%] w-[70%] object-contain",
+            brand.media.markLogo
+              ? ""
+              : logoInkClass(isDarkPalette(brand.palette.cream), brand.media.logoIsLight),
+          ].filter(Boolean).join(" ")}
         />
       ) : (
         // Ink is `on-chrome`, NOT a brand value token. This component's background

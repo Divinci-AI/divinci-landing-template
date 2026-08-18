@@ -23,6 +23,7 @@ import { cleanContextTitle } from "~/lib/clean-context-title";
 import { brandInitials } from "~/lib/initials";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
+import { isDarkPalette, logoInkClass } from "~/lib/contrast";
 
 interface Props {
   lang?: string;
@@ -114,6 +115,11 @@ const exchanges: Exchange[] = exchangeMeta.map((meta, i) => ({
 }));
 
 const ASSISTANT_MODEL = brand.identity.productName;
+// A single-colour mark has to survive the chrome it sits on — see
+// logoInkClass. Only `logo` is filtered; `markLogo` may be full-colour.
+const markInk = brand.media.markLogo
+  ? ""
+  : logoInkClass(isDarkPalette(brand.palette.cream), brand.media.logoIsLight);
 
 // Resolve a citation number to its source ("context") title for the tooltip.
 function citeTitle(ex: Exchange, n: number): string {
@@ -145,7 +151,7 @@ function citeTitle(ex: Exchange, n: number): string {
           class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15"
         >
           {(brand.media.markLogo || brand.media.logoIsMark) ? (
-            <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class={brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4"} width="16" height="16" />
+            <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class:list={[brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4", markInk]} width="16" height="16" />
           ) : (
             <span class="text-[10px] font-bold text-df-brand-ink" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
           )}
@@ -166,7 +172,7 @@ function citeTitle(ex: Exchange, n: number): string {
         <div class="flex items-start gap-2">
           <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
             {(brand.media.markLogo || brand.media.logoIsMark) ? (
-            <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class={brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4"} width="16" height="16" />
+            <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class:list={[brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4", markInk]} width="16" height="16" />
           ) : (
             <span class="text-[10px] font-bold text-df-brand-ink" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
           )}
@@ -200,7 +206,7 @@ function citeTitle(ex: Exchange, n: number): string {
               <div class="flex items-start gap-2">
                 <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-df-green-leaf/20 ring-1 ring-df-green-dark/15">
                   {(brand.media.markLogo || brand.media.logoIsMark) ? (
-            <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class={brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4"} width="16" height="16" />
+            <img src={brand.media.markLogo || brand.media.logo} alt="" aria-hidden="true" class:list={[brand.media.markLogo ? "h-full w-full object-cover" : "h-4 w-4", markInk]} width="16" height="16" />
           ) : (
             <span class="text-[10px] font-bold text-df-brand-ink" aria-hidden="true">{brandInitials(brand.identity.siteName)}</span>
           )}

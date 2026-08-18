@@ -51,11 +51,19 @@ export function readableOn(bg: string, preferred: string, fallback: string): str
 /**
  * A legible {background, text} pair for a solid button on `sectionBg`.
  *
- * Tries the brand's own accent first and keeps it whenever it clears AA against
- * both the section behind it and its own label. Otherwise falls back to a pair
- * built from the palette's cream/near-white, which is what the hover state
- * already used — so the fallback is the design that was always there, just
- * reached without needing a mouse.
+ * Every candidate is MEASURED against the section it sits on. An earlier
+ * version tried the accent and then fell back to `cream` unconditionally,
+ * which assumed `cream` is a light colour. On a dark-page brand `cream` IS the
+ * page colour — Freedom with AI's palette has `primary` and `cream` both
+ * `#0f1419` — so the fallback painted the button in the section's own colour
+ * and then, finding no readable brand ink for it, labelled it `#000000`:
+ * invisible on invisible, on the page's primary call to action.
+ *
+ * So the background is the first candidate that clears AA_LARGE against the
+ * section, and the label the first that clears AA_TEXT against that
+ * background. Brand colours come first in both lists, so a palette that
+ * already works is never restyled; `#ffffff`/`#000000` are last and exist only
+ * to guarantee the loop always terminates on a legible pair.
  */
 export function buttonColors(
   sectionBg: string,
@@ -63,18 +71,36 @@ export function buttonColors(
   label: string,
   cream: string,
 ): { bg: string; text: string } {
-  const accentWorks =
-    contrastRatio(accent, sectionBg) >= AA_LARGE && contrastRatio(label, accent) >= AA_TEXT;
-  if (accentWorks) return { bg: accent, text: label };
-  // Cream against a dark section. Label in the brand's own dark whenever that
-  // clears AA — not simply the highest-contrast colour available, which is
-  // always pure black and reads as off-brand on a warm palette. These pages
-  // exist to look like the customer's site; maximising a ratio past the point
-  // of legibility trades brand fidelity for a number nobody sees.
-  return {
-    bg: cream,
-    text: contrastRatio(sectionBg, cream) >= AA_TEXT ? sectionBg : "#000000",
-  };
+  // Brand ink first, then the two colours that always work somewhere. `label`
+  // and `sectionBg` are both brand-toned darks on these palettes; preferring
+  // them over pure black keeps a warm palette warm, since legibility is a
+  // threshold to clear rather than a number to maximise.
+  const inks = [label, sectionBg, cream, "#ffffff", "#000000"];
+  for (const bg of [accent, cream, "#ffffff", "#000000"]) {
+    if (contrastRatio(bg, sectionBg) < AA_LARGE) continue;
+    const text = inks.find((ink) => contrastRatio(ink, bg) >= AA_TEXT);
+    if (text) return { bg, text };
+  }
+  // Unreachable in practice: a section is either light enough for a black
+  // button or dark enough for a white one. Kept so the function is total.
+  return { bg: "#ffffff", text: "#000000" };
+}
+
+/**
+ * The Tailwind filter that makes a single-colour logo visible on the chrome.
+ *
+ * The rule the hero, the header and the avatar circles all need, in one place:
+ * a dark-ink logo disappears on a dark page and must be whited out, and a
+ * white logo (drawn for a dark header) washes out on a light page and must be
+ * blacked out. A logo that already matches its surface is left alone.
+ *
+ * `brightness-0 invert` is a silhouette, so it is right for a mark drawn in
+ * one colour and wrong for a full-colour one — apply it to `logo`, whose
+ * lightness `logoIsLight` describes, not to an unclassified `markLogo`.
+ */
+export function logoInkClass(isDarkBrand: boolean, logoIsLight: boolean | undefined): string {
+  if (isDarkBrand) return logoIsLight ? "" : "brightness-0 invert";
+  return logoIsLight ? "brightness-0" : "";
 }
 
 /**

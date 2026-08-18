@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { luminance, contrastRatio, readableOn, buttonColors, AA_TEXT, isDarkPalette } from "./contrast";
+import { luminance, contrastRatio, readableOn, buttonColors, logoInkClass, AA_TEXT, AA_LARGE, isDarkPalette } from "./contrast";
 
 /**
  * AuraPath's real extracted palette — the one that produced an invisible CTA.
@@ -126,5 +126,64 @@ describe("ink on the brand chrome", () => {
 
   it("keeps white on a dark green button — light brands do not move", () => {
     expect(onChrome(LONGEVITYRX)).toBe("#ffffff");
+  });
+});
+/**
+ * Freedom with AI — the palette that produced a CTA nobody could read. `primary`
+ * and `cream` are the SAME near-black, because on a dark-page brand `cream` is
+ * the page colour, not a light colour. The old fallback took `cream` on faith.
+ */
+const FREEDOM = { primary: "#0f1419", accent: "#1a73e8", cream: "#0f1419", text: "#f4f6f8" };
+
+describe("buttonColors on a dark-page brand", () => {
+  it("never paints the button in the section's own colour", () => {
+    // The bug: bg #0f1419 on a #0f1419 section, labelled #000000.
+    const c = buttonColors(FREEDOM.primary, FREEDOM.accent, FREEDOM.primary, FREEDOM.cream);
+    expect(contrastRatio(c.bg, FREEDOM.primary)).toBeGreaterThanOrEqual(AA_LARGE);
+    expect(contrastRatio(c.text, c.bg)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  it("keeps the brand's accent and relabels it, rather than discarding it", () => {
+    // The accent clears AA against the section; only the brand's dark LABEL
+    // failed on top of it. Dropping the accent for that would have thrown away
+    // the one colour on the page that is the customer's.
+    const c = buttonColors(FREEDOM.primary, FREEDOM.accent, FREEDOM.primary, FREEDOM.cream);
+    expect(c.bg).toBe(FREEDOM.accent);
+  });
+
+  it("is legible for every palette the estate actually has", () => {
+    const palettes: Array<[string, string, string, string]> = [
+      [FREEDOM.primary, FREEDOM.accent, FREEDOM.primary, FREEDOM.cream],
+      [AURAPATH.primary, AURAPATH.accent, AURAPATH.primary, AURAPATH.cream],
+      [BRIGHT.primary, BRIGHT.accent, BRIGHT.primary, BRIGHT.cream],
+      [DODCYBER.primary, DODCYBER.accent, DODCYBER.primary, DODCYBER.cream],
+      [LONGEVITYRX.primary, LONGEVITYRX.accent, LONGEVITYRX.primary, LONGEVITYRX.cream],
+      // Degenerate on purpose: one colour for everything must still resolve.
+      ["#000000", "#000000", "#000000", "#000000"],
+      ["#ffffff", "#ffffff", "#ffffff", "#ffffff"],
+    ];
+    for (const [section, accent, label, cream] of palettes) {
+      const c = buttonColors(section, accent, label, cream);
+      expect(contrastRatio(c.bg, section), `bg on ${section}`).toBeGreaterThanOrEqual(AA_LARGE);
+      expect(contrastRatio(c.text, c.bg), `label on ${c.bg}`).toBeGreaterThanOrEqual(AA_TEXT);
+    }
+  });
+});
+
+describe("logoInkClass", () => {
+  it("whites out a dark logo on a dark brand", () => {
+    // Freedom with AI's mark is filled #000000 and its avatar circle sits on a
+    // near-black panel: a black glyph on a black disc.
+    expect(logoInkClass(true, false)).toBe("brightness-0 invert");
+    expect(logoInkClass(true, undefined)).toBe("brightness-0 invert");
+  });
+
+  it("blacks out a white logo on a light brand", () => {
+    expect(logoInkClass(false, true)).toBe("brightness-0");
+  });
+
+  it("leaves a logo that already matches its surface alone", () => {
+    expect(logoInkClass(true, true)).toBe("");
+    expect(logoInkClass(false, false)).toBe("");
   });
 });

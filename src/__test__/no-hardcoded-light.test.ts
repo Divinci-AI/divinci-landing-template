@@ -86,6 +86,32 @@ describe("the assistant has ONE face", () => {
   });
 });
 
+describe("a single-colour mark stays visible on the chrome", () => {
+  // Freedom with AI's mark is filled #000000 and every avatar circle sits on a
+  // near-black panel, so the mark rendered as a black glyph on a black disc:
+  // present in the DOM, correctly sized, and unseeable. The hero and the
+  // header had always filtered the logo; the avatars never did.
+  const users = ["src/components/chat/BrandAvatar.tsx",
+                 "src/components/sections/TranscriptShowcase.astro",
+                 "src/components/sections/HeroSection.astro"];
+
+  it("every logo <img> on brand chrome runs through logoInkClass", () => {
+    for (const f of users) {
+      const src = readFileSync(f, "utf8");
+      expect(src, `${f} must filter the logo for its surface`).toContain("logoInkClass(");
+    }
+  });
+
+  it("no component re-derives the invert rule inline", () => {
+    // Three copies of `isDark ? !logoIsLight && "brightness-0 invert"` is how
+    // the avatars came to be missing it — the rule lives in one place now.
+    for (const f of users) {
+      const src = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*/g, "");
+      expect(src, `${f} re-implements the rule`).not.toMatch(/logoIsLight\s*&&\s*"brightness-0/);
+    }
+  });
+});
+
 describe("hover states follow the brand, not the template", () => {
   it("the welcome bubble's hover colour is the brand's bubble token", () => {
     // Was `rgba(220, 234, 220, 0.85) !important` — the template's original
