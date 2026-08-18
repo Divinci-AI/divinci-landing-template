@@ -363,7 +363,7 @@ function MessageRating({
             maxLength={2000}
             rows={2}
             placeholder="What was wrong? (optional)"
-            className="w-full rounded-lg border border-df-green-dark/15 bg-df-surface px-3 py-2 text-sm text-df-text focus:border-df-green-dark/40 focus:outline-none"
+            className="w-full rounded-lg border border-df-green-dark/15 bg-df-surface px-3 py-2 text-base md:text-sm text-df-text focus:border-df-green-dark/40 focus:outline-none"
           />
           <div className="flex gap-2">
             <button

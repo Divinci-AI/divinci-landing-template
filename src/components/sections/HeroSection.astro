@@ -330,6 +330,17 @@ const logoMaxHMd = Math.round(56 * logoScale);
 
       .ai-shine {
         position: relative;
+        /* inline-block + line-height:1 so the box IS the glyph box.
+           As a plain inline, the border box is the font's full em box (51px at
+           36px/40px line-height on mobile, 67px at 48px on desktop) while
+           `::after { inset: 0 }` lays its "AI" out from the TOP of that box.
+           The shimmer copy therefore rendered ~7px ABOVE the real glyphs and
+           the sweep looked too high and off the logo. Measured on the live
+           page: logo-to-AI bottom gap 9.3px -> 2.3px on mobile, 12px -> 3px on
+           desktop. The overlay must share the parent's box or it cannot share
+           its baseline. */
+        display: inline-block;
+        line-height: 1;
         /* The brand's DISPLAY face — this glyph pair sits beside the logo, so
            it belongs with the wordmark, not with the body copy. Reading
            --font-sans put AuraPath's "AI" in a heavy IBM Plex grotesque next to

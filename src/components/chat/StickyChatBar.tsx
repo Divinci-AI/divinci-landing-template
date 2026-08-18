@@ -159,7 +159,7 @@ export function StickyChatBar({
                 maxLength={MAX_MESSAGE_LEN}
                 aria-label={t.questionAriaLabel}
                 placeholder={t.questionPlaceholderSticky}
-                className="min-w-0 flex-1 rounded-full border border-df-line-strong bg-df-surface/80 px-4 py-2.5 text-sm focus:border-df-green-dark focus:outline-none focus:ring-2 focus:ring-df-green-dark/30"
+                className="min-w-0 flex-1 rounded-full border border-df-line-strong bg-df-surface/80 px-4 py-2.5 text-base md:text-sm focus:border-df-green-dark focus:outline-none focus:ring-2 focus:ring-df-green-dark/30"
               />
               <span className={`send-glow-wrap shrink-0 ${sendActive ? "is-active" : ""}`}>
                 <button
