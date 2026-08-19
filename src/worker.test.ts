@@ -192,7 +192,6 @@ const _lastCtx: { ref: MockExecutionContext | null } = { ref: null };
 function fetchHandler(req: Request, env: MockEnv): Promise<Response> {
   const ctx = new MockExecutionContext();
   _lastCtx.ref = ctx;
-  // @ts-expect-error — partial env / ctx for test
   return workerModule.fetch(req, env, ctx);
 }
 
@@ -201,7 +200,6 @@ describe("worker: Basic Auth gate", () => {
     const env = makeEnv();
     const resp = await fetchHandler(
       new Request("https://x.workers.dev/"),
-      // @ts-expect-error — partial env for test
       env,
     );
     expect(resp.status).toBe(401);
@@ -214,7 +212,6 @@ describe("worker: Basic Auth gate", () => {
       new Request("https://x.workers.dev/", {
         headers: { Authorization: authHeader("preview", "wrong") },
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(401);
@@ -226,7 +223,6 @@ describe("worker: Basic Auth gate", () => {
       new Request("https://x.workers.dev/", {
         headers: { Authorization: authHeader("admin", "secret-pw") },
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(401);
@@ -238,7 +234,6 @@ describe("worker: Basic Auth gate", () => {
       new Request("https://x.workers.dev/", {
         headers: { Authorization: authHeader("preview", "secret-pw") },
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(200);
@@ -250,7 +245,6 @@ describe("worker: Basic Auth gate", () => {
     const env = makeEnv({ BASIC_AUTH_PASSWORD: undefined });
     const resp = await fetchHandler(
       new Request("https://x.workers.dev/"),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(200);
@@ -272,7 +266,6 @@ describe("worker: /api/chat-send quota gate", () => {
         },
         body: JSON.stringify({ newPrompt: "hi" }),
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(400);
@@ -294,7 +287,6 @@ describe("worker: /api/chat-send quota gate", () => {
         },
         body: JSON.stringify({ email: "not-an-email", newPrompt: "hi" }),
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(400);
@@ -315,7 +307,6 @@ describe("worker: /api/chat-send quota gate", () => {
           newPrompt: "hi",
         }),
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(400);
@@ -334,7 +325,6 @@ describe("worker: /api/chat-send quota gate", () => {
         },
         body: JSON.stringify({ email: "u@gmail.com", newPrompt: "   " }),
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(400);
@@ -356,7 +346,6 @@ describe("worker: /api/chat-send quota gate", () => {
           newPrompt: "x".repeat(2001),
         }),
       }),
-      // @ts-expect-error
       env,
     );
     expect(resp.status).toBe(400);
@@ -400,7 +389,6 @@ describe("worker: /api/chat-send quota gate", () => {
           },
           body: JSON.stringify({ email: "u@gmail.com", newPrompt: "hi" }),
         }),
-        // @ts-expect-error
         env,
       );
       expect(r1.status).toBe(200);
@@ -423,7 +411,6 @@ describe("worker: /api/chat-send quota gate", () => {
           },
           body: JSON.stringify({ email: "u@gmail.com", newPrompt: "again" }),
         }),
-        // @ts-expect-error
         env,
       );
       expect(r2.status).toBe(402);
@@ -453,7 +440,6 @@ describe("worker: /api/chat-send quota gate", () => {
           },
           body: JSON.stringify({ email: "x@gmail.com", newPrompt: "hi" }),
         }),
-        // @ts-expect-error
         env,
       );
       expect(resp.status).toBe(502);
@@ -586,7 +572,6 @@ describe("worker: /api/chat-send quota gate", () => {
           },
           body: JSON.stringify({ email: "retry@gmail.com", newPrompt: "hi" }),
         }),
-        // @ts-expect-error partial env
         env,
       );
     try {
@@ -626,7 +611,6 @@ describe("worker: /api/chat-send quota gate", () => {
           },
           body: JSON.stringify({ email: "s@gmail.com", newPrompt: "q", ...extra }),
         }),
-        // @ts-expect-error partial env
         env,
       );
     try {
@@ -668,7 +652,6 @@ describe("worker: /api/chat-send quota gate", () => {
           },
           body: JSON.stringify({ email: "cap@gmail.com", newPrompt: "q", starter: true }),
         }),
-        // @ts-expect-error partial env
         env,
       );
     try {
@@ -702,7 +685,6 @@ describe("worker: /api/chat-send quota gate", () => {
         },
         body: JSON.stringify({ email: "raw@example.com", newPrompt: "hi" }),
       }),
-      // @ts-expect-error
       env,
     );
     // Phase 2: claim is stored in the DO keyed by SHA-256 hash of the
@@ -940,7 +922,6 @@ describe("worker: /api/admin/reset-quota", () => {
         headers: { Authorization: "Bearer anything", "Content-Type": "application/json" },
         body: JSON.stringify({ email: "mike@gmail.com" }),
       }),
-      // @ts-expect-error partial env
       env,
     );
     // Disabled route falls through to ASSETS (no admin surface exposed).
@@ -955,7 +936,6 @@ describe("worker: /api/admin/reset-quota", () => {
         headers: { Authorization: "Bearer nope", "Content-Type": "application/json" },
         body: JSON.stringify({ email: "mike@gmail.com" }),
       }),
-      // @ts-expect-error partial env
       env,
     );
     expect(resp.status).toBe(401);
@@ -986,7 +966,6 @@ describe("worker: /api/admin/reset-quota", () => {
           },
           body: JSON.stringify({ email: "mike@gmail.com", newPrompt: "hi" }),
         }),
-        // @ts-expect-error partial env
         env,
       );
     try {
@@ -1002,7 +981,6 @@ describe("worker: /api/admin/reset-quota", () => {
           },
           body: JSON.stringify({ email: "mike@gmail.com" }),
         }),
-        // @ts-expect-error partial env
         env,
       );
       expect(reset.status).toBe(200);
@@ -1049,7 +1027,6 @@ describe("worker: anonymous grace window (FREE_MESSAGES_BEFORE_EMAIL)", () => {
         },
         body: JSON.stringify({ newPrompt: "hi", ...body }),
       }),
-      // @ts-expect-error — MockEnv is structurally sufficient
       env,
     );
   }
@@ -1120,7 +1097,6 @@ describe("worker: anonymous grace window (FREE_MESSAGES_BEFORE_EMAIL)", () => {
           },
           body: JSON.stringify({ email: "real@example.com", newPrompt: "hi" }),
         }),
-        // @ts-expect-error
         env,
       );
       expect(withEmail.status).toBe(200);
