@@ -74,6 +74,18 @@ import type { QuotaNamespace } from "./lib/quota-store";
 // shared verbatim with the Vercel entry point (middleware.ts). wrangler's entry
 // is `worker.cf.ts`, which adds that export on top.
 
+/**
+ * The only part of the Workers ExecutionContext these handlers use.
+ *
+ * Structural for the same reason as ASSETS and EMAIL_QUOTA: naming Cloudflare's
+ * `ExecutionContext` would put a Cloudflare type in the signature of the module
+ * both hosts share, and force the Vercel entry to cast — which is precisely how
+ * a real mismatch gets hidden.
+ */
+export interface WaitUntilContext {
+  waitUntil(p: Promise<unknown>): void;
+}
+
 export interface Env {
   /**
    * The three bindings below are the ONLY parts of this worker that are
@@ -85,12 +97,12 @@ export interface Env {
    * `ASSETS` — optional. Vercel serves the static build itself, and its entry
    * only ever handles /api/*, so it never falls through to assets.
    */
-  ASSETS?: Fetcher;
+  ASSETS?: { fetch(request: Request): Promise<Response> };
   /**
    * `EMAIL_QUOTA` — optional. A read-only legacy fast path that predates the
    * Durable Object and is scheduled for removal; absent, the DO answers alone.
    */
-  EMAIL_QUOTA?: KVNamespace;
+  EMAIL_QUOTA?: { get(key: string): Promise<string | null>; delete(key: string): Promise<void> };
   /**
    * `QUOTA_DO` — typed as the structural interface rather than
    * `DurableObjectNamespace<EmailQuotaCoordinator>`. The real namespace
@@ -172,7 +184,12 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    ctx: ExecutionContext,
+    // Structural, like ASSETS and EMAIL_QUOTA above: the handlers use
+    // `waitUntil` and nothing else. Naming Cloudflare's ExecutionContext here
+    // would put a Cloudflare type in the signature of the module both hosts
+    // share — and force the Vercel entry to cast, which is how a real mismatch
+    // gets hidden.
+    ctx: WaitUntilContext,
   ): Promise<Response> {
     const url = new URL(request.url);
 
@@ -360,7 +377,7 @@ function validSessionId(raw: unknown): string | undefined {
 async function handleChatSend(
   request: Request,
   env: Env,
-  ctx: ExecutionContext,
+  ctx: WaitUntilContext,
 ): Promise<Response> {
   let body: ChatSendBody;
   try {
@@ -1050,7 +1067,7 @@ async function handleVerifyEmail(url: URL, env: Env): Promise<Response> {
 interface DispatchVerifyEmailArgs {
   request: Request;
   env: Env;
-  ctx: ExecutionContext;
+  ctx: WaitUntilContext;
   rawEmail: string;
   emailHash: string;
 }

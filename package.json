@@ -5,7 +5,7 @@
   "allowScripts": [],
   "license": "MIT",
   "type": "module",
-  "description": "Divinci SDK landing-page template \u2014 Astro + React islands + Cloudflare Workers. Re-skin per customer via src/brand.config.ts.",
+  "description": "Divinci SDK landing-page template — Astro + React islands + Cloudflare Workers. Re-skin per customer via src/brand.config.ts.",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -27,14 +27,16 @@
     "@divinci-ai/client": "^0.4.3",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^6.4.4",
+    "astro": "^7.2.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^4.20260702.1",
     "@playwright/test": "^1.60.0",
+    "@types/node": "^22.20.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitest/coverage-v8": "^4.1.7",

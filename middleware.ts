@@ -52,7 +52,6 @@ declare const process: { env: Record<string, string | undefined> };
 /** The subset of the Workers ExecutionContext the handlers actually use. */
 interface WorkerContext {
   waitUntil(p: Promise<unknown>): void;
-  passThroughOnException(): void;
 }
 
 export const config = {
@@ -134,8 +133,7 @@ export default async function middleware(
       // takes down the response.
       else void Promise.resolve(p).catch(() => {});
     },
-    passThroughOnException: () => {},
   };
 
-  return worker.fetch(request, workerEnv, ctx as unknown as Parameters<typeof worker.fetch>[2]);
+  return worker.fetch(request, workerEnv, ctx);
 }

@@ -25,8 +25,9 @@ export default defineConfig({
     // worker concurrency the same way the parent monorepo does in
     // CLAUDE.md.
     pool: "threads",
+    // `minWorkers` was here too and is NOT a Vitest 4 option — it was
+    // silently ignored, which the type checker now says out loud.
     maxWorkers: 2,
-    minWorkers: 1,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

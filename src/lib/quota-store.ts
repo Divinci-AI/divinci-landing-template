@@ -27,19 +27,55 @@
  * the pipeline also never sets.
  */
 
-/** What the chat-send handler actually calls on a stub. */
+export interface ClaimResult {
+  /** True if THIS call burned the lifetime quota slot. False if it already had one. */
+  allowed: boolean;
+  /** When the previous claim happened, if `allowed` is false. */
+  priorClaimedAt?: string;
+  /** Whether the prior claim has been email-verified. */
+  priorVerified?: boolean;
+}
+
+export interface VerifySendResult {
+  allowed: boolean;
+  reason?: "not_verified" | "no_prior_claim" | "window_exhausted";
+  /** Sends in the trailing window, after pruning. */
+  sentInWindow: number;
+  windowMax: number;
+}
+
+export interface MarkVerifiedResult {
+  ok: boolean;
+  reason?: "no_prior_claim";
+}
+
+/**
+ * What the chat-send handler calls on a stub.
+ *
+ * ⚠️ Every method is REQUIRED and fully typed, including the four the Vercel
+ * store does not implement. The first version marked those optional and
+ * returned `Promise<unknown>`, which was wrong twice over: it made every call
+ * site in the worker `possibly undefined` and every result `unknown`, so 18 of
+ * the repository's type errors were this interface's fault — and it invited a
+ * caller to feature-detect (`stub.markVerified?.()`), which would silently skip
+ * verification instead of failing.
+ *
+ * The unsupported ones throw. A method that is present and throws is honest;
+ * one that is absent is an invitation to route around it.
+ *
+ * These result shapes are declared here rather than imported from
+ * `quota-coordinator.ts` on purpose — that module imports `cloudflare:workers`,
+ * and pulling it in would break the portability this interface exists to
+ * provide. The Durable Object satisfies them structurally.
+ */
 export interface QuotaStub {
-  claim(emailHash: string, emailDomain: string): Promise<{
-    allowed: boolean;
-    priorClaimedAt?: string;
-    priorVerified?: boolean;
-  }>;
+  claim(emailHash: string, emailDomain: string): Promise<ClaimResult>;
   releaseClaim(emailHash: string): Promise<{ released: boolean }>;
   claimStarter(limit: number): Promise<{ allowed: boolean; used: number; limit: number }>;
-  markVerified?(emailHash: string): Promise<unknown>;
-  canSendVerified?(emailHash: string): Promise<unknown>;
-  recordVerifiedSend?(): Promise<unknown>;
-  adminReset?(emailHash: string): Promise<unknown>;
+  markVerified(emailHash: string): Promise<MarkVerifiedResult>;
+  canSendVerified(emailHash: string, nowSeconds?: number): Promise<VerifySendResult>;
+  recordVerifiedSend(nowSeconds?: number): Promise<void>;
+  adminReset(emailHash: string): Promise<{ clearedClaim: boolean; clearedStarter: boolean }>;
 }
 
 /**
@@ -140,10 +176,13 @@ export function redisQuotaNamespace(
           return { allowed: true, used, limit };
         },
 
-        markVerified() { throw new QuotaStoreUnsupported("markVerified"); },
-        canSendVerified() { throw new QuotaStoreUnsupported("canSendVerified"); },
-        recordVerifiedSend() { throw new QuotaStoreUnsupported("recordVerifiedSend"); },
-        adminReset() { throw new QuotaStoreUnsupported("adminReset"); },
+        // Present and throwing, never absent — see the note on QuotaStub.
+        markVerified(): Promise<MarkVerifiedResult> { throw new QuotaStoreUnsupported("markVerified"); },
+        canSendVerified(): Promise<VerifySendResult> { throw new QuotaStoreUnsupported("canSendVerified"); },
+        recordVerifiedSend(): Promise<void> { throw new QuotaStoreUnsupported("recordVerifiedSend"); },
+        adminReset(): Promise<{ clearedClaim: boolean; clearedStarter: boolean }> {
+          throw new QuotaStoreUnsupported("adminReset");
+        },
       };
     },
   };
