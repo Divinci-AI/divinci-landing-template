@@ -312,7 +312,7 @@ test.describe("Red-team: Email exotica (control chars, length, lookalikes)", () 
   // (\s doesn't include ASCII controls) and minted a distinct SHA-256
   // hash → up to 32 quota slots per real email.
   const controlChars = [
-    { tag: "null-byte", char: " " },
+    { tag: "null-byte", char: "\x00" },
     { tag: "bell", char: "" },
     { tag: "backspace", char: "" },
     { tag: "vt", char: "" },
@@ -333,7 +333,7 @@ test.describe("Red-team: Email exotica (control chars, length, lookalikes)", () 
 
   test("control char after the TLD → 400 email_invalid", async () => {
     const resp = await chatSend(ctx, {
-      email: `legit@gmail.com `,
+      email: `legit@gmail.com\x00`,
       newPrompt: "hi",
     });
     expect(resp.status()).toBe(400);
