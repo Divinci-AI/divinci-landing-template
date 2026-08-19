@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { clientIp } from "../worker";
 
 /**
  * `worker.ts` must stay loadable on a runtime that is not Cloudflare.
@@ -125,5 +126,44 @@ describe("the Cloudflare entry still exports what wrangler needs", () => {
 
   it("is what wrangler.toml points at", () => {
     expect(wrangler).toMatch(/main\s*=\s*"\.\/src\/worker\.cf\.ts"/);
+  });
+});
+
+describe("clientIp trusts only what the platform stamps", () => {
+  // This value is the QUOTA KEY whenever no email is collected — NO_EMAIL_GATE
+  // and the anonymous grace window both key on it. A visitor who can choose it
+  // gets unlimited free messages by rotating a header.
+  const ip = (h: Record<string, string>) =>
+    clientIp(new Request("https://x.test", { headers: h }));
+
+  it("uses the Cloudflare header", () => {
+    expect(ip({ "CF-Connecting-IP": "203.0.113.1" })).toBe("203.0.113.1");
+  });
+
+  it("uses the Vercel header", () => {
+    expect(ip({ "X-Vercel-Forwarded-For": "203.0.113.2" })).toBe("203.0.113.2");
+  });
+
+  it("IGNORES X-Forwarded-For — a client can send it", () => {
+    expect(ip({ "X-Forwarded-For": "1.2.3.4" })).toBe("unknown");
+  });
+
+  it("IGNORES X-Real-IP — a client can send that too", () => {
+    expect(ip({ "X-Real-IP": "1.2.3.4" })).toBe("unknown");
+  });
+
+  it("a spoofed header cannot displace the platform's", () => {
+    expect(ip({ "CF-Connecting-IP": "203.0.113.1", "X-Real-IP": "1.2.3.4", "X-Forwarded-For": "5.6.7.8" }))
+      .toBe("203.0.113.1");
+  });
+
+  it("collapses to one identity when no platform header is present", () => {
+    // The SAFE direction: everyone shares one budget, so an unrecognised
+    // deployment refuses rather than over-serves.
+    expect(ip({})).toBe("unknown");
+  });
+
+  it("takes the first hop of a multi-value platform header", () => {
+    expect(ip({ "X-Vercel-Forwarded-For": "203.0.113.2, 10.0.0.1" })).toBe("203.0.113.2");
   });
 });
