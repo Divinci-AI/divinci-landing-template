@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to the same branch cancels the first. The suite is seconds long
+# and there is no value in finishing a run for a superseded commit.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Don't phone home from CI.
+  WRANGLER_SEND_METRICS: "false"
+  ASTRO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"        # package.json: engines.node >=22
+          cache: npm
+
+      - run: npm ci
+
+      # The 294 unit tests. No network, no credentials, no browser.
+      - name: Unit tests
+        run: npm test
+
+      # The suite mocks the worker's bindings, so it cannot tell you the SITE
+      # still builds — a broken component or a bad import in an .astro page is
+      # invisible to it. This is the cheapest thing that can.
+      - name: Site builds
+        run: npm run build
+
+      # ── The check that matters most, and the reason this file exists ───────
+      #
+      # `wrangler deploy --dry-run` resolves the worker entry and every binding
+      # WITHOUT credentials or a network deploy. It is the only thing here that
+      # can catch a broken Durable Object export — and that is not hypothetical:
+      #
+      #   worker.ts once imported the DO class in order to re-export it, which
+      #   dragged `cloudflare:workers` into the module graph. That specifier
+      #   resolves on no other runtime, so the Vercel entry point could not have
+      #   loaded at all — and ALL 287 TESTS PASSED, because vitest.config.ts
+      #   aliases `cloudflare:workers` to a stub.
+      #
+      # The suite proved the logic and could not, even in principle, prove the
+      # entry point loads. `portable-worker.test.ts` now guards the import graph
+      # and this guards the deploy shape; neither subsumes the other.
+      #
+      # The placeholders have to be substituted first: wrangler rejects
+      # "REPLACE-landing" (uppercase) before it looks at anything else, and a
+      # KV id must be 32 hex. Both are replaced in a COPY that is thrown away —
+      # committing real values is what the hygiene job below forbids.
+      - name: Worker entry and bindings resolve
+        run: |
+          cp wrangler.toml /tmp/wrangler.orig
+          sed -i 's/^name = "REPLACE-landing"/name = "ci-verify-landing"/' wrangler.toml
+          sed -i 's/id = "REPLACE_WITH_KV_NAMESPACE_ID"/id = "0123456789abcdef0123456789abcdef"/' wrangler.toml
+          npx wrangler deploy --dry-run --outdir /tmp/wdry | tee /tmp/wdry.log
+          cp /tmp/wrangler.orig wrangler.toml
+          # `tee` makes the step's exit status wrangler's, not tee's — but a
+          # dry run that "succeeds" while resolving no Durable Object would
+          # still pass. Assert the binding by name.
+          grep -q 'env.QUOTA_DO (EmailQuotaCoordinator)' /tmp/wdry.log \
+            || { echo "::error::the Durable Object binding did not resolve — check src/worker.cf.ts exports EmailQuotaCoordinator"; exit 1; }
+
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Source files must be TEXT ─────────────────────────────────────────
+      #
+      # A comment in worker.ts illustrating an email-hash attack once contained
+      # a RAW NUL byte instead of the escape. `file` reported the module as
+      # "data", so grep, git diff and most tooling treated 1,084 lines of
+      # security-relevant code as BINARY and silently returned nothing — a
+      # search for "chat-send" in the file that defines it came back empty.
+      #
+      # It cost an hour of believing the routes did not exist. Nothing warns:
+      # grep exits 0 having skipped the file.
+      #
+      # ⚠️ NUL ONLY, deliberately. `red-team-api.spec.ts` legitimately contains
+      # bell, backspace, vertical-tab, form-feed and escape — they are the
+      # control characters it tests the API for rejecting. None of those makes
+      # grep skip a file; NUL does. Widening this check would flag correct test
+      # data and get the whole guard removed.
+      #
+      # ⚠️ Written in python, not grep. `grep -qP '\x00'` is GNU-only and
+      # returns exit 1 on macOS for a file that DOES contain a NUL — so the
+      # check passes locally whatever the file holds, and could only ever have
+      # been verified by pushing. A guard nobody can run before committing is
+      # one nobody trusts. `$(printf '\000')` is worse: command substitution
+      # strips NULs, so the pattern is empty and matches every file.
+      - name: Source files are text
+        run: |
+          python3 - <<'EOF'
+          import pathlib, subprocess, sys
+          EXT = {".ts",".tsx",".js",".mjs",".cjs",".astro",".json",".jsonc",
+                 ".md",".toml",".css",".yml",".yaml"}
+          files = subprocess.run(["git","ls-files"], capture_output=True, text=True).stdout.split("\n")
+          bad = [f for f in files
+                 if f and pathlib.Path(f).suffix in EXT
+                 and b"\x00" in pathlib.Path(f).read_bytes()]
+          if bad:
+              print("::error::NUL byte in source — this makes the WHOLE file binary to "
+                    "grep and git diff, which silently return nothing: " + ", ".join(bad))
+              print("Write the escape (\\0) rather than the character.")
+              sys.exit(1)
+          print(f"checked {sum(1 for f in files if f and pathlib.Path(f).suffix in EXT)} source files")
+          EOF
+
+      # ── The placeholders must stay placeholders ───────────────────────────
+      #
+      # This repository is CLONED per demo and its wrangler.toml is rewritten at
+      # deploy time. A real KV namespace id or release id committed here would
+      # not fail — it would SUCCEED, and every demo built from a fresh clone
+      # would quietly write to one deployment's namespace and serve one
+      # deployment's release.
+      #
+      # Same rule as the pipeline's require-env: nothing naming real
+      # infrastructure gets a default, because a wrong default fails loudly and
+      # a real one does not fail at all.
+      - name: wrangler.toml still ships placeholders
+        run: |
+          for p in 'REPLACE-landing' 'REPLACE_WITH_KV_NAMESPACE_ID' 'REPLACE_WITH_RELEASE_ID'; do
+            grep -q "$p" wrangler.toml \
+              || { echo "::error::wrangler.toml no longer contains $p — a real value may have been committed"; exit 1; }
+          done
+          # A 32-hex id anywhere in the committed config is a real namespace.
+          if grep -nE '\bid = "[0-9a-f]{32}"' wrangler.toml; then
+            echo "::error::a real KV namespace id is committed in wrangler.toml"
+            exit 1
+          fi
+
+      # ── No credentials ────────────────────────────────────────────────────
+      #
+      # `.dev.vars` is the local secrets file wrangler reads. It is gitignored;
+      # this proves the gitignore rather than trusting it.
+      - name: No secrets committed
+        run: |
+          if git ls-files | grep -qE '(^|/)\.dev\.vars$|(^|/)\.env$'; then
+            echo "::error::a secrets file is tracked"; exit 1
+          fi
+          if git grep -nE 'LANDING_PAGE_HMAC_KEY[[:space:]]*=[[:space:]]*"[^"]{8,}"' -- . ':!.github/**'; then
+            echo "::error::a signing key literal is committed"; exit 1
+          fi
