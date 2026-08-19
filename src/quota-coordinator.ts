@@ -64,9 +64,11 @@ export interface MarkVerifiedResult {
 const VERIFIED_WINDOW_MAX = 5;
 const VERIFIED_WINDOW_SECONDS = 60 * 60 * 24;
 
-export class EmailQuotaCoordinator extends DurableObject {
+export class EmailQuotaCoordinator extends DurableObject<unknown> {
   constructor(ctx: DurableObjectState, env: unknown) {
-    super(ctx, env as DurableObjectState["env"] extends infer E ? E : never);
+    // `DurableObject` is generic over the env; the previous signature cast
+    // through `DurableObjectState["env"]`, which does not exist.
+    super(ctx, env);
     ctx.blockConcurrencyWhile(async () => {
       this.ctx.storage.sql.exec(`
         CREATE TABLE IF NOT EXISTS quota_claim (

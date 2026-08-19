@@ -36,6 +36,29 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      # ── The type gate ─────────────────────────────────────────────────
+      #
+      # Added once the count reached zero. It was 149 when CI was first wired,
+      # and gating then would have been red on day one — which is how a check
+      # gets deleted rather than fixed.
+      #
+      # 96 of those were two missing type packages (@types/node and
+      # @cloudflare/workers-types, the latter not auto-included because it does
+      # not live under @types/). 19 more were this repo's own QuotaStub
+      # declaring the verification methods optional and returning `unknown`.
+      # The rest were real: a Vitest option that does not exist, an over-typed
+      # ASSETS binding, a contorted DurableObject cast, and a promise callback
+      # that never matched.
+      #
+      # ⚠️ `tsc` does NOT check .astro templates. `astro check` does, and is
+      # deliberately not gated: it reports errors against code that is
+      # deliberately written that way (Header.astro reads an i18n key that must
+      # NOT exist, because adding it to the neutral en.ts de-brands every demo).
+      # Run it by hand — it is worth reading — but a gate on it would be a gate
+      # on a false positive.
+      - name: Types
+        run: npx tsc --noEmit
+
       # The suite mocks the worker's bindings, so it cannot tell you the SITE
       # still builds — a broken component or a bad import in an .astro page is
       # invisible to it. This is the cheapest thing that can.

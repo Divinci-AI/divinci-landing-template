@@ -177,8 +177,8 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   // Release avatar — cached briefly at the edge; null keeps the fallback logo.
   useEffect(() => {
     fetch("/api/release-meta")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d: { avatarUrl?: string | null } | null) => {
+      .then((r) => (r.ok ? (r.json() as Promise<{ avatarUrl?: string | null }>) : null))
+      .then((d) => {
         if (d && typeof d.avatarUrl === "string") setAvatarUrl(d.avatarUrl);
       })
       .catch(() => {});

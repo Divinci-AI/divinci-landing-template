@@ -87,7 +87,6 @@ describe("escrow", () => {
     });
 
     it("survives a getItem that throws (private browsing)", () => {
-      // @ts-expect-error — override
       window.localStorage.getItem = () => {
         throw new Error("private mode");
       };
@@ -114,7 +113,6 @@ describe("escrow", () => {
     });
 
     it("silently swallows localStorage write errors", () => {
-      // @ts-expect-error — override
       window.localStorage.setItem = () => {
         throw new Error("quota exceeded");
       };
