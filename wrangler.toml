@@ -9,7 +9,9 @@
 #      (must match the Divinci Release's landing-page HMAC). Optional:
 #      RESEND_API_KEY, VERIFY_TOKEN_SECRET, BASIC_AUTH_PASSWORD, ADMIN_RESET_TOKEN.
 name = "REPLACE-landing"
-main = "./src/worker.ts"
+# The Cloudflare entry: worker.ts + the Durable Object export, which is the
+# only part that cannot run on another runtime. See src/worker.cf.ts.
+main = "./src/worker.cf.ts"
 compatibility_date = "2026-05-28"
 compatibility_flags = ["nodejs_compat"]
 

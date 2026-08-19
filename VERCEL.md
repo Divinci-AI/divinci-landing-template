@@ -15,6 +15,23 @@ claim rollback or the signing — which is the point. Two implementations drift,
 and the drift shows up as a demo behaving differently on one host than the
 other.
 
+### The entry-point split
+
+| file | |
+|---|---|
+| `src/worker.ts` | the handlers. Portable: no `cloudflare:` or `node:` imports. |
+| `src/worker.cf.ts` | wrangler's entry — `worker.ts` plus the Durable Object export |
+| `middleware.ts` | Vercel's entry — `worker.ts` plus a KV-backed quota namespace |
+
+The Durable Object class lives behind `worker.cf.ts` because importing it drags
+in `cloudflare:workers`, which resolves on no other runtime. `worker.ts` must
+stay clean of it or `middleware.ts` cannot load at all.
+
+⚠️ **The test suite cannot notice that on its own** — `vitest.config.ts` aliases
+`cloudflare:workers` to a stub, so every test keeps passing while the Vercel
+build breaks. `src/__test__/portable-worker.test.ts` walks the real import graph
+over source text to catch it, and is the reason that alias is safe to keep.
+
 ## ⚠️ A landing page is not a static site
 
 Two of its jobs need code and a secret **at request time**:

@@ -67,11 +67,12 @@ import {
   renderVerifySuccessHtml,
 } from "./lib/verify-email-templates";
 import { signVerifyToken, verifyVerifyToken } from "./lib/verify-token";
-import { EmailQuotaCoordinator } from "./quota-coordinator";
 import type { QuotaNamespace } from "./lib/quota-store";
 
-// Re-export the DO class so wrangler can find it under its `class_name`.
-export { EmailQuotaCoordinator };
+// ⚠️ The Durable Object class is deliberately NOT imported here. It pulls in
+// `cloudflare:workers`, which resolves on no other runtime — and this module is
+// shared verbatim with the Vercel entry point (middleware.ts). wrangler's entry
+// is `worker.cf.ts`, which adds that export on top.
 
 export interface Env {
   /**
