@@ -296,17 +296,24 @@ function assetsOr404(request: Request, env: Env): Response | Promise<Response> {
  * the closest thing to trustworthy when the other two are absent.
  */
 export function clientIp(request: Request): string {
-  const direct =
+  // ⚠️ PLATFORM-SET HEADERS ONLY. Both of these are stamped by the edge and
+  // overwrite anything the client sent; `X-Forwarded-For` and `X-Real-IP` are
+  // not, and an earlier version of this function fell back to them.
+  //
+  // That fallback was a quota bypass. This value IS the quota key whenever no
+  // email is collected, so a visitor who can choose it gets unlimited free
+  // messages by rotating a header — defeating the entire reason the
+  // synthesized-identity machinery exists. It was unreachable on both
+  // supported platforms, which is exactly what would have made it survive.
+  //
+  // Returning "unknown" is the SAFE direction: every visitor without a
+  // platform header collapses onto one identity and therefore one shared
+  // budget, so an unrecognised deployment refuses rather than over-serves.
+  const platform =
     request.headers.get("CF-Connecting-IP") ??
-    request.headers.get("X-Vercel-Forwarded-For") ??
-    request.headers.get("X-Real-IP");
-  if (direct) return direct.trim();
-  const xff = request.headers.get("X-Forwarded-For");
-  if (xff) {
-    const first = xff.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return "unknown";
+    request.headers.get("X-Vercel-Forwarded-For");
+  const first = platform?.split(",")[0]?.trim();
+  return first || "unknown";
 }
 
 // ---------- /api/chat-send ----------
