@@ -11,7 +11,14 @@ export function SignupCTA({ lang = DEFAULT_LOCALE }: SignupCTAProps) {
   const ui = getUI(lang);
   const t = ui.chat;
   return (
-    <div className="rounded-2xl border border-df-green-dark/40 bg-df-green-leaf/15 p-5 text-center backdrop-blur-sm">
+    // `data-testid` rather than a class or the visible headline: every class
+    // here is brand-themable and the headline is brand COPY, so a test bound to
+    // either breaks on the next demo. Same reasoning as `sendButton`'s
+    // accessible-name locator in tests/e2e/fixtures.ts.
+    <div
+      data-testid="signup-cta"
+      className="rounded-2xl border border-df-green-dark/40 bg-df-green-leaf/15 p-5 text-center backdrop-blur-sm"
+    >
       <p className="text-base font-semibold text-df-text">{t.signupHeadline}</p>
       <p className="mt-2 text-sm leading-relaxed text-df-muted-strong">{t.signupBody}</p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-3">

@@ -1,4 +1,4 @@
-import { test, expect, mockChatSendQuota, enterValidEmail } from "./fixtures";
+import { test, expect, mockChatSendQuota, enterValidEmail, sendButton } from "./fixtures";
 
 /**
  * ⚠️ EXPECTED TO FAIL ON THE DEPLOYED FLEET, AND THE FAILURE IS REAL.
@@ -21,27 +21,51 @@ import { test, expect, mockChatSendQuota, enterValidEmail } from "./fixtures";
  * then loosen these the way footer-links was loosened.
  */
 test.describe("Quota exhaustion → SignupCTA", () => {
-  // `test.fail()`, not skip: the defect is real and reproduces locally, so the
-  // suite should stay green while it is broken and go RED the moment somebody
-  // fixes it. A skip would go quiet in both directions — including the one
-  // where the bug is fixed and nobody updates the test.
-  test.fail();
-  test("402 from /api/chat-send replaces input with SignupCTA", async ({ page }) => {
+  // ⚠️ This spec used to click a STARTER pill, and its header claimed the
+  // missing CTA was a measured product defect. It is not.
+  //
+  // ChatIsland's 402 handler has three branches, and the starter one is
+  // deliberate — its comment reads "A starter-budget 402 must NOT flip the page
+  // to the SignupCTA — the visitor still has their free manual message." That
+  // branch dates to the template's first commit, two months before the
+  // measurement the header cited. So the spec was asserting the opposite of
+  // intended behaviour, and the failure it produced was correct.
+  //
+  // The CTA belongs to the MANUAL path: type a message, send it, exhaust the
+  // manual quota. That is what this now exercises.
+  test("402 on a manual send replaces input with SignupCTA", async ({ page }) => {
     await mockChatSendQuota(page);
     await page.goto("/");
     await enterValidEmail(page);
-    // Clicking the starter IS the send — it fires the request directly.
-    await page.locator(".starter-pill").first().click();
+    await page.locator("form:has(textarea) textarea").fill("A question of my own.");
+    await sendButton(page).click();
 
     await expect(
       page.getByText(/Want to keep talking to/i),
       "a 402 produced no visible change at all — quota exhaustion is silent, and the signup CTA never renders",
     ).toBeVisible();
 
-    const cta = page.getByRole("link", { name: /Sign up/i });
-    const href = await cta.getAttribute("href");
+    // Scoped to the CTA card. A bare name-based locator also matches the
+    // header's own "Sign up" link, and strict mode rightly refuses to guess.
+    const href = await page
+      .getByTestId("signup-cta")
+      .getByRole("link", { name: /Sign up/i })
+      .getAttribute("href");
     expect(href).toContain("acme.example/signup");
     expect(href).toContain("utm_source=acme-demo");
     expect(href).toContain("utm_campaign=free-message-quota-cta");
   });
+
+  // The other half of the same behaviour, pinned so fixing the manual path
+  // cannot regress it: a STARTER 402 must leave the visitor their own free
+  // message rather than telling them they are out.
+  test("402 on a starter does NOT show the CTA", async ({ page }) => {
+    await mockChatSendQuota(page);
+    await page.goto("/");
+    await enterValidEmail(page);
+    await page.locator(".starter-pill").first().click();
+    await page.waitForTimeout(1_500);
+    await expect(page.getByText(/Want to keep talking to/i)).toHaveCount(0);
+  });
+
 });

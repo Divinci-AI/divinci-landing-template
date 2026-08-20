@@ -9,6 +9,17 @@ import { Transcript, type TranscriptMessage } from "./Transcript";
 import { MessageInput } from "./MessageInput";
 import { StickyChatBar } from "./StickyChatBar";
 import { SignupCTA } from "./SignupCTA";
+
+/**
+ * Server says the free quota is gone, before the client's own count says so.
+ *
+ * Written by the 402 handler and read by `quotaExhausted` below. It was a bare
+ * "__quota__" string literal written in two places and read in NEITHER, so a
+ * server-side 402 set a marker nothing consulted and the signup CTA never
+ * appeared — the handler's own comment said it would. A named constant is what
+ * makes the writer and the reader provably the same value.
+ */
+const QUOTA_MARKER = "__quota__";
 import { AnonLimitCTA } from "./AnonLimitCTA";
 
 import { isDisposableEmail } from "../../lib/disposable-emails";
@@ -309,8 +320,8 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
             prev.filter((m) => m.id !== assistantPlaceholder.id),
           );
           setError(null);
-          setTranscriptId("__quota__");
-          saveEscrow({ transcriptId: "__quota__" });
+          setTranscriptId(QUOTA_MARKER);
+          saveEscrow({ transcriptId: QUOTA_MARKER });
           return;
         }
 
@@ -615,8 +626,17 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   // conversation-starter OR typing a question both spend the one free answer,
   // after which the input swaps to the sign-up / log-in CTA.
   const userMessageCount = messages.filter((m) => m.role === "user").length;
+  // Either the SERVER has refused (402 -> QUOTA_MARKER) or this client has
+  // counted its own way to the limit. The server side matters on its own: a
+  // visitor can be refused before the local count gets there — a shared device
+  // or address quota, or an escrow restored from a previous visit — and until
+  // 2026-08-20 that case rendered nothing at all. The page simply stopped
+  // responding, with no message and no route to sign up, which is the entire
+  // conversion path out of a free demo.
   const quotaExhausted =
-    userMessageCount >= FREE_MESSAGES_BEFORE_EMAIL + FREE_MESSAGE_QUOTA && !pending;
+    (transcriptId === QUOTA_MARKER ||
+      userMessageCount >= FREE_MESSAGES_BEFORE_EMAIL + FREE_MESSAGE_QUOTA) &&
+    !pending;
   // Medical-safety advisory: pinned at the bottom of the chat card (always
   // visible, not buried in the scrollback). Shows the most recent advisory
   // the server attached to any completed reply in this conversation.
