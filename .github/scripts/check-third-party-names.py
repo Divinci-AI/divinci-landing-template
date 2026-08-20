@@ -10,10 +10,27 @@ was to stop this repository naming real companies. The guard was itself the
 leak it was written to prevent, and it published the names permanently, in git
 history, whether or not anything else in the tree ever mentioned them.
 
-So the forbidden list is stored as sha256 of a NORMALISED name. A hash cannot
-be reversed into a prospect list, the check still fails on an exact match, and
-a violation is reported as `sha256[:12]` plus a file and line — never as the
-name. Whoever fixes it can see the offending line in their own checkout.
+So the forbidden list is stored as sha256 of a NORMALISED name. The check still
+fails on an exact match, and a violation is reported as `sha256[:12]` plus a
+file and line — never as the name. Whoever fixes it reads the offending line in
+their own checkout.
+
+WHAT THE HASHING DOES AND DOES NOT BUY — read this before trusting it
+---------------------------------------------------------------------
+It defends against DISCLOSURE BY READING: opening this repository does not hand
+you the list, which is the realistic exposure and the one the plaintext version
+had.
+
+It does NOT defend against CONFIRMATION BY GUESSING. These are unsalted sha256
+of short lowercase strings, so anyone holding a company name can hash it and
+check membership, and a wordlist of company names would enumerate most of the
+list offline. Do not treat this file as secret-equivalent.
+
+Salting would close that, and is deliberately not done: a salt committed beside
+the hashes is no salt at all, and a salt held only in CI makes the check
+unrunnable before pushing — and a guard nobody can run locally is one nobody
+trusts, which is how the last one rotted. The trade is stated rather than
+hidden.
 
 WHY IT TOKENISES INSTEAD OF SUBSTRING-MATCHING
 -----------------------------------------------

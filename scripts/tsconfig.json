@@ -1,0 +1,18 @@
+{
+  // Build scripts run in NODE, not in Workers.
+  //
+  // `@cloudflare/workers-types` v5 declares a global `Buffer` that lacks
+  // Node's methods, so with both type packages in scope `readUInt32BE` and
+  // `readUInt16BE` stop existing and 14 call sites in og-card.ts fail to
+  // compile. That conflict is why the wrangler upgrade — which closes nine
+  // undici advisories — was blocked twice.
+  //
+  // Two runtimes, two type worlds. Do not merge them back.
+  "extends": "../tsconfig.json",
+  "include": ["**/*"],
+  "exclude": [],
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true
+  }
+}

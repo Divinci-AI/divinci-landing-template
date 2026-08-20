@@ -31,6 +31,30 @@
  * path it took so the caller can log it.
  */
 import { execFileSync } from "node:child_process";
+import { Buffer as NodeBuffer } from "node:buffer";
+/**
+ * Byte reads go through DataView, and the signatures below take Uint8Array
+ * rather than Buffer, so this module depends on NO runtime's globals.
+ *
+ * It has to. `@cloudflare/workers-types` v5 replaces the ambient `Buffer` with
+ * one that has no `readUInt32BE`, and this module is imported by a unit test
+ * that lives in the worker type world — so `exclude` in tsconfig cannot keep it
+ * out, and an explicit `import { Buffer } from "node:buffer"` does not win
+ * either. Both were tried.
+ *
+ * That conflict blocked the wrangler 4.95 -> 4.124 upgrade twice, which is nine
+ * undici advisories held open by a byte-order helper. A Buffer is a Uint8Array,
+ * so callers are unaffected.
+ */
+const u32 = (b: Uint8Array, o: number): number =>
+  new DataView(b.buffer, b.byteOffset, b.byteLength).getUint32(o, false);
+const u16 = (b: Uint8Array, o: number): number =>
+  new DataView(b.buffer, b.byteOffset, b.byteLength).getUint16(o, false);
+const text = (b: Uint8Array, from: number, to: number, enc = "utf-8"): string =>
+  new TextDecoder(enc).decode(b.subarray(from, to));
+// base64 is the one genuinely Node-only step, so it names the Node Buffer
+// explicitly rather than reaching for whichever ambient global is in scope.
+const b64 = (b: Uint8Array): string => NodeBuffer.from(b).toString("base64");
 
 /** Escape text for interpolation into SVG. Brand names really do contain `&`. */
 export function escapeXml(s: string): string {
@@ -52,13 +76,13 @@ export interface LogoImage {
 }
 
 /** PNG intrinsic size — IHDR is always the first chunk, at a fixed offset. */
-function pngSize(buf: Buffer): { w: number; h: number } | null {
-  if (buf.length < 24 || buf.readUInt32BE(0) !== 0x89504e47) return null;
-  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+function pngSize(buf: Uint8Array): { w: number; h: number } | null {
+  if (buf.length < 24 || u32(buf, 0) !== 0x89504e47) return null;
+  return { w: u32(buf, 16), h: u32(buf, 20) };
 }
 
 /** JPEG intrinsic size — walk the segment chain to the first SOF marker. */
-function jpegSize(buf: Buffer): { w: number; h: number } | null {
+function jpegSize(buf: Uint8Array): { w: number; h: number } | null {
   if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8) return null;
   let i = 2;
   while (i + 9 < buf.length) {
@@ -66,10 +90,10 @@ function jpegSize(buf: Buffer): { w: number; h: number } | null {
     const marker = buf[i + 1];
     // SOF0..SOF15, excluding the non-frame markers DHT(c4)/JPG(c8)/DAC(cc).
     if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
-      return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+      return { h: u16(buf, i + 5), w: u16(buf, i + 7) };
     }
     if (i + 3 >= buf.length) break;
-    i += 2 + buf.readUInt16BE(i + 2);
+    i += 2 + u16(buf, i + 2);
   }
   return null;
 }
@@ -101,23 +125,23 @@ export const DEFAULT_LOGO_ASPECT = 200 / 42;
  * mislabelled file still works.
  */
 export function prepareLogo(
-  bytes: Buffer,
+  bytes: Uint8Array,
   path: string,
-  opts: { transcodeWebp?: (b: Buffer) => Buffer | null; currentColor?: string } = {},
+  opts: { transcodeWebp?: (b: Uint8Array) => Uint8Array | null; currentColor?: string } = {},
 ): LogoImage {
   const ext = (path.match(/\.([a-z0-9]+)$/i)?.[1] ?? "").toLowerCase();
-  const isPng = bytes.length > 8 && bytes.readUInt32BE(0) === 0x89504e47;
+  const isPng = bytes.length > 8 && u32(bytes, 0) === 0x89504e47;
   const isJpeg = bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8;
   const isWebp =
-    bytes.length > 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+    bytes.length > 12 && text(bytes, 0, 4, "latin1") === "RIFF" && text(bytes, 8, 12, "latin1") === "WEBP";
   // Sniffing SVG: it is text, and may open with a comment or an XML decl.
-  const head = bytes.toString("utf8", 0, Math.min(bytes.length, 1024));
+  const head = text(bytes, 0, Math.min(bytes.length, 1024));
   const isSvg = /<svg[\s>]/i.test(head) || ext === "svg";
 
   if (isPng) {
     const size = pngSize(bytes);
     return {
-      href: `data:image/png;base64,${bytes.toString("base64")}`,
+      href: `data:image/png;base64,${b64(bytes)}`,
       aspect: size && size.h > 0 ? size.w / size.h : DEFAULT_LOGO_ASPECT,
       note: size ? "" : "png header unreadable — assumed default aspect",
     };
@@ -126,7 +150,7 @@ export function prepareLogo(
   if (isJpeg) {
     const size = jpegSize(bytes);
     return {
-      href: `data:image/jpeg;base64,${bytes.toString("base64")}`,
+      href: `data:image/jpeg;base64,${b64(bytes)}`,
       aspect: size && size.h > 0 ? size.w / size.h : DEFAULT_LOGO_ASPECT,
       note: size ? "" : "jpeg header unreadable — assumed default aspect",
     };
@@ -138,14 +162,14 @@ export function prepareLogo(
     if (!png) return { href: null, aspect: DEFAULT_LOGO_ASPECT, note: "webp logo and no dwebp available" };
     const size = pngSize(png);
     return {
-      href: `data:image/png;base64,${png.toString("base64")}`,
+      href: `data:image/png;base64,${b64(png)}`,
       aspect: size && size.h > 0 ? size.w / size.h : DEFAULT_LOGO_ASPECT,
       note: "transcoded webp → png",
     };
   }
 
   if (isSvg) {
-    let source = bytes.toString("utf8");
+    let source = text(bytes, 0, bytes.length);
     const aspect = svgAspect(source);
 
     // resvg does NOT render <text> inside an SVG embedded via <image>: the
@@ -188,7 +212,7 @@ export function prepareLogo(
     ].filter(Boolean);
 
     return {
-      href: `data:image/svg+xml;base64,${Buffer.from(source, "utf8").toString("base64")}`,
+      href: `data:image/svg+xml;base64,${b64(new TextEncoder().encode(source))}`,
       aspect: aspect ?? DEFAULT_LOGO_ASPECT,
       note: notes.join("; "),
     };
@@ -198,7 +222,7 @@ export function prepareLogo(
 }
 
 /** Transcode WebP → PNG using libwebp's `dwebp`. Returns null if unavailable. */
-export function dwebpTranscode(bytes: Buffer): Buffer | null {
+export function dwebpTranscode(bytes: Uint8Array): Uint8Array | null {
   try {
     return execFileSync("dwebp", ["-quiet", "-o", "-", "--", "-"], {
       input: bytes,

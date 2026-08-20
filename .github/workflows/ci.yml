@@ -57,7 +57,13 @@ jobs:
       # Run it by hand — it is worth reading — but a gate on it would be a gate
       # on a false positive.
       - name: Types
-        run: npx tsc --noEmit
+        run: |
+          npx tsc --noEmit
+          # Build scripts are a SEPARATE type world: they run in Node, the
+          # worker runs in Workers, and workers-types v5 replaces the ambient
+          # Buffer. Sharing one ambient namespace is what blocked the wrangler
+          # upgrade twice. See scripts/tsconfig.json.
+          npx tsc --noEmit -p scripts
 
       # The suite mocks the worker's bindings, so it cannot tell you the SITE
       # still builds — a broken component or a bad import in an .astro page is
