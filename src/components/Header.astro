@@ -18,7 +18,7 @@ const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
 // The header's AI mark, painted so it is actually VISIBLE on the header.
 //
 // It was a fixed `leaf -> mid` gradient, and the header background is
-// `navy` — i.e. `palette.primary`. Aquillius extracts primary and accent as
+// `navy` — i.e. `palette.primary`. Acme Advisors extracts primary and accent as
 // the SAME orange (#f96230), so the mark was drawn in the exact colour of the
 // bar behind it and simply was not there. Nothing failed; the lockup probe
 // even reported 20.97:1, because it measures the WORDMARK's contrast and has
@@ -156,7 +156,7 @@ const navItems = [
             shape, and a generated file missing a key is rejected WHOLESALE:
             the run silently keeps the neutral copy, so the demo ships branded
             "Acme Expert AI" in its title, og:title, chat welcome and CTA.
-            Adding `menuAriaLabel` there did exactly that to mach33, and it is
+            Adding `menuAriaLabel` there did exactly that to acmeincubator, and it is
             the second time this class has reverted live demos.
 
             Rule: a new UI string gets a literal fallback in the component. Only

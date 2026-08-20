@@ -94,7 +94,7 @@ const displayFamily = fontFile ? (displayStack || "").split(",")[0].replace(/["'
 const usesTextWordmark = logo.href === null || brand.media.logoIsMark === true;
 
 // The OG lockup uses the SAME short name as the header and hero. Drawing the
-// full legal name here is what pushed "BioRenew Integrative Medicine" past the
+// full legal name here is what pushed "Acme Renew Integrative Medicine" past the
 // card's width budget in the first place.
 const ogLockupName = brand.identity.lockupName || brand.identity.siteName;
 
@@ -104,7 +104,7 @@ const ogLockupName = brand.identity.lockupName || brand.identity.siteName;
 // (the extraction default) while the card rendered at 700 (its own fallback for
 // a brand with no display font). The measurement was therefore for a narrower
 // rendering than the one drawn, so the layout reserved 511px for 554px of type
-// and "AI" was positioned INSIDE the wordmark — "Applied BioCodeAI" with a
+// and "AI" was positioned INSIDE the wordmark — "Acme BioAI" with a
 // 4px overlap. A measurement is only as good as its agreement with what is
 // actually drawn, so there is now a single object rather than two call sites
 // that happen to look similar.

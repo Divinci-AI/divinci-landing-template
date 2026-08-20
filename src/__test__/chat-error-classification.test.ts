@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 /**
  * Regression guards for 2026-08-17.
  *
- * A colleague opened the Greystone demo for the FIRST time, sent one question,
+ * A colleague opened the Acme Realty demo for the FIRST time, sent one question,
  * got an answer, sent a second, and saw "Network error — that message wasn't
  * delivered." They reasonably read it as the anonymous-message limit. It was
  * not: the API had returned 500 from an exhausted Mongo connection pool.

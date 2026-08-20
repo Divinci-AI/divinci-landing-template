@@ -12,7 +12,7 @@ import { join } from "node:path";
  *   bg-gradient-to-b from-df-green-leaf/10 to-white   ← a gradient STOP
  *   --chat-glass-gradient: linear-gradient(..., #ffffff2e, ...)  ← a CSS var
  *
- * The gradient one shipped: dodcyber's chat window faded to solid white at
+ * The gradient one shipped: acmecyber's chat window faded to solid white at
  * the bottom, so near-white body text finished at about 1.3:1 — measured
  * #ddeeff on #b7dce4 — and the glass drew a white fringe around the panel.
  */
@@ -87,7 +87,7 @@ describe("the assistant has ONE face", () => {
 });
 
 describe("a single-colour mark stays visible on the chrome", () => {
-  // Freedom with AI's mark is filled #000000 and every avatar circle sits on a
+  // Acme Freedom's mark is filled #000000 and every avatar circle sits on a
   // near-black panel, so the mark rendered as a black glyph on a black disc:
   // present in the DOM, correctly sized, and unseeable. The hero and the
   // header had always filtered the logo; the avatars never did.
@@ -129,7 +129,7 @@ describe("hover states follow the brand, not the template", () => {
 
 describe("a wordmark is never used as a circular avatar", () => {
   it("BrandAvatar requires logoIsMark before using the logo", () => {
-    // Applied BioCode's logo is 1248x138. At 70% of a 36px circle that is
+    // Acme Bio's logo is 1248x138. At 70% of a 36px circle that is
     // ~25px wide and under 3px tall — a smear — and the showcase's 16px
     // version read as barcode stripes. object-contain keeps it undistorted
     // without making it legible; there is no scale of a horizontal lockup
@@ -151,7 +151,7 @@ describe("the lockup logo is sized by an explicit height", () => {
   it("never relies on max-height alone", () => {
     // An SVG with a viewBox and no width/height has a ratio but NO intrinsic
     // size: height:auto collapses it to 0x0 and max-height has nothing to cap.
-    // Greystone's logo.svg disappeared entirely when this was max-height, and
+    // Acme Realty's logo.svg disappeared entirely when this was max-height, and
     // measuring the deployed page was the only way that surfaced —
     // forcing max-height:56px still gave 0x0, forcing height:35px gave 190x35.
     const hero = readFileSync("src/components/sections/HeroSection.astro", "utf8")

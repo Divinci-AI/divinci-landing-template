@@ -2,12 +2,12 @@ import { describe, it, expect } from "vitest";
 import { luminance, contrastRatio, readableOn, buttonColors, logoInkClass, AA_TEXT, AA_LARGE, isDarkPalette } from "./contrast";
 
 /**
- * AuraPath's real extracted palette — the one that produced an invisible CTA.
+ * AcmePath's real extracted palette — the one that produced an invisible CTA.
  * Both colours are nearly black because their site is a warm dark/cream design
  * with no bright accent, which is exactly the case the template's styling
  * assumed away.
  */
-const AURAPATH = { primary: "#1a1610", accent: "#0f0d08", cream: "#f7fafc" };
+const ACMEPATH = { primary: "#1a1610", accent: "#0f0d08", cream: "#f7fafc" };
 /** A palette matching the template's original assumption: a bright accent. */
 const BRIGHT = { primary: "#0f2c3f", accent: "#7ed957", cream: "#f7fafc" };
 
@@ -25,9 +25,9 @@ describe("contrastRatio", () => {
     expect(contrastRatio("#fff", "#000")).toBeCloseTo(21, 1);
   });
 
-  it("measures the AuraPath CTA as effectively invisible", () => {
+  it("measures the AcmePath CTA as effectively invisible", () => {
     // The bug, quantified: 1.08:1 where AA needs 4.5:1.
-    expect(contrastRatio(AURAPATH.accent, AURAPATH.primary)).toBeLessThan(1.2);
+    expect(contrastRatio(ACMEPATH.accent, ACMEPATH.primary)).toBeLessThan(1.2);
   });
 });
 
@@ -50,18 +50,18 @@ describe("readableOn", () => {
 });
 
 describe("buttonColors", () => {
-  it("rescues the AuraPath CTA to a legible pair", () => {
-    const c = buttonColors(AURAPATH.primary, AURAPATH.accent, AURAPATH.primary, AURAPATH.cream);
+  it("rescues the AcmePath CTA to a legible pair", () => {
+    const c = buttonColors(ACMEPATH.primary, ACMEPATH.accent, ACMEPATH.primary, ACMEPATH.cream);
     expect(contrastRatio(c.text, c.bg)).toBeGreaterThanOrEqual(AA_TEXT);
-    expect(contrastRatio(c.bg, AURAPATH.primary)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(c.bg, ACMEPATH.primary)).toBeGreaterThanOrEqual(3);
   });
 
   it("labels in the brand's own dark, not pure black, when that clears AA", () => {
     // These pages exist to look like the customer's site. Pure black always
     // wins on ratio and reads as off-brand on a warm palette, so legibility is
     // a threshold to clear, not a number to maximise.
-    const c = buttonColors(AURAPATH.primary, AURAPATH.accent, AURAPATH.primary, AURAPATH.cream);
-    expect(c.text).toBe(AURAPATH.primary);
+    const c = buttonColors(ACMEPATH.primary, ACMEPATH.accent, ACMEPATH.primary, ACMEPATH.cream);
+    expect(c.text).toBe(ACMEPATH.primary);
   });
 
   it("still falls back to black when the brand's dark is not dark enough", () => {
@@ -85,14 +85,14 @@ describe("buttonColors", () => {
 });
 
 // Real palettes, both produced by the extractor from the customers' own sites.
-const DODCYBER = { primary: "#04090e", dark: "#00a1c2", mid: "#00d4ff", accent: "#00d4ff",
+const ACMECYBER = { primary: "#04090e", dark: "#00a1c2", mid: "#00d4ff", accent: "#00d4ff",
   cream: "#04090e", soft: "#0a1622", bubble: "#004a59", text: "#ddeeff" };
 const LONGEVITYRX = { primary: "#1a2e20", dark: "#16271b", mid: "#30553b", accent: "#e9cc8f",
   cream: "#f5f0e8", soft: "#f0e9dd", bubble: "#f7ecd4", text: "#2c2c2c" };
 
 describe("isDarkPalette", () => {
-  it("calls dodcyberconsulting.com's palette dark", () => {
-    expect(isDarkPalette(DODCYBER.cream)).toBe(true);
+  it("calls acmecyber.com's palette dark", () => {
+    expect(isDarkPalette(ACMECYBER.cream)).toBe(true);
   });
 
   it("does NOT call a cream clinic dark", () => {
@@ -115,13 +115,13 @@ describe("isDarkPalette", () => {
 });
 
 describe("ink on the brand chrome", () => {
-  // `text-white` cannot ask whether white is legible. On dodcyber's #00a1c2
+  // `text-white` cannot ask whether white is legible. On acmecyber's #00a1c2
   // buttons it is not, and the answer has to be the near-black page colour.
-  const onChrome = (p: typeof DODCYBER) => readableOn(p.dark, "#ffffff", p.cream);
+  const onChrome = (p: typeof ACMECYBER) => readableOn(p.dark, "#ffffff", p.cream);
 
   it("puts dark ink on a bright cyan button", () => {
-    expect(onChrome(DODCYBER)).toBe(DODCYBER.cream);
-    expect(contrastRatio(onChrome(DODCYBER), DODCYBER.dark)).toBeGreaterThanOrEqual(AA_TEXT);
+    expect(onChrome(ACMECYBER)).toBe(ACMECYBER.cream);
+    expect(contrastRatio(onChrome(ACMECYBER), ACMECYBER.dark)).toBeGreaterThanOrEqual(AA_TEXT);
   });
 
   it("keeps white on a dark green button — light brands do not move", () => {
@@ -129,7 +129,7 @@ describe("ink on the brand chrome", () => {
   });
 });
 /**
- * Freedom with AI — the palette that produced a CTA nobody could read. `primary`
+ * Acme Freedom — the palette that produced a CTA nobody could read. `primary`
  * and `cream` are the SAME near-black, because on a dark-page brand `cream` is
  * the page colour, not a light colour. The old fallback took `cream` on faith.
  */
@@ -154,9 +154,9 @@ describe("buttonColors on a dark-page brand", () => {
   it("is legible for every palette the estate actually has", () => {
     const palettes: Array<[string, string, string, string]> = [
       [FREEDOM.primary, FREEDOM.accent, FREEDOM.primary, FREEDOM.cream],
-      [AURAPATH.primary, AURAPATH.accent, AURAPATH.primary, AURAPATH.cream],
+      [ACMEPATH.primary, ACMEPATH.accent, ACMEPATH.primary, ACMEPATH.cream],
       [BRIGHT.primary, BRIGHT.accent, BRIGHT.primary, BRIGHT.cream],
-      [DODCYBER.primary, DODCYBER.accent, DODCYBER.primary, DODCYBER.cream],
+      [ACMECYBER.primary, ACMECYBER.accent, ACMECYBER.primary, ACMECYBER.cream],
       [LONGEVITYRX.primary, LONGEVITYRX.accent, LONGEVITYRX.primary, LONGEVITYRX.cream],
       // Degenerate on purpose: one colour for everything must still resolve.
       ["#000000", "#000000", "#000000", "#000000"],
@@ -172,7 +172,7 @@ describe("buttonColors on a dark-page brand", () => {
 
 describe("logoInkClass", () => {
   it("whites out a dark logo on a dark brand", () => {
-    // Freedom with AI's mark is filled #000000 and its avatar circle sits on a
+    // Acme Freedom's mark is filled #000000 and its avatar circle sits on a
     // near-black panel: a black glyph on a black disc.
     expect(logoInkClass(true, false)).toBe("brightness-0 invert");
     expect(logoInkClass(true, undefined)).toBe("brightness-0 invert");

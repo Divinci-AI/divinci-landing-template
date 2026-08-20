@@ -179,3 +179,22 @@ jobs:
           if git grep -nE 'LANDING_PAGE_HMAC_KEY[[:space:]]*=[[:space:]]*"[^"]{8,}"' -- . ':!.github/**'; then
             echo "::error::a signing key literal is committed"; exit 1
           fi
+
+      # ── No third-party names ──────────────────────────────────────────────
+      #
+      # This is a PUBLIC repository generalized from a real customer's site, and
+      # it carried the names of seven real companies and one physician for two
+      # months — in code comments, test fixture constants and CSS. A name is not
+      # secret-shaped, so the secret scanner above walks straight past it.
+      #
+      # `TEMPLATE-TODO.md` asserted the sweep had been done. It had not, and a
+      # sentence claiming a grep is not a grep. Hence a step, not a note.
+      #
+      # The forbidden list is HASHED: written out in plaintext here it would
+      # itself publish the prospect list, which is the same mistake one layer
+      # up. See the script's header for why it tokenises rather than
+      # substring-matches — the previous plaintext version missed 85
+      # occurrences of names it explicitly listed, because `BIORENEW_A` matches
+      # neither the casing nor the `\b` of a pattern spelling it `BioRenew`.
+      - name: No third-party names
+        run: python3 .github/scripts/check-third-party-names.py

@@ -9,7 +9,7 @@ import { placeBelow } from "../../lib/popover-placement";
  * than `visible` establishes a clipping box on BOTH axes — so an
  * `absolute bottom-full` bubble anchored to a chip near the top of the scroll
  * area is cut off at the container's edge. That is what made the source popups
- * on the BioRenew demo appear half-drawn and "covered up": nothing was on top
+ * on the Acme Renew demo appear half-drawn and "covered up": nothing was on top
  * of them, they were being trimmed by their own ancestor.
  *
  * z-index cannot fix this. Clipping happens regardless of stacking order, and

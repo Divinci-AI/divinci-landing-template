@@ -32,7 +32,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
        rectangle), kept faint so it reads as brand texture behind the chat card,
        not a literal illustration competing with it. Fades further on first
        message via ChatIsland. Generalizes to any auto-generated art (no
-       per-image fitting, unlike the legacy drfuhrman circle-over-illustration). -->
+       per-image fitting, unlike the legacy acmenutrition circle-over-illustration). -->
   {/* Only rendered when a hero image actually exists. It used to fall back to
       a /brand/ path the template has never shipped, so every site without
       generated art emitted a broken img. Worse, the Worker's SPA fallback
@@ -72,7 +72,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
         /* The frosted card's tint.
 
            These were hardcoded WHITE (#ffffff2e / #ffffff26). On a light page
-           that is a subtle sheen; on dodcyberconsulting.com's #04090e page it
+           that is a subtle sheen; on acmecyber.com's #04090e page it
            is an 18% white wash over the entire card, which lightened the
            background until near-white body text stopped being readable — and
            its hairline border was the "white fringy edges" around the panel.
@@ -135,7 +135,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
         }
         /* Frosted glass CARD that fills the wrapper as a rounded rectangle.
            (Replaces the legacy circular orb, which only made sense atop
-           drfuhrman's half-circle hero art; a rounded card generalizes to any
+           acmenutrition's half-circle hero art; a rounded card generalizes to any
            customer's full-bleed ambient background and never gets covered.) */
         .chat-glass {
           border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
@@ -262,7 +262,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
       /* EXPLICIT height, not max-height.
          An SVG with a viewBox and no width/height has an intrinsic RATIO but
          no intrinsic SIZE, so `height:auto` collapses it to 0x0 and
-         `max-height` has nothing to cap — Greystone's logo.svg
+         `max-height` has nothing to cap — Acme Realty's logo.svg
          (viewBox="0 0 304 56.1") vanished entirely when this was max-height.
          A definite height plus width:auto lets the ratio do the rest, and
          works for rasters and SVGs alike.
@@ -343,7 +343,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
         line-height: 1;
         /* The brand's DISPLAY face — this glyph pair sits beside the logo, so
            it belongs with the wordmark, not with the body copy. Reading
-           --font-sans put AuraPath's "AI" in a heavy IBM Plex grotesque next to
+           --font-sans put AcmePath's "AI" in a heavy IBM Plex grotesque next to
            a Fraunces serif logo. --font-display falls back to --font-sans, so
            brands with a single face are unaffected. */
         font-family: var(--font-display, var(--font-sans));
@@ -437,7 +437,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
           /* The BRAND's bubble, a touch more solid than its resting 75%.
 
              This was hardcoded rgba(220, 234, 220, 0.85) — the template's
-             original DrFuhrman sage — with !important, so hovering the panel
+             original AcmeNutrition sage — with !important, so hovering the panel
              turned every customer's welcome bubble green regardless of their
              palette, and on a dark brand it painted a near-white slab under
              near-white text. */
@@ -542,7 +542,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
           tightly-cropped logo's bottom edge IS its baseline, so pairing it with
           a text box pushes the logo down by that same descender gap. That is
           why the customer's logo sat lower than "AI" on every wordmark demo,
-          and why "AuraPath" sat lower on the mark ones — one cause, two
+          and why "AcmePath" sat lower on the mark ones — one cause, two
           symptoms, which is why fixing only the text case left the other.
 
           A flex item that is an image baselines on its bottom margin edge, so
@@ -551,7 +551,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
         {/* The logo IMAGE is the lockup only when it is a wordmark — i.e. when
             it carries the brand's name. A square mark does not, so the name is
             set as text instead (below) and the mark is omitted here rather than
-            placed in front of it: "⟨glyph⟩ AuraPath AI" states the A twice, and
+            placed in front of it: "⟨glyph⟩ AcmePath AI" states the A twice, and
             a hero is the one place the brand should read cleanly. The mark still
             appears in the header and as the favicon, where it is doing the job
             marks are for. */}
@@ -571,7 +571,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
               alt={brand.identity.siteName}
               class:list={[
                 /* max-H plus max-W, not a fixed height.
-                   Applied BioCode's wordmark is 1248x138 — a 9:1 ratio. At a
+                   Acme Bio's wordmark is 1248x138 — a 9:1 ratio. At a
                    fixed h-10 that is 362px wide, so on a 390px viewport the
                    "AI" wrapped to a second line and the lockup stopped being
                    one. Constraining BOTH axes with object-contain lets a wide
@@ -597,8 +597,8 @@ const logoMaxHMd = Math.round(56 * logoScale);
             their own header.
 
             The trailing "AI" is stripped because it is drawn separately below —
-            without that, a brand already called "AuraPath AI" reads
-            "AuraPath AI AI". */}
+            without that, a brand already called "AcmePath AI" reads
+            "AcmePath AI AI". */}
         {markSplit ? (
           /* `-ml-3` cancels the flex gap so the remainder sits SNUG against
              the mark and the two read as one word. With the gap left in,

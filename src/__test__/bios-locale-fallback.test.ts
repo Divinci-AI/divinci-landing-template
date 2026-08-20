@@ -8,7 +8,7 @@ import { join } from "node:path";
  * `brand.config` is NOT localized — one config serves all 35 languages. The
  * i18n `bios.roles` array is localized but is produced by a different process
  * and is routinely SHORTER than `brand.bios`, so the renderer's fallback fires
- * often. On EvoNexus's French page six cards read "Team" in English amid fluent
+ * often. On AcmeVentures's French page six cards read "Team" in English amid fluent
  * French, which reads as a half-finished translation because that is what it is.
  *
  * The card keeps the person's name and photograph either way; the role is the

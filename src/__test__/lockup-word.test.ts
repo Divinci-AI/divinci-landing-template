@@ -5,10 +5,10 @@ import { fileURLToPath } from "node:url";
 /**
  * The `[name] AI` lockup.
  *
- * BioRenew's hero rendered the full legal name — "BioRenew Integrative
+ * Acme Renew's hero rendered the full legal name — "Acme Renew Integrative
  * Medicine" — which wrapped to two lines and left "AI" stranded at the upper
  * right, so it stopped reading as one lockup at all. `lockupName` lets a brand
- * supply a short form ("BioRenewIM") for this one purpose without changing the
+ * supply a short form ("AcmeRenewIM") for this one purpose without changing the
  * name used in copy, OG tags or the chat byline.
  */
 
@@ -22,8 +22,8 @@ beforeEach(() => vi.resetModules());
 
 describe("lockupWord", () => {
   it("prefers lockupName over the full siteName", async () => {
-    const f = await withBrand({ siteName: "BioRenew Integrative Medicine", lockupName: "BioRenewIM" });
-    expect(f()).toBe("BioRenewIM");
+    const f = await withBrand({ siteName: "Acme Renew Integrative Medicine", lockupName: "AcmeRenewIM" });
+    expect(f()).toBe("AcmeRenewIM");
   });
 
   it("falls back to siteName when no short form is given", async () => {
@@ -31,10 +31,10 @@ describe("lockupWord", () => {
     expect(f()).toBe("Ansir Cowork");
   });
 
-  it("strips a trailing AI so the lockup does not read 'AuraPath AI AI'", async () => {
+  it("strips a trailing AI so the lockup does not read 'AcmePath AI AI'", async () => {
     // The lockup draws "AI" itself as a separate styled element.
-    expect(await (await withBrand({ siteName: "AuraPath AI" }))()).toBe("AuraPath");
-    expect(await (await withBrand({ siteName: "X", lockupName: "BioRenewIM AI" }))()).toBe("BioRenewIM");
+    expect(await (await withBrand({ siteName: "AcmePath AI" }))()).toBe("AcmePath");
+    expect(await (await withBrand({ siteName: "X", lockupName: "AcmeRenewIM AI" }))()).toBe("AcmeRenewIM");
   });
 
   it("does not strip 'AI' from the middle of a name", async () => {

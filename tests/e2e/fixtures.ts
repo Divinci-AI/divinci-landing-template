@@ -104,7 +104,7 @@ export async function enterValidEmail(page: Page, email = "qa@divinci.ai"): Prom
 /**
  * The send control, located by ACCESSIBLE NAME rather than visible text.
  *
- * Its label is brand copy: the template says "Send", caseymeans.com says
+ * Its label is brand copy: the template says "Send", acmelongevity.com says
  * "Ask", and any demo may say something else again. `aria-label="Send
  * message"` is the part that does not move, because it is an accessibility
  * contract rather than marketing copy — so it is the right thing to bind a
@@ -119,7 +119,7 @@ export function sendButton(page: Page) {
   // name-based locator, so .first()/.last() is a guess about DOM order —
   // and it was a losing one either way: .last() left network-error-retry and
   // quota failing on every demo, while .first() fixed one spec and broke two
-  // others (3 → 5 failures on aurapath and evonexus).
+  // others (3 → 5 failures on acmepath and acmeventures).
   //
   // The specs type into the textarea, so the button they mean is the one in
   // the same form. `form:has(textarea)` says exactly that, and stays correct

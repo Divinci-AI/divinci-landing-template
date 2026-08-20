@@ -6,7 +6,7 @@ import { placeBelow } from "../lib/popover-placement";
 // The old rule was `!(roomAbove >= h + gap) && roomBelow > roomAbove`.
 describe("placeBelow", () => {
   it("opens DOWNWARD for a chip near the top of the viewport", () => {
-    // The Aquillius case: 180px above (enough, but only just), 620px below.
+    // The Acme Advisors case: 180px above (enough, but only just), 620px below.
     // The old rule saw above "fits" and opened upward across the conversation.
     expect(placeBelow(180, 620, 160, 8)).toBe(true);
   });

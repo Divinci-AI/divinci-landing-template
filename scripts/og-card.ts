@@ -218,7 +218,7 @@ export interface OgBrand {
   /**
    * The logo is designed for a DARK background (light/knocked-out artwork).
    * The card is light, so such a logo needs a dark plate behind it or it is
-   * invisible — which is exactly how Centeno-Schultz's card came out: the
+   * invisible — which is exactly how Acme Ortho's card came out: the
    * clinic's name and strapline rendered white-on-white while everything
    * around them was correct. The flag was already in brand.config; the card
    * simply ignored it.
@@ -259,7 +259,7 @@ export interface OgBrand {
  * The name to draw beside a separately-rendered "AI".
  *
  * The card draws "AI" as its own gradient element, so a brand already called
- * "AuraPath AI" reads "AuraPath AI AI" on the card. Mirrors the same rule in
+ * "AcmePath AI" reads "AcmePath AI AI" on the card. Mirrors the same rule in
  * the hero lockup; matches only a TRAILING occurrence, so "Xenon AI Labs" is
  * untouched, and never strips a name to nothing.
  */
@@ -272,8 +272,8 @@ export interface OgBrand {
  *  * The wordmark width was `Math.min(720, measured)`. The CLAMP changed the
  *    number used for layout but not the text being drawn, so for a name wider
  *    than 720px the "AI" mark — positioned at `startX + logoW + gap` — landed
- *    INSIDE the still-drawing name. "BioRenew Integrative Medicine" rendered as
- *    "BioRenew Integrative M[AI]dicine".
+ *    INSIDE the still-drawing name. "Acme Renew Integrative Medicine" rendered as
+ *    "Acme Renew Integrative M[AI]dicine".
  *  * The tagline is centred at x=600 with no width constraint at all, so a long
  *    one overflows BOTH card edges and is clipped at each end.
  *
@@ -373,7 +373,7 @@ export function composeOgCard(brand: OgBrand, logo: LogoImage): { svg: string; n
   const plated = !usingText && brand.logoIsLight === true;
   // A TEXT wordmark needs a wider gap than a logo image does. 30px measures as
   // ~28px of ink, which is fine beside a logo but reads as ZERO between two
-  // runs of type at 71px — "Applied BioCodeAI". An italic serif gets away with
+  // runs of type at 71px — "Acme BioAI". An italic serif gets away with
   // it (the slant separates them); bold sans against bold sans does not, and
   // the brand name is the half that loses.
   //

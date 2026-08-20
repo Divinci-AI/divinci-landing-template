@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
  * The inline `[[n]]` citation badge must be READABLE.
  *
  * It rendered `text-df-green-dark` on `bg-df-green-leaf/30`. Against
- * BioRenew's gold palette that measures **2.06:1** — the numeral showed as a
+ * Acme Renew's gold palette that measures **2.06:1** — the numeral showed as a
  * coloured smudge inside a coloured chip. At `text-[0.65em]` it needs *more*
  * contrast than body text, not less; WCAG AA for normal text is 4.5:1 and
  * small text has no lower bar.
@@ -59,11 +59,11 @@ function contrast(a: RGB, b: RGB): number {
 
 /** Real palettes from generated demos — not invented swatches. */
 const PALETTES = {
-  // runs/biorenewim/2026-08-14-001 — the demo that surfaced this.
-  biorenew: { leaf: "#d6ad62", dark: "#af812e", text: "#000000", bubble: "#ccccff" },
+  // runs/acmerenew/2026-08-14-001 — the demo that surfaced this.
+  acmerenew: { leaf: "#d6ad62", dark: "#af812e", text: "#000000", bubble: "#ccccff" },
   // The template's own defaults.
   divinci: { leaf: "#9ec947", dark: "#3b6b3f", text: "#1a1a1a", bubble: "#eef4e4" },
-  // runs/drlongevityrx — a DARK-primary brand whose accent is a pale gold, so
+  // runs/acmerx — a DARK-primary brand whose accent is a pale gold, so
   // the badge sits on a very light wash. The previous palettes both had a
   // mid-tone accent; this one checks the light end of the range.
   longevityrx: { leaf: "#e9cc8f", dark: "#16271b", text: "#2c2c2c", bubble: "#f7ecd4" },
@@ -71,7 +71,7 @@ const PALETTES = {
 
 describe("citation badge contrast", () => {
   it("the OLD pairing was genuinely unreadable — this is the regression", () => {
-    const p = PALETTES.biorenew;
+    const p = PALETTES.acmerenew;
     const bg = over(hex(p.leaf), 0.3, hex(p.bubble));
     expect(contrast(hex(p.dark), bg)).toBeLessThan(3);
   });

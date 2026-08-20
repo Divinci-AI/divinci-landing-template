@@ -1,5 +1,5 @@
 /** Short, legible avatar initials from a brand/site name.
- *  "MD Spine Care" → "MD" (keeps a leading acronym); "Acme Health" → "AH". */
+ *  "Acme Spine Care" → "MD" (keeps a leading acronym); "Acme Health" → "AH". */
 export function brandInitials(name: string): string {
   const clean = (name || "")
     .replace(/\(.*?\)/g, " ") // drop "(Dr. …)" parentheticals

@@ -75,7 +75,7 @@ describe("new UI strings must not break existing demos", () => {
     // generated file missing a key is rejected wholesale — the run keeps the
     // neutral copy, so the demo ships branded "Acme Expert AI" in its title,
     // og:title, chat welcome and CTA. Adding `menuAriaLabel` to en.ts did
-    // exactly that to a live mach33 demo, and it is the second time this class
+    // exactly that to a live acmeincubator demo, and it is the second time this class
     // has silently reverted demos.
     //
     // Rule: a new UI string gets a literal fallback in the component. A key in
