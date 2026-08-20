@@ -68,4 +68,37 @@ test.describe("Quota exhaustion → SignupCTA", () => {
     await expect(page.getByText(/Want to keep talking to/i)).toHaveCount(0);
   });
 
+
+  // A stale marker must never lock the composer.
+  //
+  // Making `quotaExhausted` honour the marker was the fix for a silent 402.
+  // The marker was ALSO being persisted to escrow, and hydrated on load — so
+  // that fix, shipped as-is, would have given a returning visitor whose quota
+  // window had reset the CTA *instead of* the composer, permanently. Earlier
+  // builds already wrote that value, so real visitors have it today.
+  test("a persisted quota marker from a previous visit does not lock the input", async ({
+    page,
+  }) => {
+    // Seeded via addInitScript, NOT setItem-then-reload.
+    //
+    // `fixtures.ts` extends `page` with its own init script that calls
+    // `localStorage.clear()` on EVERY navigation, so a value written with
+    // setItem is wiped before the app can hydrate it. This test passed against
+    // deliberately broken code three times because of that — it was
+    // structurally incapable of reproducing the bug it names. Init scripts run
+    // in the order they are added, so seeding here lands after the clear.
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "divinci-landing.escrow",
+        JSON.stringify({ email: "qa@divinci.ai", transcriptId: "__quota__" }),
+      );
+    });
+    // The fixture's goto already awaits hydration, so no arbitrary timeout: the
+    // assertions below are about post-hydration state, and the pre-hydration
+    // DOM satisfies both of them.
+    await page.goto("/");
+    await expect(page.locator("form:has(textarea) textarea")).toBeVisible();
+    await expect(page.getByTestId("signup-cta")).toHaveCount(0);
+  });
+
 });

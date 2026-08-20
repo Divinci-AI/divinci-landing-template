@@ -158,7 +158,12 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
   useEffect(() => {
     const esc = loadEscrow();
     if (esc.email) setEmail(esc.email);
-    if (esc.transcriptId) setTranscriptId(esc.transcriptId);
+    // Ignore a persisted quota marker. Earlier builds wrote one, so real
+    // visitors have it in localStorage today; hydrating it would lock them out
+    // of the composer on load.
+    if (esc.transcriptId && esc.transcriptId !== QUOTA_MARKER) {
+      setTranscriptId(esc.transcriptId);
+    }
     if (esc.sessionId) sessionIdRef.current = esc.sessionId;
   }, []);
 
@@ -320,8 +325,15 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
             prev.filter((m) => m.id !== assistantPlaceholder.id),
           );
           setError(null);
+          // In-session only — deliberately NOT persisted to escrow.
+          //
+          // The server is the authority on quota, and a refusal is not a fact
+          // about the visitor, it is a fact about a moment. Persisting it and
+          // then gating the input on it means a returning visitor whose window
+          // has since reset gets the CTA *instead of* the composer, forever,
+          // with no way back. A reload now restores the input and the next send
+          // re-asks the server; if it is still exhausted the CTA comes back.
           setTranscriptId(QUOTA_MARKER);
-          saveEscrow({ transcriptId: QUOTA_MARKER });
           return;
         }
 
