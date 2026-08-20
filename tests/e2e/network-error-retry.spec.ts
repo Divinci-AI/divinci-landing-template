@@ -1,5 +1,12 @@
 import { test, expect, enterValidEmail, sendButton } from "./fixtures";
 
+/**
+ * The asserted string is `SYS.errorServer` from i18n/chat-system-strings.ts.
+ * It was neutralized from "Network error — …" to "Something went wrong on our
+ * end — …" on 2026-08-17 and this spec was not updated, so it had been failing
+ * ever since. Nothing noticed, because the suite ran nowhere until 2026-08-20.
+ */
+
 test.describe("Network-error retry: failed sends don't trip the quota gate", () => {
   test("500 from chat-send removes the user message + lets user retry", async ({
     page,
@@ -47,7 +54,7 @@ test.describe("Network-error retry: failed sends don't trip the quota gate", () 
 
     // Error toast renders
     await expect(
-      page.getByText(/Network error — that message wasn't delivered/i),
+      page.getByText(/Something went wrong on our end — that message wasn't delivered/i),
     ).toBeVisible({ timeout: 10_000 });
 
     // SignupCTA must NOT be visible — the failed send didn't count.

@@ -16,9 +16,21 @@ import { test, expect, request as playwrightRequest } from "@playwright/test";
  * collisions across runs.
  */
 
-const DEPLOYED =
-  process.env.E2E_DEPLOYED_URL ??
-  "https://REPLACE-landing.example.workers.dev";
+/**
+ * Needs a REAL deployment. Until 2026-08-20 this fell back to the template's
+ * own placeholder host, so with no deployment configured the suite did not
+ * skip — it spent its timeout resolving `REPLACE-landing.example.workers.dev`
+ * and failed with ENOTFOUND. 30 of 44 specs failed that way, which made the
+ * whole suite look broken and is a large part of why it ran nowhere.
+ *
+ * A guard that cannot be run without production credentials still has to be
+ * runnable *without* them — as a skip, not as a failure.
+ */
+const DEPLOYED = process.env.E2E_DEPLOYED_URL ?? "";
+test.skip(
+  !process.env.E2E_DEPLOYED_URL,
+  "set E2E_DEPLOYED_URL (and E2E_BASIC_AUTH_USER/PASS) to run against a deployment",
+);
 
 const CREDS = {
   username: process.env.E2E_BASIC_AUTH_USER ?? "preview",

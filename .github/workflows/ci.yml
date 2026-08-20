@@ -209,3 +209,51 @@ jobs:
           # a public repository while it reported green.
           python3 .github/scripts/test_check_third_party_names.py
           python3 .github/scripts/check-third-party-names.py
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      # Against the BUILT output, not the dev server. Astro 7's `astro dev` and
+      # `astro preview` both daemonize — the foreground process exits rc=0 while
+      # the server keeps serving — so Playwright's `webServer:` block reads a
+      # healthy server as "exited early" and the suite cannot start at all. The
+      # astro 6 -> 7 upgrade broke that silently, because this suite ran nowhere.
+      #
+      # Starting it here and passing E2E_BASE_URL bypasses `webServer:` entirely
+      # and tests what actually deploys.
+      - name: Build and serve
+        run: |
+          npm run build
+          npx astro preview --host 127.0.0.1 --port 4321 &
+          # Poll rather than sleep: a fixed sleep is either flaky or slow, and
+          # this must fail loudly if the server never comes up.
+          for i in $(seq 1 60); do
+            curl -fsS -o /dev/null http://127.0.0.1:4321/ && break
+            sleep 1
+          done
+          curl -fsS -o /dev/null http://127.0.0.1:4321/ \
+            || { echo "::error::preview server never became ready"; exit 1; }
+
+      # 12 specs run here. The rest need a live deployment and skip with a
+      # reason — never a fake host: they used to fall back to the template's own
+      # placeholder domain, so 30 specs failed on ENOTFOUND and the suite looked
+      # broken rather than unconfigured.
+      - name: E2E
+        run: npx playwright test --project=chromium --reporter=line
+        env:
+          E2E_BASE_URL: http://127.0.0.1:4321
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
