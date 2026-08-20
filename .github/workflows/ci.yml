@@ -202,4 +202,10 @@ jobs:
       # real name as the illustration. That is the guard working: prose about
       # the names is not exempt from the rule about the names.
       - name: No third-party names
-        run: python3 .github/scripts/check-third-party-names.py
+        run: |
+          # The guard's own mechanics are tested, because its failure mode is
+          # to pass. Every case in this suite is a form the previous plaintext
+          # guard could not see, and each corresponds to real names that sat in
+          # a public repository while it reported green.
+          python3 .github/scripts/test_check_third_party_names.py
+          python3 .github/scripts/check-third-party-names.py
