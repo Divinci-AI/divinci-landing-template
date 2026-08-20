@@ -194,7 +194,12 @@ jobs:
       # itself publish the prospect list, which is the same mistake one layer
       # up. See the script's header for why it tokenises rather than
       # substring-matches — the previous plaintext version missed 85
-      # occurrences of names it explicitly listed, because `BIORENEW_A` matches
-      # neither the casing nor the `\b` of a pattern spelling it `BioRenew`.
+      # occurrences of names it explicitly listed, because a name inside a
+      # `SCREAMING_CASE` fixture constant matches neither the casing nor the
+      # `\b` of a pattern spelling it in mixed case.
+      #
+      # This very comment tripped the check on its first CI run, by using a
+      # real name as the illustration. That is the guard working: prose about
+      # the names is not exempt from the rule about the names.
       - name: No third-party names
         run: python3 .github/scripts/check-third-party-names.py
