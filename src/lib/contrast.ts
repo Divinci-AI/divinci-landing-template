@@ -6,7 +6,7 @@
  * property of most brands, not all of them — and when it fails, it fails
  * silently and almost totally.
  *
- * AuraPath: `primary #1a1610`, `accent #0f0d08`. Both nearly black. The final
+ * AcmePath: `primary #1a1610`, `accent #0f0d08`. Both nearly black. The final
  * CTA rendered an accent-on-primary button with primary-coloured label text at
  * a contrast ratio of **1.08:1** against a required 4.5:1 — an invisible button
  * that only became readable on hover, because the hover state happens to
@@ -54,7 +54,7 @@ export function readableOn(bg: string, preferred: string, fallback: string): str
  * Every candidate is MEASURED against the section it sits on. An earlier
  * version tried the accent and then fell back to `cream` unconditionally,
  * which assumed `cream` is a light colour. On a dark-page brand `cream` IS the
- * page colour — Freedom with AI's palette has `primary` and `cream` both
+ * page colour — Acme Freedom's palette has `primary` and `cream` both
  * `#0f1419` — so the fallback painted the button in the section's own colour
  * and then, finding no readable brand ink for it, labelled it `#000000`:
  * invisible on invisible, on the page's primary call to action.

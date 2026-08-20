@@ -22,15 +22,23 @@ Step 1 (fork + parameterize) status. The **foundation spine is wired to
 
 ## Remaining
 1. **DONE (2026-06-13): i18n + all component copy neutralized.** `en.ts`
-   rewritten to neutral "Acme Expert" copy; the 35 Fuhrman locale files deleted
+   rewritten to neutral "Acme Expert" copy; the 35 AcmeNutrition locale files deleted
    (the loader's English fallback serves all 36 advertised locales until a
    customer adds translations). Also neutralized the component-level refs the
    i18n split left behind: TranscriptShowcase (sources, labels, model →
    brand.config), ChatIsland/Transcript (labels, corpus fallback, logo, event
-   name `divinci:populateInput`), ComingSoon (dropped dead Fuhrman card copy),
+   name `divinci:populateInput`), ComingSoon (dropped dead AcmeNutrition card copy),
    Footer, links.ts REF_SOURCE, escrow storage key, verify-email templates
    (→ brand.identity.siteName), and the test fixtures. Deleted the dormant
-   `worker-v2.ts`. **`grep -ri fuhrman src/` → zero.** Build = 36 pages.
+   `worker-v2.ts`. Build = 36 pages.
+
+   ⚠️ This item claimed a `grep` for the source brand's name returned **zero**, from 2026-06-13 until
+   2026-08-19. It was false the day it was written and stayed false for two
+   months: the name survived in `HeroSection.astro` (×3) and `global.css`, and
+   five other real companies were never in scope of that grep at all. A claim
+   about a grep is not a grep. The check now runs in CI —
+   `.github/workflows/ci.yml`, "No third-party names" — where it fails a build
+   instead of reassuring a reader.
 2. **DONE: Corpus stats** → `brand.config.corpus.stats` (value + label); the
    per-stat "flavor" paragraph was dropped (grid adapts to 3 or 4 stats).
 3. **DONE: Bios layout** rewritten bare — initial-letter avatar cards driven by
@@ -39,7 +47,7 @@ Step 1 (fork + parameterize) status. The **foundation spine is wired to
    kit supplies headshots.
 4. **DONE: wrangler.toml** rewritten as a single-env template — placeholder
    worker name + KV id + `REPLACE_WITH_RELEASE_ID`; default API is now
-   **prod** (`api.divinci.app`), not staging (the drfuhrman bug is not carried
+   **prod** (`api.divinci.app`), not staging (the acmenutrition bug is not carried
    over). Multi-account staging/prod blocks removed (documented as optional).
 5. **DONE: worker.ts** from-name, basic-auth realm/user, all quota messages,
    and the verify-email subject derive from `brand.config`.

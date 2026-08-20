@@ -649,7 +649,7 @@ function Citation({ n, sources, onCite }: { n: number } & InlineOpts) {
       }}
       /* The numeral is 0.65em, so it needs MORE contrast than body text, not
          less. `text-df-brand-ink` on `bg-df-green-leaf/30` measured 2.06:1
-         against BioRenew's gold palette — the badge read as a coloured smudge.
+         against Acme Renew's gold palette — the badge read as a coloured smudge.
          `df-text` is the brand's own body-text colour, so it is readable on the
          brand's light surfaces by construction, for any palette rather than
          just the ones we have looked at. */

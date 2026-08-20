@@ -34,7 +34,7 @@ export function BrandAvatar({
         <img src={avatarUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
       ) : brand.media.markLogo || (brand.media.logo && brand.media.logoIsMark) ? (
         // ONLY a mark. `object-contain` keeps a wordmark undistorted but does
-        // not make it legible: Applied BioCode's logo is 1248x138, so at 70%
+        // not make it legible: Acme Bio's logo is 1248x138, so at 70%
         // of a 36px circle it renders ~25px wide and under 3px tall — a smear,
         // and the showcase's 16px version read as barcode stripes.
         //
@@ -42,7 +42,7 @@ export function BrandAvatar({
         // that works in a small circle. Initials do, which is why they are the
         // fallback rather than a last-ditch one.
         // The mark also has to be VISIBLE on the circle, which is the brand's
-        // own chrome: Freedom with AI's mark is drawn in #000000 and the
+        // own chrome: Acme Freedom's mark is drawn in #000000 and the
         // avatar sits on a near-black panel, so it rendered as a black glyph
         // on a black disc — present, correctly sized, and unseeable. Same rule
         // the hero and the header already apply to the wordmark, and only for
@@ -63,7 +63,7 @@ export function BrandAvatar({
         // Ink is `on-chrome`, NOT a brand value token. This component's background
         // is set by its CALLER via className — WelcomeMessage and the chat header
         // both pass `bg-df-green-dark` — so brand-toned ink is painted onto its
-        // own background and vanishes. The Greystone demo shipped a blank navy
+        // own background and vanishes. The Acme Realty demo shipped a blank navy
         // circle this way, on a LIGHT brand: it was never about brand lightness.
         <span className="text-[11px] font-bold text-df-on-chrome" aria-hidden="true">
           {brandInitials(brand.identity.siteName)}

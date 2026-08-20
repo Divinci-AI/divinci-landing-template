@@ -24,9 +24,9 @@ import { join } from "node:path";
  * alike, because the contrast is zero by construction.
  *
  * FOUND BY THIS TEST, live in the template: BrandAvatar wraps the initials in
- * `bg-df-green-dark` and then colours them `text-df-green-dark`. The Greystone
+ * `bg-df-green-dark` and then colours them `text-df-green-dark`. The Acme Realty
  * demo shipped a blank navy circle where the assistant's avatar should be. It
- * was mistaken for a dark-brand bug for most of a session; Greystone is a light
+ * was mistaken for a dark-brand bug for most of a session; Acme Realty is a light
  * brand, and it was never about brand lightness at all.
  */
 
@@ -206,7 +206,7 @@ describe("a component that does not own its background cannot pick ink that depe
    * BrandAvatar takes a `className` prop and its CALLERS supply the surface
    * (`bg-df-green-dark`). Internally it coloured the initials
    * `text-df-green-dark` — the same token, in a different file — so no
-   * single-file scan could see it. Greystone shipped a blank navy circle.
+   * single-file scan could see it. Acme Realty shipped a blank navy circle.
    *
    * The invariant is a design rule, not a colour rule: a component whose
    * background is chosen by its caller may only use ink that is correct against

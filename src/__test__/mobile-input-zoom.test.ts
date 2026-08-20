@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 /**
  * iOS Safari ZOOMS the page when a focused input's font-size is under 16px,
- * and does not zoom back out. On the Greystone demo that made the chat field
+ * and does not zoom back out. On the Acme Realty demo that made the chat field
  * unusable on a phone: you could not see what you were typing.
  *
  * `text-sm` is 14px. Every real TEXT-ENTRY field therefore has to be >=16px at

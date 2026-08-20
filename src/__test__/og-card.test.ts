@@ -161,7 +161,7 @@ describe("logoIsLight", () => {
   const LIGHT_LOGO = { href: "data:image/png;base64,AAAA", aspect: 4, note: "" };
 
   it("puts a dark plate behind a knocked-out logo so it is not invisible", () => {
-    // Centeno-Schultz's logo is white artwork. On the light card its name and
+    // Acme Ortho's logo is white artwork. On the light card its name and
     // strapline rendered white-on-white while everything around them was
     // correct — and `logoIsLight` was already set in brand.config; the card
     // just ignored it.
@@ -201,8 +201,8 @@ describe("logoIsLight", () => {
  */
 describe("mark logos and the AI suffix on the card", () => {
   const brand = {
-    siteName: "AuraPath AI",
-    productName: "AuraPath AI",
+    siteName: "AcmePath AI",
+    productName: "AcmePath AI",
     palette: { primary: "#1a1610", dark: "#262017", mid: "#403627", accent: "#0f0d08", cream: "#f7fafc", text: "#0f0d08" },
     ogTagline: "answered 24/7.",
     ogSubtitle: "AI-powered answers.",
@@ -213,7 +213,7 @@ describe("mark logos and the AI suffix on the card", () => {
     // A mark carries no name, so the shared card read "<glyph> AI" with the
     // brand absent from the image people actually see.
     const { svg } = composeOgCard({ ...brand, logoIsMark: true }, embeddable);
-    expect(svg).toContain("AuraPath");
+    expect(svg).toContain("AcmePath");
     expect(svg).not.toContain("<image");
   });
 
@@ -224,15 +224,15 @@ describe("mark logos and the AI suffix on the card", () => {
 
   it("does not print the AI suffix twice in the WORDMARK", () => {
     // "AI" is drawn separately as a gradient, so rendering the full site name
-    // beside it produced "AuraPath AI AI" in the lockup.
+    // beside it produced "AcmePath AI AI" in the lockup.
     //
     // Scoped to the wordmark <text>, not the whole SVG: the input placeholder
-    // legitimately reads "Ask the AuraPath AI…" — that is the product name and
+    // legitimately reads "Ask the AcmePath AI…" — that is the product name and
     // it is correct. An over-broad assertion here fails on working output,
     // which is how a test starts costing more than the bug.
     const { svg } = composeOgCard({ ...brand, logoIsMark: true }, embeddable);
     const wordmark = svg.match(/<text[^>]*font-weight="700"[^>]*>([^<]*)<\/text>/);
-    expect(wordmark?.[1]).toBe("AuraPath");
+    expect(wordmark?.[1]).toBe("AcmePath");
   });
 
   it("leaves a name whose AI is not a trailing word alone", () => {
@@ -246,8 +246,8 @@ describe("mark logos and the AI suffix on the card", () => {
 
 describe("AI sizing against the wordmark", () => {
   const brand = {
-    siteName: "AuraPath AI",
-    productName: "AuraPath AI",
+    siteName: "AcmePath AI",
+    productName: "AcmePath AI",
     palette: { primary: "#1a1610", dark: "#262017", mid: "#403627", accent: "#0f0d08", cream: "#f7fafc", text: "#0f0d08" },
     ogTagline: "answered 24/7.",
     ogSubtitle: "AI-powered answers.",
@@ -262,7 +262,7 @@ describe("AI sizing against the wordmark", () => {
     // 96 against a 71px wordmark made the AI visibly larger than the brand's
     // own name; as two runs of type they should read as one piece.
     const { svg } = composeOgCard({ ...brand, logoIsMark: true }, embeddable);
-    const wm = svg.match(/font-size="(\d+)"[^>]*font-weight="[^"]*"[^>]*>AuraPath</);
+    const wm = svg.match(/font-size="(\d+)"[^>]*font-weight="[^"]*"[^>]*>AcmePath</);
     const ai = svg.match(/font-size="(\d+)"[^>]*fill="url\(#aiGrad\)">AI</);
     expect(ai?.[1]).toBe(wm?.[1]);
   });
@@ -282,7 +282,7 @@ describe("AI sizing against the wordmark", () => {
  *  * the wordmark width was `Math.min(720, measured)`, which shrank the number
  *    used for LAYOUT without shrinking the TEXT — so "AI", placed at
  *    `startX + logoW + gap`, landed inside a name that was still drawing.
- *    "BioRenew Integrative Medicine" rendered as "BioRenew Integrative M[AI]dicine".
+ *    "Acme Renew Integrative Medicine" rendered as "Acme Renew Integrative M[AI]dicine".
  *  * the tagline is centred at x=600 with no width constraint, so a long one
  *    overflows BOTH card edges and is clipped at each end.
  *
@@ -294,7 +294,7 @@ describe("og card — text must fit the card it is drawn on", () => {
   it("scales an over-wide wordmark instead of clamping its reported width", async () => {
     const { fitFontSize } = await import("../../scripts/og-card");
     // Long real name at the card's wordmark size.
-    const long = "BioRenew Integrative Medicine";
+    const long = "Acme Renew Integrative Medicine";
     const fitted = fitFontSize(long, 720, 96, 0.54);
     expect(fitted).toBeLessThan(96);
     // And it genuinely fits now.
@@ -304,13 +304,13 @@ describe("og card — text must fit the card it is drawn on", () => {
   it("leaves a name that already fits at full size", async () => {
     const { fitFontSize } = await import("../../scripts/og-card");
     // The short lockup name the card now uses.
-    expect(fitFontSize("BioRenewIM", 720, 96, 0.54)).toBe(96);
+    expect(fitFontSize("AcmeRenewIM", 720, 96, 0.54)).toBe(96);
   });
 
   it("shrinks the tagline that overflowed both card edges", async () => {
     const { fitFontSize } = await import("../../scripts/og-card");
     // Verbatim from the deployed card.
-    const tagline = "BioRenew Integrative Medicine — answered 24/7";
+    const tagline = "Acme Renew Integrative Medicine — answered 24/7";
     const fitted = fitFontSize(tagline, 1080, 58, 0.54);
     expect(fitted).toBeLessThan(58);
     expect(tagline.length * fitted * 0.54).toBeLessThanOrEqual(1080);

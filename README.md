@@ -2,7 +2,7 @@
 
 An open-source, **re-skinnable** landing page with an embedded Divinci AI chat —
 Astro + React islands on **Cloudflare Workers**, backed by a Divinci Release.
-Generalized from the production `drfuhrman.ai` implementation.
+Generalized from the production `acmenutrition.ai` implementation.
 
 The whole site re-skins from **one file**: [`src/brand.config.ts`](src/brand.config.ts).
 Fill it out, drop in three assets, deploy.

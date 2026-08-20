@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
  *
  * This template is cloned and installed by the demo pipeline on an operator's
  * machine, so it inherits whatever that machine's npm config happens to say.
- * On 2026-08-06 that took down the evonexus landing deploy three nights
+ * On 2026-08-06 that took down the acmeventures landing deploy three nights
  * running and quarantined the run.
  *
  * Declaring the field in package.json is what npm asks for, and the EMPTY

@@ -16,7 +16,7 @@
  * For a citation near the top of the transcript that opens the bubble upward
  * across the message it belongs to, and when above fits by less than the
  * bubble's height it lands clamped against the viewport edge — which is what
- * "the popup isn't showing up like it should" looks like on the Aquillius demo.
+ * "the popup isn't showing up like it should" looks like on the Acme Advisors demo.
  */
 export function placeBelow(roomAbove: number, roomBelow: number, height: number, gap: number): boolean {
   const need = height + gap;

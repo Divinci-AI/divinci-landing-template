@@ -51,7 +51,7 @@ const p = brand.palette;
 // The semantic surface tokens in global.css default to the light values the
 // components used to hardcode, so a light palette is untouched by everything
 // below. A dark palette needs every one of them inverted at once: a white card
-// with gray-500 text on dodcyberconsulting.com's #04090e body is not a styling
+// with gray-500 text on acmecyber.com's #04090e body is not a styling
 // blemish, it is a different website.
 //
 // Keyed on the PAGE colour, which is what `cream` means on both paths — the
@@ -91,7 +91,7 @@ const darkSurfaceVars = isDarkBrand
     `--color-df-brand-ink:${p.accent};` +
     `--color-df-on-chrome:${onChrome};` +
     // The frosted chat card. A white tint at 18% is a sheen on a light page
-    // and a haze on a near-black one — it lightened dodcyber's card until
+    // and a haze on a near-black one — it lightened acmecyber's card until
     // near-white body text stopped being readable, and its border drew a
     // white fringe around the panel. On a dark page the lift has to be a
     // fraction of that, and the hairline drawn in the brand's own ink.
@@ -111,7 +111,7 @@ const brandVars = `:root{` +
   `--font-sans:${brand.fonts.family};` +
   // The brand's DISPLAY face, for the "AI" wordmark beside the logo. Falls back
   // to the body font, so a brand whose headings and body share a face is
-  // unchanged. AuraPath is why this exists: its body is IBM Plex Sans and its
+  // unchanged. AcmePath is why this exists: its body is IBM Plex Sans and its
   // headings are Fraunces, so rendering "AI" in the body font put a heavy
   // grotesque next to a serif wordmark.
   `--font-display:${brand.fonts.display ?? brand.fonts.family};` +

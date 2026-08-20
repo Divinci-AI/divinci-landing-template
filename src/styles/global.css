@@ -20,7 +20,7 @@
      through the components.
 
      Those utilities are correct on every light palette and catastrophic on a
-     dark one: dodcyberconsulting.com is body #04090e, and a white card with
+     dark one: acmecyber.com is body #04090e, and a white card with
      gray-500 text on that page is not a styling blemish, it is a different
      website. The defaults below are exactly the values they replace, so a
      light brand renders byte-identically; Landing.astro overrides them only
@@ -153,5 +153,5 @@ body {
 }
 
 /* Cursors: use the OS defaults (clean + professional + never off-brand). The
-   old custom green pointer/I-beam was a drfuhrman flourish that clashed on a
+   old custom green pointer/I-beam was a acmenutrition flourish that clashed on a
    re-skinned clinic site. */

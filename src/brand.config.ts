@@ -85,7 +85,7 @@ export interface BrandConfig {
      *
      * `items-baseline` puts an <img>'s BOTTOM EDGE on the text baseline, which
      * is right for a tightly-cropped wordmark and wrong when a mark overshoots
-     * below the letters — Aquillius's flame descends 13px past "AQUILLIUS" in
+     * below the letters — Acme Advisors's flame descends 13px past "ACMEADVISORS" in
      * a 143px image, so the name floated ~5px above the "AI" beside it.
      *
      * A FRACTION, because a CSS translate percentage resolves against the
@@ -107,7 +107,7 @@ export interface BrandConfig {
      *
      * The lockup wants the wordmark and an avatar wants a square; most brands
      * publish both, but only the wordmark is discoverable from a page's
-     * <img> tags. Greystone's is a "G" monogram that appears on their LinkedIn
+     * <img> tags. Acme Realty's is a "G" monogram that appears on their LinkedIn
      * and as a 48px favicon, and nowhere the extractor looks.
      *
      * Preferred over `logo` in every avatar position, and over initials. The
@@ -120,7 +120,7 @@ export interface BrandConfig {
      * The lockup sizes the logo by BOX height (40px / 56px), but a
      * tightly-cropped all-caps wordmark fills its box, so its letters render
      * 56px against the "AI" cap height of ~35px and visibly dwarf it —
-     * Greystone measured exactly that. A brand whose logo carries padding, or
+     * Acme Realty measured exactly that. A brand whose logo carries padding, or
      * has ascenders and descenders, already looks right and should omit this.
      *
      * 1 (or absent) leaves the current sizing untouched.
