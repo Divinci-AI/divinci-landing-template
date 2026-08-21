@@ -153,3 +153,57 @@ describe("the anonymous-cap CTA points at Divinci, not the customer", () => {
     expect(code).toMatch(/href=\{DIVINCI_CHAT_URL\}/);
   });
 });
+
+/**
+ * Regression guard for 2026-08-21.
+ *
+ * Every demo landing site returned "Something went wrong on our end" at once.
+ * The API was healthy: it was answering 402 `insufficient funds`, because the
+ * single wallet that funds all 558 demo whitelabels
+ * (google-oauth2|113125452813615956494) had gone to -$0.038. The worker
+ * flattened that to `502 upstream_error`, so a billing state that one Stripe
+ * top-up would clear was indistinguishable from a platform outage — and cost
+ * a full investigation to tell apart.
+ */
+describe("an unfunded wallet is not a generic upstream error", () => {
+  const code = codeOf("worker.ts");
+
+  it("classifies 402 insufficient funds on its own", () => {
+    expect(code).toMatch(/upstream\.status === 402/);
+    expect(code).toMatch(/insufficient funds/i);
+    expect(code).toMatch(/assistant_unfunded/);
+  });
+
+  it("never forwards it to the island as a 402", () => {
+    // The island's 402 branch is the quota/email screen. Reaching it here
+    // would tell the visitor they had used up their free messages while the
+    // real cause was our own overdrawn account — a lie that reads as normal
+    // product behaviour, which hides the outage better than the 502 did.
+    //
+    // Scoped to the UPSTREAM-refusal block: the worker's own free-message
+    // quota legitimately returns 402 earlier in the handler, and asserting
+    // over the whole file would fail on that unrelated correct code.
+    const start = code.indexOf("if (!upstream.ok)");
+    expect(start).toBeGreaterThan(-1);
+    const upstreamBlock = code.slice(start);
+    expect(upstreamBlock).toMatch(/upstream\.status === 402/);
+    expect(upstreamBlock).not.toMatch(/return json\(402,/);
+  });
+
+  it("keeps it a server fault, so the island's copy stays truthful", () => {
+    expect(code).toMatch(/return json\(503, \{ error: "assistant_unfunded" \}\)/);
+  });
+
+  it("logs it at error severity with its own marker", () => {
+    // `[chat-send] assistant_unfunded` is the only signal that separates this
+    // from network faults and pool exhaustion. console.info would not surface
+    // it alongside the other upstream failures.
+    expect(code).toMatch(/console\.error\("\[chat-send\] assistant_unfunded"/);
+  });
+
+  it("rolls the visitor's free-message claim back", () => {
+    const branch = code.slice(code.indexOf("upstream.status === 402"));
+    const upToReturn = branch.slice(0, branch.indexOf("assistant_unfunded\" }"));
+    expect(upToReturn).toMatch(/if \(freshClaim\) await stub\.releaseClaim\(hash\)/);
+  });
+});

@@ -702,6 +702,27 @@ async function handleChatSend(
         ...(retryAfterSeconds ? { retryAfterSeconds } : {}),
       });
     }
+    // Operator billing, NOT a visitor problem: the wallet funding this
+    // release is empty, so the API refused the turn before any inference ran
+    // (402 `insufficient funds` from payAndEscrow -> debitUserBalance).
+    //
+    // ⚠️ This must NOT be forwarded to the island as a 402. The island's 402
+    // branch means "email required" / "free messages used up" and renders the
+    // quota screen — telling a visitor they are out of messages when in fact
+    // OUR account is overdrawn. That reads as legitimate, so it would hide a
+    // total outage more thoroughly than the generic 502 it replaces.
+    //
+    // It stays a 5xx (the fault really is ours, and the island's server-fault
+    // copy is accurate) but carries its own code and its own log marker, so
+    // "the whole demo fleet is unfunded" is greppable instead of being one
+    // more `upstream_error` among network faults and pool exhaustion.
+    if (upstream.status === 402 && /insufficient funds/i.test(upstreamText)) {
+      console.error("[chat-send] assistant_unfunded", {
+        releaseId: env.DIVINCI_RELEASE_ID,
+      });
+      if (freshClaim) await stub.releaseClaim(hash);
+      return json(503, { error: "assistant_unfunded" });
+    }
     console.error("[chat-send] upstream_non_ok", {
       status: upstream.status,
       body: upstreamText.slice(0, 300),
