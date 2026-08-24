@@ -1,5 +1,6 @@
 import { cleanContextTitle } from "../../lib/clean-context-title";
 import { FloatingLayer } from "./FloatingLayer";
+import { createHoverGrace } from "../../lib/hover-grace";
 import { brand } from "../../brand.config";
 import { BrandAvatar } from "./BrandAvatar";
 import {
@@ -417,6 +418,12 @@ function SourceChip({
   const title = cleanContextTitle(label);
   const hasDetail = Boolean(detail?.excerpt || detail?.url || detail?.image);
   const anchorRef = useRef<HTMLSpanElement | null>(null);
+  // The bubble is PORTALLED, so it is not a child of this span — a bare
+  // `onMouseLeave={() => setOpen(false)}` shut it the instant the pointer set
+  // off toward it, making "View source" unclickable and a long excerpt
+  // unreadable. The grace period is what lets the pointer make the trip.
+  const hover = useRef(createHoverGrace(setOpen)).current;
+  useEffect(() => hover.cancel, [hover]);
 
   return (
     <span
@@ -425,8 +432,8 @@ function SourceChip({
         anchorRef.current = el;
       }}
       className="relative inline-flex shrink-0"
-      onMouseEnter={() => hasDetail && setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => hasDetail && hover.open()}
+      onMouseLeave={hover.scheduleClose}
     >
       <button
         type="button"
@@ -437,8 +444,8 @@ function SourceChip({
           e.stopPropagation();
           if (hasDetail) setOpen((v) => !v);
         }}
-        onFocus={() => hasDetail && setOpen(true)}
-        onBlur={() => setOpen(false)}
+        onFocus={() => hasDetail && hover.open()}
+        onBlur={hover.scheduleClose}
         onKeyDown={(e) => {
           if (e.key === "Escape") setOpen(false);
         }}
@@ -461,6 +468,10 @@ function SourceChip({
       <FloatingLayer
         anchorRef={anchorRef}
         open={open && hasDetail}
+        /* The pointer is ON the bubble: cancel the pending close so it can be
+           read and its "View source" link clicked. */
+        onMouseEnter={hover.open}
+        onMouseLeave={hover.scheduleClose}
         /* overflow-hidden so nothing inside can paint outside the card, and
            the rounded corners actually clip. */
         className="w-[min(22rem,80vw)] overflow-hidden rounded-lg border border-df-green-dark/15 bg-df-surface p-3 text-left shadow-lg"

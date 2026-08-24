@@ -29,6 +29,8 @@ export function FloatingLayer({
   role = "tooltip",
   gap = 8,
   maxWidth = "min(22rem, 80vw)",
+  onMouseEnter,
+  onMouseLeave,
 }: {
   anchorRef: RefObject<HTMLElement | null>;
   open: boolean;
@@ -37,6 +39,16 @@ export function FloatingLayer({
   role?: string;
   gap?: number;
   maxWidth?: string;
+  /**
+   * Hover handlers for the PORTALLED box itself.
+   *
+   * A popover in a portal is not a descendant of its trigger, so the trigger's
+   * `mouseleave` fires the moment the pointer sets off toward it. Without a
+   * way for the box to say "the pointer is on me now", anything interactive
+   * inside it is unreachable. See lib/hover-grace.ts.
+   */
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }) {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number }>();
@@ -97,6 +109,8 @@ export function FloatingLayer({
         visibility: pos ? "visible" : "hidden",
       }}
       className={className}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {children}
     </div>,
