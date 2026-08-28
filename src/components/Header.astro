@@ -4,7 +4,7 @@ import { getUI } from "~/i18n";
 import { DEFAULT_LOCALE } from "~/i18n/locales";
 import { brand } from "~/brand.config";
 import { lockupWord as resolveLockupWord, lockupMarkSplit } from "~/lib/lockup-word";
-import { contrastRatio, AA_LARGE } from "~/lib/contrast";
+import { contrastRatio, logoInkClass, AA_LARGE } from "~/lib/contrast";
 
 interface Props {
   lang?: string;
@@ -14,6 +14,19 @@ const ui = getUI(lang);
 const lockupWord = resolveLockupWord();
 // Same mark-plus-remainder rule as the hero, so the two lockups agree.
 const markSplit = brand.media.logoIsMark ? lockupMarkSplit() : null;
+
+// The header logo's treatment. This was HARDCODED `brightness-0 invert` on both
+// <img> branches below — right for the one asset the filter was written for (a
+// dark mark on transparency, whited out for the navy bar) and wrong for every
+// other kind. bermanmedicallasers' JPEG wordmark carries an opaque white plate,
+// so inverting it painted a solid WHITE block into the header; traininglab's
+// knocked-out badge lost its letters the same way.
+//
+// `isDarkBrand: true` unconditionally — unlike the hero, the header bar is
+// `bg-df-navy` on every brand, so the surface this logo lands on is dark no
+// matter how light the page is. Everything else (leave a baked-bg asset alone,
+// chip a multi-tone one) is logoInkClass's single rule, shared with the hero.
+const headerLogoClass = logoInkClass(true, brand.media.logoIsLight, brand.media);
 
 // The header's AI mark, painted so it is actually VISIBLE on the header.
 //
@@ -71,7 +84,7 @@ const navItems = [
           <img
             src={brand.media.logo}
             alt={brand.identity.siteName}
-            class="h-6 w-auto brightness-0 invert"
+            class:list={["h-6 w-auto", headerLogoClass]}
             width="200"
             height="42"
           />
@@ -87,7 +100,7 @@ const navItems = [
         <img
           src={brand.media.logo}
           alt={brand.identity.siteName}
-          class="h-6 w-auto brightness-0 invert"
+          class:list={["h-6 w-auto", headerLogoClass]}
           style={brand.media.logoBaselineDrop
                   ? `translate: 0 ${(brand.media.logoBaselineDrop * 100).toFixed(2)}%`
                   : undefined}

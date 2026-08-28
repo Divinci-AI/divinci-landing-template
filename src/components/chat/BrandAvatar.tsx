@@ -56,7 +56,9 @@ export function BrandAvatar({
             brand.media.markLogo ? "h-full w-full object-cover" : "h-[70%] w-[70%] object-contain",
             brand.media.markLogo
               ? ""
-              : logoInkClass(isDarkPalette(brand.palette.cream), brand.media.logoIsLight),
+              // chip: false — the avatar is a 36px circle that already clips
+              // its contents round, so a padded chip has nowhere to go.
+              : logoInkClass(isDarkPalette(brand.palette.cream), brand.media.logoIsLight, { ...brand.media, chip: false }),
           ].filter(Boolean).join(" ")}
         />
       ) : (

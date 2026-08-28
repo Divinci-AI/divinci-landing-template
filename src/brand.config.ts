@@ -79,6 +79,14 @@ export interface BrandConfig {
     /** True when the logo is light/white (built for a dark header) — the hero
      *  darkens it so it doesn't wash out on the light background. */
     logoIsLight?: boolean;
+    /** True when the logo file is opaque edge to edge, i.e. it carries its own
+     *  background plate (a JPEG wordmark, a PNG with no transparency). The
+     *  brightness filter would blacken the plate — see logoInkClass. */
+    logoHasBakedBg?: boolean;
+    /** True when the logo holds BOTH light and dark ink (a knocked-out badge,
+     *  a two-colour lockup), so flattening it to a silhouette loses half the
+     *  artwork. Also see logoInkClass. */
+    logoIsMultiTone?: boolean;
     /**
      * How far the logo image must drop so its LETTERFORMS sit on the "AI"
      * baseline, as a fraction of the rendered logo height (0.0909 = 9.09%).

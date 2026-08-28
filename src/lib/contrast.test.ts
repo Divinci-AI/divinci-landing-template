@@ -186,4 +186,42 @@ describe("logoInkClass", () => {
     expect(logoInkClass(true, true)).toBe("");
     expect(logoInkClass(false, false)).toBe("");
   });
+
+  it("never filters an asset that carries its own background", () => {
+    // bermanmedicallasers: a JPEG wordmark on an opaque WHITE plate, shipped
+    // 2026-08-28 as a solid black block because `brightness-0` blackened the
+    // plate along with the ink. The plate already supplies the contrast, on a
+    // light page and a dark one alike — and it gets no chip either, because a
+    // plate that blends into the page is the seamless case.
+    for (const dark of [true, false]) {
+      for (const light of [true, false, undefined]) {
+        expect(logoInkClass(dark, light, { logoHasBakedBg: true })).toBe("");
+      }
+    }
+  });
+
+  it("chips a multi-tone logo instead of flattening it", () => {
+    // traininglab: a white badge with its letters KNOCKED OUT, on transparency.
+    // `brightness-0` filled the badge in and took the knockout with it. The
+    // artwork is left intact and the surface under it is changed instead —
+    // but only when its overall tone matches the page it sits on.
+    expect(logoInkClass(true, false, { logoIsMultiTone: true })).toBe("rounded-md bg-white p-1.5");
+    expect(logoInkClass(false, true, { logoIsMultiTone: true })).toBe("rounded-md bg-df-navy p-1.5");
+    // Already contrasting: nothing to fix, and a chip would only box it in.
+    expect(logoInkClass(true, true, { logoIsMultiTone: true })).toBe("");
+    expect(logoInkClass(false, false, { logoIsMultiTone: true })).toBe("");
+  });
+
+  it("skips the chip where a padded box has nowhere to go", () => {
+    // The avatar circles clip their contents round, so a chip's corners are cut
+    // off and its padding shrinks the mark inside an already-36px disc.
+    expect(logoInkClass(true, false, { logoIsMultiTone: true, chip: false })).toBe("");
+  });
+
+  it("filters as before when the asset was never measured", () => {
+    // An SVG, an unreadable file, or a demo built before logo-surface.ts
+    // existed: no flags in brand.config, and the old behaviour is the answer.
+    expect(logoInkClass(true, false, {})).toBe("brightness-0 invert");
+    expect(logoInkClass(false, true, {})).toBe("brightness-0");
+  });
 });

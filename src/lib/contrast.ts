@@ -87,7 +87,22 @@ export function buttonColors(
 }
 
 /**
- * The Tailwind filter that makes a single-colour logo visible on the chrome.
+ * What the logo ASSET is made of, measured from its pixels by the pipeline.
+ * Both flags absent (an SVG, an unreadable file, a demo built before the
+ * measurement existed) means "assume a plain silhouette" — the old behaviour.
+ */
+export interface LogoAsset {
+  /** Opaque edge to edge: the asset carries its own background plate. */
+  logoHasBakedBg?: boolean;
+  /** Holds both light and dark ink: a silhouette would lose half of it. */
+  logoIsMultiTone?: boolean;
+  /** Opt out of the contrast chip where a padded box does not fit — the
+   *  avatar circles, which are 36px across and already clipped round. */
+  chip?: boolean;
+}
+
+/**
+ * The Tailwind classes that make a logo visible on the chrome.
  *
  * The rule the hero, the header and the avatar circles all need, in one place:
  * a dark-ink logo disappears on a dark page and must be whited out, and a
@@ -97,8 +112,37 @@ export function buttonColors(
  * `brightness-0 invert` is a silhouette, so it is right for a mark drawn in
  * one colour and wrong for a full-colour one — apply it to `logo`, whose
  * lightness `logoIsLight` describes, not to an unclassified `markLogo`.
+ *
+ * ⚠️ A silhouette has no INTERIOR, so the filter is right for exactly one kind
+ * of asset: one ink on transparency. Two demos shipped as solid black blocks
+ * on 2026-08-28 — bermanmedicallasers' logo is a JPEG (a dark wordmark on an
+ * opaque WHITE rectangle, and `brightness-0` blackened the rectangle), and
+ * traininglab's is a white badge with its letters knocked OUT (`brightness-0`
+ * filled the badge in and took the knockout with it). Neither had a wrong
+ * `logoIsLight`; the filter itself was inapplicable.
+ *
+ * So an asset that carries its own contrast is never filtered:
+ *  - `logoHasBakedBg` — the plate supplies the contrast on any page, and it is
+ *    left bare deliberately: a plate that blends into the page is the seamless
+ *    case, and a chip would only draw a box around it.
+ *  - `logoIsMultiTone` — transparent background, so part of the artwork sits
+ *    directly on the page. Unfiltered, plus a chip when the artwork's overall
+ *    tone matches the page and would otherwise wash out.
  */
-export function logoInkClass(isDarkBrand: boolean, logoIsLight: boolean | undefined): string {
+export function logoInkClass(
+  isDarkBrand: boolean,
+  logoIsLight: boolean | undefined,
+  asset: LogoAsset = {},
+): string {
+  if (asset.logoHasBakedBg) return "";
+  if (asset.logoIsMultiTone) {
+    if (asset.chip === false) return "";
+    // The chip is painted on the <img> itself — no wrapper element, so every
+    // call site gets it without restructuring its lockup.
+    if (isDarkBrand && !logoIsLight) return "rounded-md bg-white p-1.5";
+    if (!isDarkBrand && logoIsLight) return "rounded-md bg-df-navy p-1.5";
+    return "";
+  }
   if (isDarkBrand) return logoIsLight ? "" : "brightness-0 invert";
   return logoIsLight ? "brightness-0" : "";
 }

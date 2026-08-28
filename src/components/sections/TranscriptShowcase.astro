@@ -119,7 +119,9 @@ const ASSISTANT_MODEL = brand.identity.productName;
 // logoInkClass. Only `logo` is filtered; `markLogo` may be full-colour.
 const markInk = brand.media.markLogo
   ? ""
-  : logoInkClass(isDarkPalette(brand.palette.cream), brand.media.logoIsLight);
+  // chip: false — this mark renders in the transcript's small avatar circles,
+  // where a padded box would be clipped by the circle it sits in.
+  : logoInkClass(isDarkPalette(brand.palette.cream), brand.media.logoIsLight, { ...brand.media, chip: false });
 
 // Resolve a citation number to its source ("context") title for the tooltip.
 function citeTitle(ex: Exchange, n: number): string {

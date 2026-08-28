@@ -93,7 +93,8 @@ describe("a single-colour mark stays visible on the chrome", () => {
   // header had always filtered the logo; the avatars never did.
   const users = ["src/components/chat/BrandAvatar.tsx",
                  "src/components/sections/TranscriptShowcase.astro",
-                 "src/components/sections/HeroSection.astro"];
+                 "src/components/sections/HeroSection.astro",
+                 "src/components/Header.astro"];
 
   it("every logo <img> on brand chrome runs through logoInkClass", () => {
     for (const f of users) {
@@ -108,6 +109,18 @@ describe("a single-colour mark stays visible on the chrome", () => {
     for (const f of users) {
       const src = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*/g, "");
       expect(src, `${f} re-implements the rule`).not.toMatch(/logoIsLight\s*&&\s*"brightness-0/);
+    }
+  });
+
+  it("no component writes a brightness filter into a class list", () => {
+    // The header hardcoded `class="h-6 w-auto brightness-0 invert"` on both of
+    // its logo branches, so it inverted assets the filter destroys — a JPEG
+    // wordmark on a white plate became a solid white block (2026-08-28).
+    // A filter that ignores the asset is the bug; every class must come from
+    // logoInkClass, which knows what the pixels are.
+    for (const f of users) {
+      const src = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*/g, "");
+      expect(src, `${f} hardcodes a brightness filter`).not.toContain("brightness-0");
     }
   });
 });
