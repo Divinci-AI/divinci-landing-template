@@ -268,6 +268,36 @@ const logoMaxHMd = Math.round(56 * logoScale);
          works for rasters and SVGs alike.
          max-width still guards the over-wide case; object-contain means an
          over-wide mark letterboxes inside the box rather than distorting. */
+      /* The lockup aligns "AI" to the wordmark's LAST baseline, not its first.
+         Flex baseline alignment uses an item's FIRST baseline, so as soon as
+         the brand name wrapped, "AI" stayed pinned beside line 1 while the
+         name ran on beneath it. Measured on a live demo: exactly one
+         line-height adrift at two lines (-48px), two at three lines (-96px) —
+         the tell is that the error is always a whole multiple of line-height.
+         32 of 71 demos were showing it, mostly on mobile but also at 1440px
+         for any name long enough to wrap.
+
+         Written as @supports, NOT as two declarations of the same property.
+         The two-declaration fallback is the usual idiom and it does not
+         survive this build: Lightning CSS deduplicates them and emits only
+         `align-items:last baseline`, so a browser without support would get
+         NO align-items at all and fall back to `stretch` — worse than the bug.
+         Caught by reading dist/, which is the only place that answers what
+         actually ships. @supports cannot be merged away.
+
+         Verified to be a NO-OP for every case that was already correct: an
+         image wordmark (first and last baseline are both its bottom edge) and
+         a single-line name (it has only one baseline). It changes the wrapped
+         text case and nothing else. */
+      .hero-lockup {
+        align-items: baseline;
+      }
+      @supports (align-items: last baseline) {
+        .hero-lockup {
+          align-items: last baseline;
+        }
+      }
+
       .hero-logo {
         height: var(--logo-max-h, 40px);
       }
@@ -547,7 +577,7 @@ const logoMaxHMd = Math.round(56 * logoScale);
 
           A flex item that is an image baselines on its bottom margin edge, so
           items-baseline lands the logo's foot on the text baseline. */}
-      <div class="relative inline-flex items-baseline justify-center gap-3">
+      <div class="hero-lockup relative inline-flex justify-center gap-3">
         {/* The logo IMAGE is the lockup only when it is a wordmark — i.e. when
             it carries the brand's name. A square mark does not, so the name is
             set as text instead (below) and the mark is omitted here rather than
