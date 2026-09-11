@@ -72,6 +72,31 @@ export interface BrandConfig {
   divinci: { releaseId: string; apiBase: string; whitelabelId: string };
   bios: Array<{ name: string; title: string; blurbKey: string; image?: string }>;
   corpus: { framing: string; stats: Array<{ value: string; label: string }> };
+
+  /**
+   * Measured evidence about THIS assistant, rendered by AssuranceSection.
+   *
+   * Optional throughout, and the section renders nothing without it — a demo
+   * that was never scored must not imply that it was. `redTeam` is separately
+   * optional from `qa` for the same reason: as of 2026-09-11 the demo fleet is
+   * QA-scored but NOT red-teamed, so the block stays absent until a run
+   * actually supplies results.
+   *
+   * Numbers are pre-formatted strings so the template never re-rounds them,
+   * and they are published raw — a weak score is shown as it is measured.
+   */
+  assurance?: {
+    qa?: {
+      /** Composite, e.g. "81%". */
+      scorePct: string;
+      /** Factual correctness alone, e.g. "70%". Shown beside the composite
+       *  because near-perfect relevance can carry a weak correctness upward. */
+      correctnessPct?: string;
+      passed: number;
+      total: number;
+    };
+    redTeam?: { passed: number; total: number };
+  };
   chat: { fallbackWelcome: string; starters: string[] };
   media: {
     logo: string; favicon: string; heroImage?: string; corpusVideo?: string;
@@ -158,7 +183,7 @@ export interface BrandConfig {
    *  could be identified: the card falls back to the ORGANISATION's name under
    *  a personal role, which reads as "The Space Finance Group — Founder". An
    *  absent section is honest; a wrong one is not. */
-  sections?: { examples?: boolean; comingSoon?: boolean; bios?: boolean };
+  sections?: { examples?: boolean; comingSoon?: boolean; bios?: boolean; assurance?: boolean };
 }
 
 export const brand: BrandConfig = {

@@ -22,6 +22,7 @@ import TranscriptShowcase from "~/components/sections/TranscriptShowcase.astro";
 import ExamplesSection from "~/components/sections/ExamplesSection.astro";
 import ComingSoonSection from "~/components/sections/ComingSoonSection.astro";
 import BiosSection from "~/components/sections/BiosSection.astro";
+import AssuranceSection from "~/components/sections/AssuranceSection.astro";
 import CTASection from "~/components/sections/CTASection.astro";
 import { getUI } from "~/i18n";
 import {
@@ -211,6 +212,7 @@ const ogImage = new URL(`/og.png?v=${OG_VERSION}`, `${site}/`).href;
       {brand.sections?.examples !== false && <ExamplesSection lang={lang} />}
       {brand.sections?.comingSoon !== false && <ComingSoonSection lang={lang} />}
       {brand.sections?.bios !== false && <BiosSection lang={lang} />}
+      {brand.sections?.assurance !== false && <AssuranceSection lang={lang} />}
       <CTASection lang={lang} />
     </main>
     <Footer lang={lang} />
