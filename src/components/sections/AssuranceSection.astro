@@ -42,6 +42,12 @@ const rt = brand.assurance?.redTeam;
               <span class="value">{qa.passed}/{qa.total}</span>
               <span class="label">{S.qaPassedLabel}</span>
             </div>
+            {qa.worstPct && (
+              <div class="figure">
+                <span class="value">{qa.worstPct}</span>
+                <span class="label">{S.qaWorstLabel}</span>
+              </div>
+            )}
           </div>
           <p class="method">{S.qaMethod}</p>
         </div>

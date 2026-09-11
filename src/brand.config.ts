@@ -94,6 +94,16 @@ export interface BrandConfig {
       correctnessPct?: string;
       passed: number;
       total: number;
+      /**
+       * The LOWEST single answer, e.g. "0%".
+       *
+       * Publishing a composite while suppressing a catastrophic single answer
+       * is the one genuinely misleading thing this section could do: 97 of 148
+       * measured demos contain an answer below 50% and three sit at 0%, under
+       * a median composite of 85%. Showing the worst is what makes publishing
+       * the raw score honest rather than flattering.
+       */
+      worstPct?: string;
     };
     redTeam?: { passed: number; total: number };
   };

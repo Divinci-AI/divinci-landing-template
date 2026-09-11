@@ -70,6 +70,19 @@ describe("the composite score is never shown alone", () => {
   });
 });
 
+describe("a composite must never hide a catastrophic single answer", () => {
+  /**
+   * 97 of 148 measured demos contain an answer below 50% and three sit at 0%,
+   * under a median composite of 85%. Publishing the composite while
+   * suppressing that is the one genuinely misleading thing this page could do
+   * — so the worst answer is rendered beside it.
+   */
+  it("renders the lowest single answer when supplied", () => {
+    expect(SECTION).toContain("qa.worstPct");
+    expect(ASSURANCE_STRINGS.qaWorstLabel).toMatch(/lowest/i);
+  });
+});
+
 describe("protections describe controls that actually exist", () => {
   it("lists several, each with a title and a body", () => {
     expect(ASSURANCE_STRINGS.protections.length).toBeGreaterThanOrEqual(4);

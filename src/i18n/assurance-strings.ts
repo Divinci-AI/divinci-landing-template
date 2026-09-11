@@ -25,6 +25,9 @@ export const ASSURANCE_STRINGS = {
   qaScoreLabel: "overall score",
   qaCorrectnessLabel: "factual correctness",
   qaPassedLabel: "questions passed",
+  /** Deliberately blunt. A composite that hides a 0% answer is the one thing
+   *  this section must not do. */
+  qaWorstLabel: "lowest single answer",
   /**
    * The composite averages correctness, relevance and completeness, and
    * near-perfect relevance can carry a weak correctness score upward — so
