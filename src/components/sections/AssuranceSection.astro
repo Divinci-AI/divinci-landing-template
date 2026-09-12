@@ -33,6 +33,31 @@ if (qa) {
   if (qa.worstPct) figures.push({ value: qa.worstPct, label: S.qaWorstLabel });
 }
 const cols = figures.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
+
+/**
+ * Glyphs for the protections grid, inline.
+ *
+ * Inline SVG rather than an icon font or a library: no extra request, no flash
+ * of missing icons, no dependency, and `currentColor` means each customer's
+ * palette carries them for free. The template has no icon package and four
+ * components already hand-roll their SVGs this way — matching that is the
+ * whole reason this section was rewritten once already.
+ *
+ * Only the PROTECTIONS carry glyphs. The QA and corpus figures do not: there
+ * the number is the content, and a glyph beside "33% lowest single answer"
+ * would have to imply something — a tick would mislead, a warning would turn
+ * candour into an apology. Bare figures let the reader judge.
+ */
+const PROTECTION_ICONS: Record<string, string> = {
+  document:
+    "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  refuse: "M18.364 18.364A9 9 0 105.636 5.636a9 9 0 0012.728 12.728zM5.636 5.636l12.728 12.728",
+  shield:
+    "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+  clock: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  lock: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
+};
+
 ---
 
 {(qa || rt) && (
@@ -79,6 +104,20 @@ const cols = figures.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
       <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {S.protections.map((p) => (
           <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5">
+            {PROTECTION_ICONS[p.icon] && (
+              <svg
+                class="mb-3 h-5 w-5 shrink-0 text-df-brand-ink"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d={PROTECTION_ICONS[p.icon]} />
+              </svg>
+            )}
             <p class="font-bold text-df-text">{p.title}</p>
             <p class="mt-2 text-sm leading-relaxed text-df-muted-strong">{p.body}</p>
           </article>

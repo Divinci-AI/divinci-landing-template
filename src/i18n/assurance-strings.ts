@@ -43,23 +43,34 @@ export const ASSURANCE_STRINGS = {
    * aspirational belongs in this list: the page is the evidence.
    */
   protections: [
+    // `icon` names a glyph drawn in AssuranceSection, not an image path. The
+    // protections are five DIFFERENT KINDS of thing, so a glyph aids scanning
+    // across what is otherwise five similar blocks of text. The stat figures
+    // deliberately have none: there the number IS the content, and any glyph
+    // beside "33% lowest single answer" would imply a judgement the section is
+    // careful not to make.
     {
+      icon: "document",
       title: "Answers only from published content",
       body: "The assistant retrieves from this site's own pages and cites what it used. It has no general knowledge to fall back on, so an answer with no source is an answer it does not give.",
     },
     {
+      icon: "refuse",
       title: "Refuses what it should not answer",
       body: "Regulated questions — medical, legal, financial, or anything turning on an individual's circumstances — are routed to a human rather than answered.",
     },
     {
+      icon: "shield",
       title: "Bot and abuse protection",
       body: "Human verification runs before a conversation starts, and the verification is pinned server-side to the domains we serve, so a copy of this widget on another site cannot use it.",
     },
     {
+      icon: "clock",
       title: "Per-visitor limits",
       body: "Usage is capped per visitor, so a single party cannot exhaust the demo or run up its cost.",
     },
     {
+      icon: "lock",
       title: "Minimal data retention",
       body: "Email addresses are stored as a one-way hash and never written to logs. Global Privacy Control is honoured on the server, not just in the browser.",
     },

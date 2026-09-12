@@ -125,3 +125,46 @@ describe("it must look like the rest of the page", () => {
     expect(SECTION).not.toContain("<style>");
   });
 });
+
+describe("icons, and where they must NOT go", () => {
+  /**
+   * The protections are five different KINDS of thing, so a glyph aids
+   * scanning across five otherwise-identical blocks of text. This is the one
+   * place the section may differ from CorpusSection's vocabulary — no other
+   * section has a feature grid — and the difference is deliberate rather than
+   * a quiet loosening of the parity check above.
+   */
+  it("gives every protection a glyph", () => {
+    for (const p of ASSURANCE_STRINGS.protections) {
+      expect(p.icon, `"${p.title}" has no icon`).toBeTruthy();
+      expect(SECTION).toContain("PROTECTION_ICONS");
+    }
+  });
+
+  it("draws them inline, with no icon library", () => {
+    // An icon font costs a render-blocking request and a flash of missing
+    // glyphs on 174 static pages whose pitch is that they load instantly.
+    const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8"));
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+    for (const name of Object.keys(deps))
+      expect(name).not.toMatch(/fontawesome|lucide|heroicon|feather|phosphor|react-icons/i);
+    expect(SECTION).toContain("<svg");
+    expect(SECTION).toContain('stroke="currentColor"');
+  });
+
+  it("hides them from screen readers — the title carries the meaning", () => {
+    expect(SECTION).toContain('aria-hidden="true"');
+  });
+
+  /**
+   * The figures stay bare. There the number IS the content, and a glyph beside
+   * "33% lowest single answer" has to imply something: a tick would mislead, a
+   * warning would turn candour into an apology.
+   */
+  it("puts NO glyph on the QA figures", () => {
+    const start = SECTION.indexOf("{figures.map");
+    const end = SECTION.indexOf("qaMethod");
+    expect(start).toBeGreaterThan(-1);
+    expect(SECTION.slice(start, end)).not.toContain("<svg");
+  });
+});
