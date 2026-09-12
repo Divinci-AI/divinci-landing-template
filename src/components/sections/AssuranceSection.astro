@@ -10,115 +10,80 @@
  * Copy lives in `~/i18n/assurance-strings`, NOT in `ui/en.ts`. See that module
  * for why: a key added to the customer copy surface de-brands every
  * previously-generated demo on its next rebuild.
+ *
+ * ⚠️ STYLING: this uses the template's Tailwind `df-` tokens and the SAME stat
+ * card as CorpusSection (`rounded-2xl bg-df-surface p-6 shadow-sm ring-1
+ * ring-df-text/5`, value `text-4xl font-bold text-df-brand-ink`, label
+ * uppercase tracking-wider text-df-muted). The first cut shipped hand-rolled
+ * CSS against raw --color-df-* vars and read as a section from a different
+ * site — bare figures where every other band on the page uses cards. Match the
+ * neighbours; do not invent a second visual language.
  */
 import { brand } from "~/brand.config";
 import { ASSURANCE_STRINGS as S } from "~/i18n/assurance-strings";
 
 const qa = brand.assurance?.qa;
 const rt = brand.assurance?.redTeam;
+
+const figures: Array<{ value: string; label: string }> = [];
+if (qa) {
+  figures.push({ value: qa.scorePct, label: S.qaScoreLabel });
+  if (qa.correctnessPct) figures.push({ value: qa.correctnessPct, label: S.qaCorrectnessLabel });
+  figures.push({ value: `${qa.passed}/${qa.total}`, label: S.qaPassedLabel });
+  if (qa.worstPct) figures.push({ value: qa.worstPct, label: S.qaWorstLabel });
+}
+const cols = figures.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
 ---
 
 {(qa || rt) && (
-  <section class="assurance" id="assurance" aria-labelledby="assurance-heading">
-    <div class="inner">
-      <h2 id="assurance-heading">{S.heading}</h2>
-      <p class="intro">{S.intro}</p>
+  <section id="assurance" class="bg-df-cream py-20">
+    <div class="mx-auto max-w-6xl px-6">
+      <h2 class="text-3xl font-bold leading-tight text-df-text md:text-4xl">{S.heading}</h2>
+      <p class="mt-4 max-w-2xl text-lg text-df-muted-strong">{S.intro}</p>
 
       {qa && (
-        <div class="block">
-          <h3>{S.qaHeading}</h3>
-          <div class="figures">
-            <div class="figure">
-              <span class="value">{qa.scorePct}</span>
-              <span class="label">{S.qaScoreLabel}</span>
-            </div>
-            {qa.correctnessPct && (
-              <div class="figure">
-                <span class="value">{qa.correctnessPct}</span>
-                <span class="label">{S.qaCorrectnessLabel}</span>
-              </div>
-            )}
-            <div class="figure">
-              <span class="value">{qa.passed}/{qa.total}</span>
-              <span class="label">{S.qaPassedLabel}</span>
-            </div>
-            {qa.worstPct && (
-              <div class="figure">
-                <span class="value">{qa.worstPct}</span>
-                <span class="label">{S.qaWorstLabel}</span>
-              </div>
-            )}
+        <>
+          <p class="mt-12 text-sm font-medium uppercase tracking-wider text-df-brand-ink">
+            {S.qaHeading}
+          </p>
+          <div class={`mt-6 grid gap-6 sm:grid-cols-2 ${cols}`}>
+            {figures.map((f) => (
+              <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5">
+                <p class="text-4xl font-bold leading-none text-df-brand-ink">{f.value}</p>
+                <p class="mt-1 text-sm font-medium uppercase tracking-wider text-df-muted">{f.label}</p>
+              </article>
+            ))}
           </div>
-          <p class="method">{S.qaMethod}</p>
-        </div>
+          <p class="mt-6 max-w-3xl text-df-muted-strong">{S.qaMethod}</p>
+        </>
       )}
 
       {rt && (
-        <div class="block">
-          <h3>{S.redTeamHeading}</h3>
-          <div class="figures">
-            <div class="figure">
-              <span class="value">{rt.passed}/{rt.total}</span>
-              <span class="label">{S.redTeamPassLabel}</span>
-            </div>
+        <>
+          <p class="mt-14 text-sm font-medium uppercase tracking-wider text-df-brand-ink">
+            {S.redTeamHeading}
+          </p>
+          <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5">
+              <p class="text-4xl font-bold leading-none text-df-brand-ink">{rt.passed}/{rt.total}</p>
+              <p class="mt-1 text-sm font-medium uppercase tracking-wider text-df-muted">{S.redTeamPassLabel}</p>
+            </article>
           </div>
-          <p class="method">{S.redTeamMethod}</p>
-        </div>
+          <p class="mt-6 max-w-3xl text-df-muted-strong">{S.redTeamMethod}</p>
+        </>
       )}
 
-      <div class="block">
-        <h3>{S.securityHeading}</h3>
-        <ul class="protections">
-          {S.protections.map((p) => (
-            <li>
-              <strong>{p.title}</strong>
-              <span>{p.body}</span>
-            </li>
-          ))}
-        </ul>
+      <p class="mt-14 text-sm font-medium uppercase tracking-wider text-df-brand-ink">
+        {S.securityHeading}
+      </p>
+      <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {S.protections.map((p) => (
+          <article class="flex flex-col rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5">
+            <p class="font-bold text-df-text">{p.title}</p>
+            <p class="mt-2 text-sm leading-relaxed text-df-muted-strong">{p.body}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 )}
-
-<style>
-  .assurance {
-    background: var(--color-df-soft);
-    color: var(--color-df-text);
-    padding: clamp(3rem, 8vw, 5.5rem) 1.25rem;
-  }
-  .inner { max-width: 62rem; margin: 0 auto; }
-  h2 {
-    font-weight: var(--df-heading-weight, 600);
-    font-size: clamp(1.6rem, 3.4vw, 2.3rem);
-    margin: 0 0 0.6rem;
-  }
-  .intro { margin: 0 0 2.5rem; max-width: 46rem; opacity: 0.85; line-height: 1.6; }
-  .block { margin-bottom: 2.75rem; }
-  .block:last-child { margin-bottom: 0; }
-  h3 {
-    font-size: 1.05rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.65;
-    margin: 0 0 1rem;
-  }
-  .figures { display: flex; flex-wrap: wrap; gap: clamp(1.5rem, 5vw, 3.5rem); margin-bottom: 1.1rem; }
-  .figure { display: flex; flex-direction: column; }
-  .value {
-    font-size: clamp(2rem, 5vw, 2.9rem);
-    font-weight: 600;
-    line-height: 1.05;
-    color: var(--color-df-primary);
-  }
-  .label { font-size: 0.85rem; opacity: 0.7; margin-top: 0.3rem; }
-  .method { margin: 0; max-width: 46rem; line-height: 1.65; opacity: 0.85; }
-  .protections { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
-  /* Two columns only where there is room; a 400px phone keeps one. */
-  @media (min-width: 46rem) {
-    .protections { grid-template-columns: 1fr 1fr; gap: 1.4rem 2.5rem; }
-  }
-  .protections li { display: flex; flex-direction: column; gap: 0.25rem; }
-  .protections strong { font-weight: 600; }
-  .protections span { opacity: 0.82; line-height: 1.6; font-size: 0.95rem; }
-</style>

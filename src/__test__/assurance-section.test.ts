@@ -97,3 +97,31 @@ describe("protections describe controls that actually exist", () => {
     expect(blob).not.toMatch(/red.?team/i);
   });
 });
+
+describe("it must look like the rest of the page", () => {
+  /**
+   * The first cut used hand-rolled CSS against raw --color-df-* vars: bare
+   * figures with small labels, where every other band on the page uses the
+   * same stat card. On wolf-greenfield it read as a section lifted from a
+   * different site. The template is Tailwind with `df-` design tokens, and
+   * CorpusSection is the neighbour to match.
+   */
+  it("uses the same stat card as CorpusSection", () => {
+    const corpus = readFileSync(
+      join(process.cwd(), "src/components/sections/CorpusSection.astro"), "utf8",
+    );
+    const card = "rounded-2xl bg-df-surface p-6 shadow-sm ring-1 ring-df-text/5";
+    expect(corpus).toContain(card);
+    expect(SECTION).toContain(card);
+  });
+
+  it("uses the same figure and label treatment", () => {
+    expect(SECTION).toContain("text-4xl font-bold leading-none text-df-brand-ink");
+    expect(SECTION).toContain("uppercase tracking-wider text-df-muted");
+  });
+
+  it("carries no bespoke stylesheet of its own", () => {
+    // A <style> block here is how a second visual language creeps back in.
+    expect(SECTION).not.toContain("<style>");
+  });
+});
