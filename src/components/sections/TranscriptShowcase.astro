@@ -74,34 +74,28 @@ const welcomeMessage = welcome;
 // Non-translatable per-exchange data — retrieved-source filenames and the
 // book recommendation — zipped by index with the translated question +
 // answer paragraphs from the `transcript` dictionary.
-// PLACEHOLDER showcase data — replace with a real exchange from the
-// customer's own assistant (retrieved-source filenames + recommendations),
-// zipped by index with the translated question + answer prose from the
-// `transcript` dictionary.
+// Per-exchange metadata. Sources default to NONE — never to invented
+// filenames.
+//
+// This used to ship three placeholder documents ("getting-started-guide.pdf",
+// "intro-talk-episode-1.txt", "knowledge-base-overview.html") on every demo
+// whose pipeline did not supply `brand.showcase.sources`, which as of
+// 2026-09-12 was ALL of them. The section's own subheading claims the reply is
+// grounded "with the exact sources shown", so the page asserted three
+// documents the customer has never held — checked across pantherin,
+// wolf-greenfield, delmarcity and firstnationalbullion, byte-identical on
+// every one, and on 37 demos already emailed to prospects.
+//
+// A missing chip is honest; a fabricated one is not. So the default is empty
+// and the chip row hides itself. `citeTitle` already degrades the inline [n]
+// tooltips to "<site>'s knowledge base", so nothing renders a name we cannot
+// stand behind. Populate `brand.showcase.sources` with the titles actually
+// retrieved for that exchange to bring the chips back.
 const exchangeMeta: Array<{ sources: string[]; recommendation?: string }> = [
-  {
-    sources: [
-      "getting-started-guide.pdf",
-      "intro-talk-episode-1.txt",
-      "knowledge-base-overview.html",
-    ],
-    recommendation: "Getting Started Guide",
-  },
-  {
-    sources: [
-      "about-us.html",
-      "knowledge-base-overview.html",
-      "core-offerings.pdf",
-    ],
-    recommendation: `About ${brand.identity.siteName}`,
-  },
-  {
-    sources: [
-      "beginner-basics.pdf",
-      "intro-talk-episode-1.txt",
-      "faq.html",
-    ],
-  },
+  { sources: [] },
+  // Derived from the brand, not invented — safe to keep as a default.
+  { sources: [], recommendation: `About ${brand.identity.siteName}` },
+  { sources: [] },
 ];
 
 // Brand-supplied sources win over the placeholders. Per-index so a brand can
@@ -194,7 +188,9 @@ function citeTitle(ex: Exchange, n: number): string {
                 </p>
               </div>
 
-              {/* Retrieved sources — the context bubbles */}
+              {/* Retrieved sources — the context bubbles. Rendered only when
+                  we have REAL retrieved titles; see exchangeMeta. */}
+              {ex.sources.length > 0 && (
               <div class="flex flex-wrap gap-1.5">
                 {ex.sources.map((s) => (
                   <span class="inline-flex max-w-full items-center gap-1 rounded-md border border-df-green-dark/15 bg-df-surface/80 px-2 py-1 text-xs text-df-muted">
@@ -203,6 +199,7 @@ function citeTitle(ex: Exchange, n: number): string {
                   </span>
                 ))}
               </div>
+              )}
 
               {/* Assistant answer */}
               <div class="flex items-start gap-2">

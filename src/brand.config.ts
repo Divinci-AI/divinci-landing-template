@@ -54,7 +54,11 @@ export interface BrandConfig {
    * not splice its own showcase HTML, so a UFO-archive assistant cited an
    * "Intro Talk Episode 1" it has never held.
    *
-   * Omit to keep the placeholders.
+   * Omitting this now renders NO source chips for that exchange, rather than
+   * inventing three. Changed 2026-09-12: the placeholders were still shipping
+   * fleet-wide — identical on every demo checked, under a subheading that
+   * claims the reply is grounded "with the exact sources shown". Supply the
+   * titles actually retrieved for the exchange to show chips.
    */
   showcase?: {
     sources?: string[][];
