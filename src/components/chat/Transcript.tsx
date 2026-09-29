@@ -1,9 +1,11 @@
 import { cleanContextTitle } from "../../lib/clean-context-title";
+import { parseRichText, type Inline } from "../../lib/rich-text";
 import { FloatingLayer } from "./FloatingLayer";
 import { createHoverGrace } from "../../lib/hover-grace";
 import { brand } from "../../brand.config";
 import { BrandAvatar } from "./BrandAvatar";
 import {
+  Fragment,
   useCallback,
   useEffect,
   useRef,
@@ -682,75 +684,54 @@ function Citation({ n, sources, onCite }: { n: number } & InlineOpts) {
   );
 }
 
-// Lightweight inline formatter — mirrors the static showcase's mini-syntax
-// so the live reply renders **bold** / *italic* / [[n]] citations instead of
-// raw markup, split into paragraphs on blank lines. Deliberately small (no
-// markdown dependency); anything it doesn't recognise renders as plain text.
+// Live-reply formatter. Parsing lives in lib/rich-text.ts (pure, unit-tested);
+// this only turns its tree into elements. Lists, links, line breaks, **bold**,
+// *italic* and [n] citations — see that file for why each case exists.
 function renderRichText(text: string, opts?: InlineOpts): ReactNode {
-  const paragraphs = text
-    .replace(/\r\n/g, "\n")
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  return paragraphs.map((para, i) => <p key={i}>{renderInline(para, opts)}</p>);
+  return parseRichText(text).map((b, i) => {
+    if (b.t === "ul")
+      return (
+        <ul key={i} className="list-disc space-y-1 pl-5">
+          {b.items.map((it, j) => <li key={j}>{renderNodes(it, opts)}</li>)}
+        </ul>
+      );
+    if (b.t === "ol")
+      return (
+        <ol key={i} start={b.start} className="list-decimal space-y-1 pl-5">
+          {b.items.map((it, j) => <li key={j}>{renderNodes(it, opts)}</li>)}
+        </ol>
+      );
+    if (b.t === "h") return <p key={i} className="font-semibold">{renderNodes(b.c, opts)}</p>;
+    return (
+      <p key={i}>
+        {b.lines.map((line, j) => (
+          <Fragment key={j}>
+            {j > 0 && <br />}
+            {renderNodes(line, opts)}
+          </Fragment>
+        ))}
+      </p>
+    );
+  });
 }
 
-function renderInline(s: string, opts?: InlineOpts): ReactNode[] {
-  const out: ReactNode[] = [];
-  // First pass: bold / italic spans. Their CONTENT is run through the
-  // citation pass too — refs inside **bold**/*italic* used to fall out as
-  // dead text because the bold branch pushed its capture as a plain string.
-  const re = /\*\*([^*]+)\*\*|\*([^*]+)\*/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  let key = 0;
-  while ((m = re.exec(s)) !== null) {
-    if (m.index > last) out.push(...renderCitations(s.slice(last, m.index), key, opts));
-    key += 100; // keep keys unique across segments
-    if (m[1] !== undefined) {
-      out.push(
-        <strong key={key++} className="font-semibold">
-          {renderCitations(m[1], key + 1, opts)}
-        </strong>,
+function renderNodes(nodes: Inline[], opts?: InlineOpts): ReactNode[] {
+  return nodes.map((x, k) => {
+    if (x.t === "text") return <Fragment key={k}>{x.v}</Fragment>;
+    if (x.t === "strong") return <strong key={k} className="font-semibold">{renderNodes(x.c, opts)}</strong>;
+    if (x.t === "em") return <em key={k}>{renderNodes(x.c, opts)}</em>;
+    if (x.t === "link")
+      return (
+        <a key={k} href={x.href} target="_blank" rel="noopener noreferrer nofollow" className="underline underline-offset-2 hover:opacity-80">
+          {renderNodes(x.c, opts)}
+        </a>
       );
-      key += 100;
-    } else if (m[2] !== undefined) {
-      out.push(<em key={key++}>{renderCitations(m[2], key + 1, opts)}</em>);
-      key += 100;
-    }
-    last = re.lastIndex;
-  }
-  if (last < s.length) out.push(...renderCitations(s.slice(last), key, opts));
-  return out;
-}
-
-/**
- * Citation pass: every bracket ref becomes an interactive circle — singular
- * `[7]`, grouped `[2, 8]`, ranges `[4-6]` (endpoints), and the static
- * showcase's `[[n]]`. A bare bracket ref as text is the old, dead-looking
- * fallback we never want.
- */
-function renderCitations(s: string, keyBase: number, opts?: InlineOpts): ReactNode[] {
-  const out: ReactNode[] = [];
-  const re = /\[\[(\d+)\]\]|\[(\d+(?:\s*[,\u2013-]\s*\d+)*)\]/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  let key = keyBase;
-  while ((m = re.exec(s)) !== null) {
-    if (m.index > last) out.push(s.slice(last, m.index));
-    const nums = (m[1] ?? m[2] ?? "")
-      .split(/[,\u2013-]/)
-      .map((part) => Number(part.trim()))
-      .filter((n) => Number.isInteger(n) && n > 0);
-    nums.forEach((n) => {
-      out.push(
-        <Citation key={key++} n={n} sources={opts?.sources} onCite={opts?.onCite} />,
-      );
-    });
-    last = re.lastIndex;
-  }
-  if (last < s.length) out.push(s.slice(last));
-  return out;
+    return (
+      <Fragment key={k}>
+        {x.n.map((n, m) => <Citation key={m} n={n} sources={opts?.sources} onCite={opts?.onCite} />)}
+      </Fragment>
+    );
+  });
 }
 
 function ThinkingDots() {

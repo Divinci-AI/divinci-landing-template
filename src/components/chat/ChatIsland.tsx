@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { brand } from "../../brand.config";
 import { BrandAvatar } from "./BrandAvatar";
 import { FREE_MESSAGE_QUOTA, FREE_MESSAGES_BEFORE_EMAIL, getDivinci } from "../../lib/divinci";
+import { advisoryAddsInformation, humanizeReply } from "../../lib/refusal-copy";
 import { loadEscrow, saveEscrow } from "../../lib/escrow";
 import { WelcomeMessage } from "./WelcomeMessage";
 import { ConversationStarters } from "./ConversationStarters";
@@ -472,15 +473,20 @@ export function ChatIsland({ lang = DEFAULT_LOCALE }: ChatIslandProps) {
         // Medical-safety advisory (server-side medicalSafety check). Carried
         // verbatim from the signed payload → rendered as an amber banner
         // under the reply bubble.
+        // The moderation path copies its refusal into the advisory verbatim, so
+        // the banner is dropped when it would only repeat the bubble, and the
+        // refusal itself is reworded (lib/refusal-copy.ts explains both).
         const safetyAdvisory =
-          lastMsg?.safetyAdvisory && typeof lastMsg.safetyAdvisory.text === "string"
+          lastMsg?.safetyAdvisory &&
+          typeof lastMsg.safetyAdvisory.text === "string" &&
+          advisoryAddsInformation(lastMsg.safetyAdvisory.text, reply)
             ? lastMsg.safetyAdvisory
             : undefined;
 
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantPlaceholder.id
-              ? { ...m, content: reply, sources, sourceDetails, safetyAdvisory, pending: false }
+              ? { ...m, content: humanizeReply(reply), sources, sourceDetails, safetyAdvisory, pending: false }
               : m,
           ),
         );
