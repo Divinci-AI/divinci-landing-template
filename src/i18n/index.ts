@@ -25,9 +25,41 @@ const DICTS: Record<string, UIStrings> = {
   en,
 };
 
-export function getUI(code: string): UIStrings {
-  return DICTS[code] ?? DICTS[DEFAULT_LOCALE];
+/**
+ * Per-STRING fallback to English, not just per-locale.
+ *
+ * A locale file translated before the template gained a key has no entry for
+ * it, and `t.newKey` then rendered blank (or "undefined") on that locale's
+ * pages. That is the shape every demo takes when it is rebuilt against a newer
+ * template WITHOUT re-translating (a full re-translation is ~76 min per demo,
+ * so on 2026-09-29 the fleet was rebuilt reusing its existing translations).
+ * Missing or empty strings now come from English; arrays and present strings
+ * are the translator's and are never mixed.
+ */
+function withEnglishFallback<T>(translated: unknown, english: T): T {
+  if (typeof english === "string")
+    return (typeof translated === "string" && translated.trim() !== "" ? translated : english) as T;
+  if (Array.isArray(english)) return (Array.isArray(translated) && translated.length ? translated : english) as T;
+  if (english && typeof english === "object") {
+    const src = (translated && typeof translated === "object" && !Array.isArray(translated) ? translated : {}) as Record<string, unknown>;
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(english as Record<string, unknown>)) out[k] = withEnglishFallback(src[k], v);
+    for (const [k, v] of Object.entries(src)) if (!(k in out)) out[k] = v;
+    return out as T;
+  }
+  return (translated ?? english) as T;
 }
+
+const MERGED: Record<string, UIStrings> = {};
+
+export function getUI(code: string): UIStrings {
+  const dict = DICTS[code];
+  if (!dict || code === DEFAULT_LOCALE) return DICTS[DEFAULT_LOCALE];
+  return (MERGED[code] ??= withEnglishFallback(dict, DICTS[DEFAULT_LOCALE]));
+}
+
+/** Exported for tests only. */
+export const __withEnglishFallback = withEnglishFallback;
 
 /** True when a real (non-fallback) dictionary exists for this locale. */
 export function hasUI(code: string): boolean {
