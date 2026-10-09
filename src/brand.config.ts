@@ -40,6 +40,13 @@ export interface BrandConfig {
     displayWeight?: string;
     displayLetterSpacing?: string;
     displayVariationSettings?: string;
+    /** The page's real h1-h3 face, when distinct from body (see font-patches.ts). */
+    headingFamily?: string;
+    headingFontWeight?: string;
+    headingTracking?: string;
+    headingTransform?: string;
+    headingSubstituteFor?: string;
+    displayTransform?: string;
     headingWeight: number;
     bodyWeight: number;
     links?: string[];

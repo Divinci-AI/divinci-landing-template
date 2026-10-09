@@ -104,6 +104,21 @@ const darkSurfaceVars = isDarkBrand
     `--glass-shadow:0 8px 32px color-mix(in srgb, ${p.cream} 60%, transparent);}`
   : `:root{--color-df-on-chrome:${onChrome};--color-df-brand-ink:${p.dark};}`;
 
+// px-heading-patch: the page's real HEADING face, when the brand has one distinct from its body.
+// Emitted only then. Every declaration is !important because the template's utility classes
+// (font-bold, tracking-*, ...) sit on individual headings and out-rank an element selector;
+// this is the brand's explicit instruction.
+// Every value is stripped of characters that could end a declaration, rule or <style>.
+const cssv = (v: unknown) => String(v).replace(/[<>{};\\\n\r`@]/g, "");
+const hf = brand.fonts.headingFamily;
+const headingCss = hf
+  ? `h1,h2,h3{font-family:${cssv(hf)} !important;` +
+    (brand.fonts.headingFontWeight ? `font-weight:${cssv(brand.fonts.headingFontWeight)} !important;` : "") +
+    (brand.fonts.headingTracking ? `letter-spacing:${cssv(brand.fonts.headingTracking)} !important;` : "") +
+    (brand.fonts.headingTransform ? `text-transform:${cssv(brand.fonts.headingTransform)} !important;` : "") +
+    `}`
+  : "";
+
 const brandVars = `:root{` +
   `--color-df-navy:${p.primary};--color-df-green-dark:${p.dark};` +
   `--color-df-green-mid:${p.mid};--color-df-green-leaf:${p.accent};` +
@@ -122,6 +137,7 @@ const brandVars = `:root{` +
   `--font-display-weight:${brand.fonts.displayWeight ?? "500"};` +
   `--font-display-tracking:${brand.fonts.displayLetterSpacing ?? "normal"};` +
   `--font-display-variation:${brand.fonts.displayVariationSettings ?? "normal"};` +
+  `--font-display-transform:${brand.fonts.displayTransform ?? "none"};` +
   `--logo-url:url("${brand.media.logo}");}` +
   darkSurfaceVars;
 
@@ -163,6 +179,7 @@ const ogImage = new URL(`/og.png?v=${OG_VERSION}`, `${site}/`).href;
       </>
     )}
     <style is:inline set:html={brandVars}></style>
+    {headingCss && <style is:inline set:html={headingCss}></style>}
     <title>{m.title}</title>
     <meta name="description" content={m.description} />
     <link rel="canonical" href={canonical} />
